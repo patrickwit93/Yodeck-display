@@ -7,18 +7,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
   <style>
 
-    /* ═══════════════════════════════════════
-       AMSTELLAND INGENIEURS — KLEURPALET
-    ════════════════════════════════════════ */
+    /* ═══════════════════════════════
+       AMSTELLAND KLEURPALET
+    ════════════════════════════════ */
     :root {
-      --rood:        #E4032D;
-      --donkerrood:  #A0021F;
-      --zwart:       #1D1D1B;
-      --grijs-donker:#484848;
-      --grijs-midden:#616160;
-      --grijs-licht: #D9D9D9;
-      --gebroken-wit:#F5F5F5;
-      --wit:         #FFFFFF;
+      --rood:       #E4032D;
+      --donkerrood: #A0021F;
+      --zwart:      #1D1D1B;
+      --grijs-d:    #484848;
+      --grijs-m:    #616160;
+      --grijs-l:    #D9D9D9;
+      --grijs-xl:   #F5F5F5;
+      --wit:        #FFFFFF;
+
+      /* 55" scherm: basisgrootte */
+      --fs-time:    48px;
+      --fs-dir:     26px;
+      --fs-via:     14px;
+      --fs-badge:   13px;
+      --fs-track:   36px;
+      --fs-status:  14px;
+      --row-pad:    18px 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,478 +35,397 @@
     html, body {
       width: 100%; height: 100vh;
       background: var(--zwart);
-      font-family: 'Montserrat', 'Arial Narrow', Arial, sans-serif;
+      font-family: 'Montserrat', Arial, sans-serif;
       color: var(--wit);
       overflow: hidden;
     }
 
-    /* ═══════════════════════════════════════
-       ACHTERGROND — subtiele textuur
-    ════════════════════════════════════════ */
+    /* subtiele rode gloed bovenaan */
     body::before {
       content: '';
       position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(228,3,45,.08) 0%, transparent 70%),
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 79px,
-          rgba(255,255,255,.025) 79px,
-          rgba(255,255,255,.025) 80px
-        );
-      pointer-events: none;
-      z-index: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% -5%,
+        rgba(228,3,45,.10) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
     }
 
-    /* Subtiele rode verticale streep — verwijzing naar logo */
+    /* rode verticale streep links — verwijzing naar logo */
     body::after {
       content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 4px; height: 100%;
+      position: fixed; top: 0; left: 0;
+      width: 5px; height: 100%;
       background: linear-gradient(to bottom, var(--rood), var(--donkerrood));
       z-index: 10;
     }
 
-    /* ═══════════════════════════════════════
-       LAYOUT WRAPPER
-    ════════════════════════════════════════ */
     .screen {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
       height: 100vh;
-      padding: 0 0 0 4px; /* ruimte voor rode streep */
+      padding-left: 5px;
     }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════
        HEADER
-    ════════════════════════════════════════ */
+    ════════════════════════════════ */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 36px 18px 36px;
-      background: linear-gradient(180deg, rgba(0,0,0,.45) 0%, transparent 100%);
+      padding: 22px 48px 20px;
       flex-shrink: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 100%);
     }
 
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
+    .header-left { display: flex; align-items: center; gap: 28px; }
 
-    .logo-svg {
-      height: 42px;
-      width: auto;
-      /* Maak de donkerdere elementen wit zodat het leesbaar is op donker */
-      filter: brightness(0) invert(1);
-    }
+    .logo-svg { height: 48px; width: auto; }
 
-    /* Rode override voor het rode element in het logo */
-    .logo-svg .cls-2-override {
-      fill: var(--rood) !important;
+    .divider-v {
+      width: 1px; height: 42px;
+      background: rgba(255,255,255,.18);
     }
-
-    .header-divider {
-      width: 1px;
-      height: 36px;
-      background: rgba(255,255,255,.2);
-    }
-
-    .station-block {}
 
     .station-label {
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--rood);
-      margin-bottom: 3px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 3.5px; text-transform: uppercase;
+      color: var(--rood); margin-bottom: 4px;
     }
 
     .station-name {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--wit);
-      letter-spacing: .5px;
+      font-size: 26px; font-weight: 700;
+      color: var(--wit); letter-spacing: .3px;
     }
 
-    /* Klok rechts */
-    .header-right {
-      text-align: right;
-    }
+    .header-right { text-align: right; }
 
     .clock {
-      font-size: 52px;
-      font-weight: 900;
-      color: var(--wit);
-      letter-spacing: 2px;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
+      font-size: 64px; font-weight: 900;
+      color: var(--wit); letter-spacing: 3px;
+      line-height: 1; font-variant-numeric: tabular-nums;
     }
 
-    .clock-colon {
+    .clock-sep {
       animation: blink 1s step-end infinite;
       color: var(--rood);
     }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: .2; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    .date-str {
+      font-size: 13px; font-weight: 400;
+      color: var(--grijs-m); letter-spacing: 1.5px;
+      text-transform: uppercase; margin-top: 5px;
     }
 
-    .date-line {
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--grijs-midden);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-top: 4px;
+    /* ═══════════════════════════════
+       RODE LIJN ONDER HEADER
+    ════════════════════════════════ */
+    .red-line {
+      height: 2px; flex-shrink: 0;
+      margin: 0 48px;
+      background: linear-gradient(90deg,
+        var(--rood) 0%, var(--donkerrood) 55%, transparent 100%);
     }
 
-    /* ═══════════════════════════════════════
-       RODE SCHEIDINGSLIJN
-    ════════════════════════════════════════ */
-    .red-rule {
-      height: 2px;
-      background: linear-gradient(90deg, var(--rood) 0%, var(--donkerrood) 60%, transparent 100%);
-      flex-shrink: 0;
-      margin: 0 36px;
-    }
-
-    /* ═══════════════════════════════════════
-       KOLOM-HEADERS
-    ════════════════════════════════════════ */
-    .col-headers {
+    /* ═══════════════════════════════
+       KOLOM HEADERS
+    ════════════════════════════════ */
+    .col-head {
       display: grid;
-      grid-template-columns: 100px 1fr 180px 90px 100px;
-      padding: 10px 36px;
+      grid-template-columns: 150px 1fr 260px 110px 160px;
+      padding: 12px 48px 10px;
       flex-shrink: 0;
     }
 
-    .col-headers span {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--grijs-midden);
+    .col-head span {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m);
+    }
+    .col-head span.c { text-align: center; }
+    .col-head span.r { text-align: right; }
+
+    .thin-line {
+      height: 1px; flex-shrink: 0;
+      margin: 0 48px;
+      background: rgba(255,255,255,.08);
     }
 
-    .col-headers span.center { text-align: center; }
-    .col-headers span.right  { text-align: right; }
-
-    /* ═══════════════════════════════════════
-       DUNNE SCHEIDINGSLIJN
-    ════════════════════════════════════════ */
-    .thin-rule {
-      height: 1px;
-      background: rgba(255,255,255,.07);
-      flex-shrink: 0;
-      margin: 0 36px;
-    }
-
-    /* ═══════════════════════════════════════
-       VERTREKTIJDEN LIJST
-    ════════════════════════════════════════ */
+    /* ═══════════════════════════════
+       VERTREKTIJDEN CONTAINER
+    ════════════════════════════════ */
     .departures {
-      flex: 1;
-      overflow: hidden;
-      padding: 0 36px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      flex: 1; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 0 48px;
     }
 
-    .departure-row {
+    /* ═══════════════════════════════
+       RIJ
+    ════════════════════════════════ */
+    .row {
       display: grid;
-      grid-template-columns: 100px 1fr 180px 90px 100px;
+      grid-template-columns: 150px 1fr 260px 110px 160px;
       align-items: center;
-      padding: 13px 0;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      animation: slideIn .35s ease forwards;
+      padding: var(--row-pad);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      animation: enter .3s ease both;
       opacity: 0;
+      position: relative;
     }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-12px); }
+    /* Subtiele rode highlight eerste rij */
+    .row:first-child::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg,
+        rgba(228,3,45,.07) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Alternerende achtergrond */
+    .row:nth-child(even) {
+      background: rgba(255,255,255,.02);
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateX(-10px); }
       to   { opacity: 1; transform: translateX(0); }
     }
+    .row:nth-child(1)  { animation-delay: .03s; }
+    .row:nth-child(2)  { animation-delay: .06s; }
+    .row:nth-child(3)  { animation-delay: .09s; }
+    .row:nth-child(4)  { animation-delay: .12s; }
+    .row:nth-child(5)  { animation-delay: .15s; }
+    .row:nth-child(6)  { animation-delay: .18s; }
+    .row:nth-child(7)  { animation-delay: .21s; }
+    .row:nth-child(8)  { animation-delay: .24s; }
+    .row:nth-child(9)  { animation-delay: .27s; }
 
-    /* Staggered animaties */
-    .departure-row:nth-child(1)  { animation-delay: .04s; }
-    .departure-row:nth-child(2)  { animation-delay: .08s; }
-    .departure-row:nth-child(3)  { animation-delay: .12s; }
-    .departure-row:nth-child(4)  { animation-delay: .16s; }
-    .departure-row:nth-child(5)  { animation-delay: .20s; }
-    .departure-row:nth-child(6)  { animation-delay: .24s; }
-    .departure-row:nth-child(7)  { animation-delay: .28s; }
-    .departure-row:nth-child(8)  { animation-delay: .32s; }
-    .departure-row:nth-child(9)  { animation-delay: .36s; }
-    .departure-row:nth-child(10) { animation-delay: .40s; }
+    /* ── TIJD ── */
+    .cell-time { display: flex; flex-direction: column; gap: 2px; }
 
-    /* Eerste rij: iets meer accent */
-    .departure-row:first-child {
-      background: linear-gradient(90deg, rgba(228,3,45,.06) 0%, transparent 60%);
-    }
-
-    /* TIJD */
-    .dep-time-block {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .dep-time {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--wit);
-      letter-spacing: 1px;
+    .time-planned {
+      font-size: var(--fs-time);
+      font-weight: 700; color: var(--wit);
+      letter-spacing: 1px; line-height: 1;
       font-variant-numeric: tabular-nums;
-      line-height: 1;
     }
-
-    .dep-time.is-delayed {
-      font-size: 16px;
-      font-weight: 400;
-      color: var(--grijs-midden);
+    .time-planned.struck {
+      font-size: 22px; font-weight: 400;
+      color: var(--grijs-m);
       text-decoration: line-through;
     }
-
-    .dep-time-actual {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--rood);
-      letter-spacing: 1px;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
+    .time-actual {
+      font-size: 42px; font-weight: 700;
+      color: var(--rood); letter-spacing: 1px;
+      font-variant-numeric: tabular-nums; line-height: 1;
     }
 
-    /* RICHTING */
-    .dep-direction-block {
-      padding-right: 16px;
+    /* ── RICHTING ── */
+    .cell-dir { padding-right: 20px; }
+
+    .dir-name {
+      font-size: var(--fs-dir);
+      font-weight: 700; color: var(--wit);
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
-    .dep-direction {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--wit);
-      white-space: nowrap;
-      overflow: hidden;
+    .dir-via {
+      font-size: var(--fs-via); font-weight: 400;
+      color: var(--grijs-m); margin-top: 5px;
+      white-space: nowrap; overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .dep-via {
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--grijs-midden);
-      margin-top: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    /* ── TREIN / DRUKTE ── */
+    .cell-train {
+      display: flex; flex-direction: row;
+      align-items: center; gap: 16px;
     }
 
-    /* TREIN TYPE */
-    .dep-type-block {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+    .train-top {
+      display: flex; align-items: center;
+      gap: 10px; flex-shrink: 0;
     }
 
-    .train-badge {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      padding: 4px 8px;
-      border-radius: 2px;
-      text-transform: uppercase;
+    .badge {
+      font-size: var(--fs-badge); font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 3px;
     }
-
-    .badge-ic   { background: rgba(255,255,255,.1);  color: var(--wit);          border: 1px solid rgba(255,255,255,.2); }
-    .badge-spr  { background: rgba(228,3,45,.15);    color: var(--rood);         border: 1px solid rgba(228,3,45,.4);    }
-    .badge-int  { background: rgba(228,3,45,.25);    color: var(--wit);          border: 1px solid var(--rood);          }
-    .badge-other{ background: rgba(255,255,255,.06); color: var(--grijs-licht);  border: 1px solid rgba(255,255,255,.1); }
+    .badge-ic   { background: rgba(255,255,255,.1);  color: var(--wit);      border: 1px solid rgba(255,255,255,.2); }
+    .badge-spr  { background: rgba(228,3,45,.15);    color: var(--rood);     border: 1px solid rgba(228,3,45,.5); }
+    .badge-int  { background: rgba(228,3,45,.3);     color: var(--wit);      border: 1px solid var(--rood); }
+    .badge-x    { background: rgba(255,255,255,.06); color: var(--grijs-l);  border: 1px solid rgba(255,255,255,.12); }
 
     .delay-pill {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 7px;
-      border-radius: 10px;
-      background: var(--rood);
-      color: var(--wit);
+      font-size: 12px; font-weight: 700;
+      padding: 4px 9px; border-radius: 20px;
+      background: var(--rood); color: var(--wit);
       letter-spacing: .5px;
     }
 
-    /* SPOOR */
-    .dep-track {
-      text-align: center;
+    /* drukte */
+    .crowd {
+      display: flex; align-items: center; gap: 9px;
     }
 
-    .track-number {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--wit);
+    /* Persoon-icoon kleur per niveau */
+    .crowd-none .crowd-icon { color: rgba(255,255,255,.15); }
+    .crowd-low  .crowd-icon { color: rgba(255,255,255,.4); }
+    .crowd-med  .crowd-icon { color: rgba(230,170,0,.95); }
+    .crowd-high .crowd-icon { color: var(--rood); }
+
+    /* Staafjes */
+    .crowd-bars {
+      display: flex; align-items: flex-end; gap: 3px;
+    }
+    .crowd-bars b {
+      display: block; width: 5px; border-radius: 2px;
+      background: rgba(255,255,255,.12);
+    }
+    .crowd-bars b:nth-child(1) { height: 7px;  }
+    .crowd-bars b:nth-child(2) { height: 12px; }
+    .crowd-bars b:nth-child(3) { height: 17px; }
+
+    .crowd-low  .crowd-bars b:nth-child(1)                          { background: rgba(255,255,255,.45); }
+    .crowd-med  .crowd-bars b:nth-child(1),
+    .crowd-med  .crowd-bars b:nth-child(2)                          { background: rgba(230,170,0,.9); }
+    .crowd-high .crowd-bars b                                       { background: var(--rood); }
+
+    .crowd-text {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .crowd-none .crowd-text { color: rgba(255,255,255,.15); }
+    .crowd-low  .crowd-text { color: rgba(255,255,255,.35); }
+    .crowd-med  .crowd-text { color: rgba(230,170,0,.9); }
+    .crowd-high .crowd-text { color: var(--rood); }
+
+    /* ── SPOOR ── */
+    .cell-track { text-align: center; }
+
+    .track-num {
+      font-size: var(--fs-track); font-weight: 700;
+      color: var(--wit); line-height: 1;
+    }
+    .track-lbl {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m); margin-top: 3px;
     }
 
-    .track-label {
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--grijs-midden);
-      margin-top: 1px;
-    }
+    /* ── STATUS ── */
+    .cell-status { text-align: right; }
 
-    /* STATUS */
-    .dep-status {
-      text-align: right;
-    }
-
-    .status-badge {
+    .status {
       display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .5px;
-      padding: 5px 10px;
-      border-radius: 2px;
+      font-size: var(--fs-status); font-weight: 600;
+      letter-spacing: .5px; padding: 6px 14px;
+      border-radius: 3px;
+    }
+    .s-ok      { color: rgba(255,255,255,.3); }
+    .s-late    { color: var(--rood); }
+    .s-cancel  { background: var(--rood); color: var(--wit); }
+
+    /* Storingsbericht */
+    .msg-line {
+      font-size: 12px; font-weight: 500;
+      color: rgba(228,3,45,.8);
+      margin-top: 5px; line-height: 1.3;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .status-ontime    { color: rgba(255,255,255,.35); }
-    .status-delayed   { color: var(--rood); }
-    .status-cancelled {
-      background: var(--rood);
-      color: var(--wit);
-      padding: 4px 8px;
-      border-radius: 2px;
-    }
-
-    /* ═══════════════════════════════════════
-       LEGE STAAT / LADEN
-    ════════════════════════════════════════ */
-    .empty-state {
-      flex: 1;
-      display: flex;
+    /* ═══════════════════════════════
+       LEGE STAAT
+    ════════════════════════════════ */
+    .empty {
+      flex: 1; display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      color: var(--grijs-midden);
+      align-items: center; justify-content: center;
+      gap: 18px; color: var(--grijs-m);
     }
-
     .spinner {
-      width: 36px; height: 36px;
-      border: 2px solid rgba(255,255,255,.1);
+      width: 44px; height: 44px;
+      border: 3px solid rgba(255,255,255,.08);
       border-top-color: var(--rood);
       border-radius: 50%;
       animation: spin .8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-lbl { font-size: 16px; letter-spacing: 1px; }
 
-    .empty-label {
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1px;
-    }
-
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════
        ERROR BANNER
-    ════════════════════════════════════════ */
-    .error-banner {
-      flex-shrink: 0;
-      display: none;
-      background: rgba(228,3,45,.12);
+    ════════════════════════════════ */
+    .err {
+      display: none; flex-shrink: 0;
+      padding: 10px 48px;
+      background: rgba(228,3,45,.1);
       border-left: 3px solid var(--rood);
-      padding: 10px 36px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--rood);
-      letter-spacing: .3px;
+      font-size: 13px; font-weight: 500;
+      color: var(--rood); letter-spacing: .3px;
     }
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════════
        FOOTER
-    ════════════════════════════════════════ */
-    .footer-rule {
-      height: 1px;
+    ════════════════════════════════ */
+    .footer-line {
+      height: 1px; flex-shrink: 0;
+      margin: 0 48px;
       background: rgba(255,255,255,.07);
-      margin: 0 36px;
-      flex-shrink: 0;
     }
 
     .footer {
       flex-shrink: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 36px;
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 12px 48px;
       background: linear-gradient(0deg, rgba(0,0,0,.3) 0%, transparent 100%);
     }
 
-    .footer-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .footer-brand {
+      display: flex; align-items: center; gap: 10px;
     }
-
     .footer-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
+      width: 6px; height: 6px; border-radius: 50%;
       background: var(--rood);
     }
-
-    .footer-text {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--grijs-midden);
+    .footer-name {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m);
     }
-
-    .footer-refresh {
-      font-size: 10px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,.2);
+    .footer-upd {
+      font-size: 11px; font-weight: 400;
+      letter-spacing: 1px; color: rgba(255,255,255,.2);
     }
-
-    /* ═══════════════════════════════════════
-       NS LINK (subtiel rechtsonder)
-    ════════════════════════════════════════ */
-    .ns-link {
-      font-size: 10px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,.2);
-      text-decoration: none;
-    }
-
-    .ns-link:hover { color: var(--rood); }
 
   </style>
 </head>
 <body>
 
-  <!-- ══════════════════════════════════════════════════════════════════
-       CONFIGURATIE  ←  ALLEEN DEZE TWEE REGELS HOEF JE AAN TE PASSEN
-  ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════
+       CONFIGURATIE — alleen dit aanpassen
+  ═══════════════════════════════════ -->
   <script>
-    const NS_API_KEY   = '4ea55d62583e4e18be32816e9ad1787a';  // ← https://apiportal.ns.nl
-    const STATION_CODE = 'HWZB';                       // Halfweg-Zwanenburg (officiële NS-code)
-    const MAX_ROWS     = 9;
+    const NS_API_KEY   = '4ea55d62583e4e18be32816e9ad1787a';
+    const STATION_CODE = 'HWZB';   // Halfweg-Zwanenburg
+    const MAX_ROWS     = 8;
     const REFRESH_MS   = 60000;
   </script>
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════ -->
 
   <div class="screen">
 
     <!-- HEADER -->
     <header class="header">
-      <div class="header-logo">
+      <div class="header-left">
 
-        <!-- Amstelland Ingenieurs logo (inline SVG, wit op donker) -->
+        <!-- Amstelland logo — wit op donker -->
         <svg class="logo-svg" viewBox="0 0 380.77 127.56" xmlns="http://www.w3.org/2000/svg">
           <rect fill="#E4032D" x="99.39" width="2.76" height="127.56"/>
           <g fill="#FFFFFF">
@@ -521,237 +449,302 @@
             <path d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
             <path d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
             <path d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
-            <!-- "A" beeldmerk -->
-            <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93h0s-.02.03-.03.04l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8,0,0,0,0,0,0,0,.01-.01.02-.02.03-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59,0,0,0-.01.02-.03v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
+            <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
           </g>
-          <!-- Rode hoek van de A -->
-          <path fill="#E4032D" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39,0,0,0,0,0,0v11.91h14.3v-14.3h-12.44Z"/>
+          <path fill="#E4032D" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39v11.91h14.3v-14.3h-12.44Z"/>
         </svg>
 
-        <div class="header-divider"></div>
+        <div class="divider-v"></div>
 
-        <div class="station-block">
+        <div>
           <div class="station-label">Live vertrektijden</div>
           <div class="station-name">Halfweg-Zwanenburg</div>
         </div>
-
       </div>
 
       <div class="header-right">
         <div class="clock">
-          <span id="clock-h">--</span><span class="clock-colon">:</span><span id="clock-m">--</span>
+          <span id="hh">--</span><span class="clock-sep">:</span><span id="mm">--</span>
         </div>
-        <div class="date-line" id="date-line">–</div>
+        <div class="date-str" id="ds">–</div>
       </div>
     </header>
 
-    <!-- RODE LIJN -->
-    <div class="red-rule"></div>
+    <div class="red-line"></div>
 
-    <!-- KOLOM HEADERS -->
-    <div class="col-headers">
+    <div class="col-head">
       <span>Vertrek</span>
       <span>Richting</span>
-      <span>Trein</span>
-      <span class="center">Spoor</span>
-      <span class="right">Status</span>
+      <span>Trein &amp; drukte</span>
+      <span class="c">Spoor</span>
+      <span class="r">Status</span>
     </div>
 
-    <div class="thin-rule"></div>
+    <div class="thin-line"></div>
 
-    <!-- ERROR BANNER -->
-    <div class="error-banner" id="error-banner"></div>
+    <div class="err" id="err"></div>
 
-    <!-- VERTREKTIJDEN -->
-    <div class="departures" id="departures">
-      <div class="empty-state" id="loading">
+    <div class="departures" id="deps">
+      <div class="empty">
         <div class="spinner"></div>
-        <div class="empty-label">Vertrektijden ophalen…</div>
+        <div class="empty-lbl">Vertrektijden ophalen…</div>
       </div>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer-rule"></div>
+    <div class="footer-line"></div>
     <footer class="footer">
-      <div class="footer-left">
+      <div class="footer-brand">
         <div class="footer-dot"></div>
-        <span class="footer-text">Amstelland Ingenieurs</span>
+        <span class="footer-name">Amstelland Ingenieurs</span>
       </div>
-      <a class="ns-link" href="https://www.ns.nl/reisplanner/#/?vertrek=Halfweg-Zwanenburg" target="_blank">ns.nl →</a>
-      <span class="footer-refresh" id="refresh-label">–</span>
+      <span class="footer-upd" id="upd">–</span>
     </footer>
 
-  </div><!-- .screen -->
+  </div>
 
   <script>
-    /* ─────────────────────────────────────────
-       KLOK
-    ───────────────────────────────────────── */
+    /* ── Klok ── */
     const DAYS   = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
-    const MONTHS = ['januari','februari','maart','april','mei','juni',
-                    'juli','augustus','september','oktober','november','december'];
+    const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const pad = n => String(n).padStart(2,'0');
 
-    function pad(n){ return String(n).padStart(2,'0'); }
-
-    function updateClock(){
-      const now = new Date();
-      document.getElementById('clock-h').textContent = pad(now.getHours());
-      document.getElementById('clock-m').textContent = pad(now.getMinutes());
-      document.getElementById('date-line').textContent =
-        DAYS[now.getDay()] + ' ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+    function tickClock(){
+      const d = new Date();
+      document.getElementById('hh').textContent = pad(d.getHours());
+      document.getElementById('mm').textContent = pad(d.getMinutes());
+      document.getElementById('ds').textContent =
+        DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    setInterval(tickClock, 1000); tickClock();
 
-    /* ─────────────────────────────────────────
-       HELPERS
-    ───────────────────────────────────────── */
+    /* ── Helpers ── */
     function fmtTime(iso){
       if(!iso) return '--:--';
       const d = new Date(iso);
       return pad(d.getHours()) + ':' + pad(d.getMinutes());
     }
 
-    function delayMin(planned, actual){
-      if(!planned || !actual) return 0;
-      return Math.round((new Date(actual) - new Date(planned)) / 60000);
+    function delayMin(p, a){
+      if(!p || !a) return 0;
+      return Math.round((new Date(a) - new Date(p)) / 60000);
     }
 
     function badgeCls(cat){
-      if(!cat) return 'badge-other';
-      const c = cat.toUpperCase();
+      const c = (cat||'').toUpperCase();
       if(c==='IC'||c==='ICD') return 'badge-ic';
       if(c==='SPR')           return 'badge-spr';
       if(['INT','ICE','THA','EUR'].includes(c)) return 'badge-int';
-      return 'badge-other';
+      return 'badge-x';
     }
 
-    /* ─────────────────────────────────────────
-       RENDER
-    ───────────────────────────────────────── */
-    function render(list){
-      const el = document.getElementById('departures');
+    function crowdCls(cf){
+      const c = (cf||'').toUpperCase();
+      if(c==='HIGH')   return 'crowd-high';
+      if(c==='MEDIUM') return 'crowd-med';
+      if(c==='LOW')    return 'crowd-low';
+      return '';
+    }
+    function crowdLbl(cf){
+      const c = (cf||'').toUpperCase();
+      if(c==='HIGH')   return 'Vol';
+      if(c==='MEDIUM') return 'Druk';
+      if(c==='LOW')    return 'Rustig';
+      return '';
+    }
 
-      if(!list || list.length === 0){
-        el.innerHTML = `<div class="empty-state"><div class="empty-label">Geen vertrektijden beschikbaar</div></div>`;
+    /* ── Render ── */
+    function render(list){
+      const el = document.getElementById('deps');
+      if(!list || !list.length){
+        el.innerHTML = '<div class="empty"><div class="empty-lbl">Geen vertrektijden beschikbaar</div></div>';
         return;
       }
 
-      const rows = list.slice(0, MAX_ROWS).map(dep => {
+      el.innerHTML = list.slice(0, MAX_ROWS).map(dep => {
         const pt  = fmtTime(dep.plannedDateTime);
         const at  = fmtTime(dep.actualDateTime);
         const del = delayMin(dep.plannedDateTime, dep.actualDateTime);
-        const cancelled = !!dep.cancelled;
+        const can = !!dep.cancelled;
         const cat = dep.trainCategory || '?';
         const dir = dep.direction || '–';
         const via = (dep.routeStations||[]).slice(0,4).map(s=>s.mediumName).join(' · ');
-        const track = dep.actualTrack || dep.plannedTrack || '–';
+        const trk = dep.actualTrack || dep.plannedTrack || '–';
+        const msg = dep.messages && dep.messages.length ? dep.messages[0].text || '' : '';
 
-        /* Tijd blok */
-        let timeHtml;
-        if(cancelled){
-          timeHtml = `<div class="dep-time is-delayed">${pt}</div>`;
-        } else if(del >= 1){
-          timeHtml = `<div class="dep-time is-delayed">${pt}</div><div class="dep-time-actual">${at}</div>`;
-        } else {
-          timeHtml = `<div class="dep-time">${pt}</div>`;
-        }
+        /* Tijd */
+        const timeHtml = can
+          ? `<div class="time-planned struck">${pt}</div>`
+          : del >= 1
+            ? `<div class="time-planned struck">${pt}</div><div class="time-actual">${at}</div>`
+            : `<div class="time-planned">${pt}</div>`;
 
         /* Delay pill */
-        const pill = (!cancelled && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
+        const pill = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
+
+        /* Drukte */
+        const cf  = dep.crowdForecast || '';
+        const cc  = crowdCls(cf);
+        const cl  = crowdLbl(cf);
+        // Persoon-SVG icoon (hoofd + lichaam)
+        const personSvg = `<svg class="crowd-icon" width="18" height="22" viewBox="0 0 18 22" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="5" r="4"/>
+          <path d="M1 21c0-4.4 3.6-8 8-8s8 3.6 8 8H1z"/>
+        </svg>`;
+
+        const crowdHtml = `
+          <div class="crowd ${cc || 'crowd-none'}">
+            ${personSvg}
+            <div class="crowd-bars"><b></b><b></b><b></b></div>
+            <span class="crowd-text">${cl || '–'}</span>
+          </div>`;
 
         /* Status */
-        let statusHtml;
-        if(cancelled){
-          statusHtml = `<span class="status-badge status-cancelled">Rijdt niet</span>`;
-        } else if(del >= 1){
-          statusHtml = `<span class="status-badge status-delayed">${del} min later</span>`;
-        } else {
-          statusHtml = `<span class="status-badge status-ontime">Op tijd</span>`;
-        }
+        const statusHtml = can
+          ? `<span class="status s-cancel">Rijdt niet</span>`
+          : del >= 1
+            ? `<span class="status s-late">${del} min later</span>`
+            : `<span class="status s-ok">Op tijd</span>`;
+
+        /* Storingsbericht */
+        const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
 
         return `
-          <div class="departure-row">
-            <div class="dep-time-block">${timeHtml}</div>
-            <div class="dep-direction-block">
-              <div class="dep-direction">${dir}</div>
-              ${via ? `<div class="dep-via">via ${via}</div>` : ''}
+          <div class="row">
+            <div class="cell-time">${timeHtml}</div>
+            <div class="cell-dir">
+              <div class="dir-name">${dir}</div>
+              ${via ? `<div class="dir-via">via ${via}</div>` : ''}
+              ${msgHtml}
             </div>
-            <div class="dep-type-block">
-              <span class="train-badge ${badgeCls(cat)}">${cat}</span>${pill}
+            <div class="cell-train">
+              <div class="train-top">
+                <span class="badge ${badgeCls(cat)}">${cat}</span>
+                ${pill}
+              </div>
+              ${crowdHtml}
             </div>
-            <div class="dep-track">
-              <div class="track-number">${track}</div>
-              <div class="track-label">spoor</div>
+            <div class="cell-track">
+              <div class="track-num">${trk}</div>
+              <div class="track-lbl">spoor</div>
             </div>
-            <div class="dep-status">${statusHtml}</div>
+            <div class="cell-status">${statusHtml}</div>
           </div>`;
-      });
-
-      el.innerHTML = rows.join('');
+      }).join('');
     }
 
-    /* ─────────────────────────────────────────
-       NS API
-    ───────────────────────────────────────── */
+    /* ── Crowd forecast via treinnummer ── */
+    async function fetchCrowd(dep){
+      const trainNr = dep.product?.number || dep.trainNumber || '';
+      if(!trainNr){ console.log('Geen treinnummer voor', dep.direction); return ''; }
+
+      try{
+        const url = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey`
+                  + `?train=${trainNr}&omitCrowdForecast=false`;
+
+        const r = await fetch(url, { headers:{ 'Ocp-Apim-Subscription-Key': NS_API_KEY }});
+        if(!r.ok){ console.warn('Journey HTTP', r.status, 'trein', trainNr); return ''; }
+
+        const j = await r.json();
+        const stops = j.payload?.stops || [];
+
+        // Log structuur bij eerste aanroep
+        if(stops.length && !window._crowdLogged){
+          window._crowdLogged = true;
+          console.log('Stop[0] keys:', Object.keys(stops[0]).join(', '));
+          console.log('Stop[0]:', JSON.stringify(stops[0]).substring(0, 500));
+        }
+
+        // Zoek de Halfweg-stop (of neem eerste stop als Halfweg niet gevonden wordt)
+        const hw = stops.find(s =>
+          s.stop?.name?.toLowerCase().includes('halfweg') ||
+          s.stop?.uicCode === '8400272' ||
+          s.stop?.stationCode?.toUpperCase() === 'HWZB'
+        ) || stops[0]; // fallback: eerste stop (vaak vertrekstation met crowd-data)
+
+        if(!hw){ return ''; }
+
+        // coachCrowdForecast kan een string of array zijn
+        const rawCf = hw.coachCrowdForecast
+                   || hw.crowdForecast
+                   || hw.actualStock?.trainParts?.[0]?.crowdForecast
+                   || hw.plannedStock?.trainParts?.[0]?.crowdForecast
+                   || '';
+
+        // Als het een array is: neem het hoogste niveau
+        let cf = '';
+        if(Array.isArray(rawCf)){
+          const order = ['HIGH','MEDIUM','LOW'];
+          cf = order.find(lvl => rawCf.includes(lvl)) || rawCf[0] || '';
+        } else {
+          cf = rawCf;
+        }
+
+        console.log('Crowd', dep.direction, trainNr, '→', cf || '(geen data)',
+                    '| coachCrowdForecast raw:', JSON.stringify(rawCf).substring(0,100));
+        return cf;
+
+      } catch(e){
+        console.warn('fetchCrowd fout:', e.message);
+        return '';
+      }
+    }
+
+    /* ── NS API ── */
     async function fetchDepartures(){
-      const errEl = document.getElementById('error-banner');
+      const errEl = document.getElementById('err');
 
       if(!NS_API_KEY || NS_API_KEY === 'JOUW_NS_API_SLEUTEL_HIER'){
         errEl.style.display = 'block';
-        errEl.textContent = '⚠  Vul je NS API-sleutel in bovenaan het HTML-bestand — zie apiportal.ns.nl';
-        document.getElementById('departures').innerHTML =
-          `<div class="empty-state"><div class="empty-label">API-sleutel ontbreekt</div></div>`;
+        errEl.textContent = '⚠  Vul je NS API-sleutel in';
         return;
       }
 
+      // Probeer timetable-api, daarna reisinformatie-api als fallback
+      const url1 = `https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+      const url2 = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+      const hdrs = { 'Ocp-Apim-Subscription-Key': NS_API_KEY };
+
+      let deps = null;
+
+      // Poging 1
       try {
+        console.log('Probeer:', url1);
+        const r = await fetch(url1, { headers: hdrs });
+        console.log('Status 1:', r.status);
+        if(r.ok){ const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+      } catch(e){ console.warn('Endpoint 1 fout:', e.message); }
 
-      // Probeer eerst de nieuwe timetable-api, dan de oude als fallback
-      const ENDPOINTS = [
-        `https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`,
-        `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`
-      ];
-
-      let lastError = null;
-
-      for(const url of ENDPOINTS){
-        try{
-          const resp = await fetch(url, {
-            headers:{ 'Ocp-Apim-Subscription-Key': NS_API_KEY }
-          });
-
-          if(resp.status === 401) throw new Error('HTTP 401 — API-sleutel ongeldig of verlopen');
-          if(resp.status === 403) throw new Error('HTTP 403 — Geen toegang. Controleer "NS App" subscriptie op apiportal.ns.nl');
-          if(resp.status === 404){ lastError = new Error(`HTTP 404 via ${url}`); continue; }
-          if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-          const json = await resp.json();
-          const deps = (json.payload && json.payload.departures) || [];
-
-          errEl.style.display = 'none';
-          render(deps);
-
-          const now = new Date();
-          document.getElementById('refresh-label').textContent =
-            'Bijgewerkt om ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
-          return; // succes — stop hier
-
-        } catch(err){
-          // 401/403 direct gooien, 404 proberen we de volgende endpoint
-          if(err.message.startsWith('HTTP 401') || err.message.startsWith('HTTP 403')) throw err;
-          lastError = err;
+      // Poging 2 als eerste mislukte
+      if(!deps){
+        try {
+          console.log('Probeer:', url2);
+          const r = await fetch(url2, { headers: hdrs });
+          console.log('Status 2:', r.status);
+          if(r.ok){ const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+          else { throw new Error('HTTP ' + r.status); }
+        } catch(e){
+          errEl.style.display = 'block';
+          errEl.textContent = '⚠  ' + e.message + ' — controleer console (F12) voor details';
+          document.getElementById('upd').textContent = 'Fout';
+          return;
         }
       }
 
-      // Beide endpoints gefaald
-      throw lastError || new Error('Alle endpoints gaven een fout');
+      errEl.style.display = 'none';
+      if(deps.length) console.log('Departure[0]:', JSON.stringify(deps[0]).substring(0,400));
+      render(deps);
 
-      } catch(err) {
-        errEl.style.display = 'block';
-        errEl.textContent = '⚠  ' + err.message;
-        document.getElementById('refresh-label').textContent = 'Poging mislukt';
-      }
+      // Crowd data parallel ophalen
+      try {
+        const slice   = deps.slice(0, MAX_ROWS);
+        const crowds  = await Promise.all(slice.map(d => fetchCrowd(d)));
+        const enriched = slice.map((d,i) => ({ ...d, crowdForecast: crowds[i] || '' }));
+        render(enriched);
+      } catch(e){ console.warn('Crowd fout:', e.message); }
+
+      const n = new Date();
+      document.getElementById('upd').textContent =
+        'Bijgewerkt om ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
     }
 
     fetchDepartures();
