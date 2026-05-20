@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080">
+  <title>Wist je dat… Tunnels | Amstelland Ingenieurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 1920px; height: 1080px; overflow: hidden; font-family: 'Montserrat', 'Segoe UI', sans-serif; background: #1D1D1B; }
+    .slideshow { width: 1920px; height: 1080px; position: relative; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 100px 140px; opacity: 0; transition: opacity 0.8s ease-in-out; pointer-events: none; }
+    .slide.active { opacity: 1; pointer-events: auto; }
+    .slide.dark { background: #1D1D1B; }
+    .slide.red  { background: #E4032D; }
+    .label { font-size: 22px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 32px; }
+    .dark .label { color: #E4032D; }
+    .red  .label { color: #1D1D1B; }
+    .big-number { font-size: 175px; font-weight: 900; line-height: 1; margin-bottom: 20px; letter-spacing: -4px; }
+    .dark .big-number { color: #FFFFFF; }
+    .red  .big-number { color: #1D1D1B; }
+    .big-number span.accent { color: #E4032D; }
+    .red  .big-number span.accent { color: #FFFFFF; }
+    .headline { font-size: 50px; font-weight: 700; line-height: 1.2; max-width: 1300px; margin-bottom: 28px; }
+    .dark .headline { color: #FFFFFF; }
+    .red  .headline { color: #1D1D1B; }
+    .sub { font-size: 30px; font-weight: 300; line-height: 1.5; max-width: 1100px; opacity: 0.85; }
+    .dark .sub { color: #D9D9D9; }
+    .red  .sub  { color: #1D1D1B; }
+    .slide::before { content: ''; position: absolute; left: 0; top: 80px; bottom: 80px; width: 8px; border-radius: 0 4px 4px 0; }
+    .dark::before { background: #E4032D; }
+    .red::before  { background: #1D1D1B; }
+    .logo-block { position: absolute; bottom: 52px; right: 80px; display: flex; align-items: center; gap: 16px; }
+    .logo-bar { width: 5px; height: 44px; border-radius: 3px; }
+    .dark .logo-bar { background: #E4032D; }
+    .red  .logo-bar { background: #1D1D1B; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .logo-text .name    { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+    .logo-text .tagline { font-size: 14px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+    .dark .logo-text .name    { color: #FFFFFF; }
+    .dark .logo-text .tagline { color: #616160; }
+    .red  .logo-text .name    { color: #1D1D1B; }
+    .red  .logo-text .tagline { color: #1D1D1B; opacity: 0.6; }
+    .slide-counter { position: absolute; bottom: 58px; right: 380px; font-size: 15px; font-weight: 300; letter-spacing: 3px; }
+    .dark .slide-counter { color: #484848; }
+    .red  .slide-counter { color: rgba(29,29,27,0.4); }
+    .progress-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: #E4032D; width: 0%; transition: width linear; }
+    .red .progress-bar { background: #1D1D1B; }
+    .deco { position: absolute; right: -60px; top: -60px; width: 380px; height: 380px; border-radius: 50%; opacity: 0.05; }
+    .dark .deco { background: #E4032D; }
+    .red  .deco { background: #1D1D1B; }
+    .tag { display: inline-block; font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 8px 18px; border-radius: 4px; margin-bottom: 28px; }
+    .dark .tag { background: rgba(228,3,45,0.15); color: #E4032D; }
+    .red  .tag { background: rgba(29,29,27,0.15); color: #1D1D1B; }
+  </style>
+</head>
+<body>
+<div class="slideshow">
+
+  <!-- SLIDE 1: Westerscheldetunnel -->
+  <div class="slide dark active" id="slide-0">
+    <div class="deco"></div>
+    <div class="label">Wist je dat…</div>
+    <div class="big-number">6<span class="accent">,</span>6 km</div>
+    <div class="headline">De Westerscheldetunnel de langste verkeerstunnel van Nederland is</div>
+    <div class="sub">Geopend in 2003, verbindt Zeeuws-Vlaanderen met de rest van Nederland.<br>Amstelland ondersteunt het maintenance engineering van deze tunnel.</div>
+    <div class="tag">Tunnels</div>
+    <div class="slide-counter">01 / 03</div>
+    <div class="logo-block">
+      <div class="logo-bar"></div>
+      <div class="logo-text">
+        <span class="name">Amstelland Ingenieurs</span>
+        <span class="tagline">Maintenance &amp; Asset Management</span>
+      </div>
+    </div>
+    <div class="progress-bar" id="pb-0"></div>
+  </div>
+
+  <!-- SLIDE 2: Maastunnel -->
+  <div class="slide red" id="slide-1">
+    <div class="deco"></div>
+    <div class="label">Wist je dat…</div>
+    <div class="big-number"><span class="accent">1</span>942</div>
+    <div class="headline">De Maastunnel in Rotterdam al opende in 1942</div>
+    <div class="sub">De eerste onderwaterwegtunnel van Nederland, 1.070 meter lang.<br>Amstelland herziet het onderhoudsconcept voor deze historische tunnel.</div>
+    <div class="tag">Tunnels</div>
+    <div class="slide-counter">02 / 03</div>
+    <div class="logo-block">
+      <div class="logo-bar"></div>
+      <div class="logo-text">
+        <span class="name">Amstelland Ingenieurs</span>
+        <span class="tagline">Maintenance &amp; Asset Management</span>
+      </div>
+    </div>
+    <div class="progress-bar" id="pb-1"></div>
+  </div>
+
+  <!-- SLIDE 3: Rotterdamsebaan -->
+  <div class="slide dark" id="slide-2">
+    <div class="deco"></div>
+    <div class="label">Wist je dat…</div>
+    <div class="big-number">2<span class="accent">,</span>4 km</div>
+    <div class="headline">De Rotterdamsebaan de nieuwste stadstunnel van Den Haag is</div>
+    <div class="sub">Geopend in 2020, verbindt de A4/A13 rechtstreeks met de binnenstad.<br>Amstelland stelde de werkinstructies op voor het meerjarig tunnelonderhoud.</div>
+    <div class="tag">Tunnels</div>
+    <div class="slide-counter">03 / 03</div>
+    <div class="logo-block">
+      <div class="logo-bar"></div>
+      <div class="logo-text">
+        <span class="name">Amstelland Ingenieurs</span>
+        <span class="tagline">Maintenance &amp; Asset Management</span>
+      </div>
+    </div>
+    <div class="progress-bar" id="pb-2"></div>
+  </div>
+
+</div>
+<script>
+  const SLIDE_DURATION = 10000;
+  const slides = document.querySelectorAll('.slide');
+  const pbs    = document.querySelectorAll('.progress-bar');
+  let current  = 0;
+  function showSlide(index) {
+    slides.forEach((s, i) => s.classList.toggle('active', i === index));
+    pbs.forEach(pb => { pb.style.transition = 'none'; pb.style.width = '0%'; });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      pbs[index].style.transition = `width ${SLIDE_DURATION}ms linear`;
+      pbs[index].style.width = '100%';
+    }));
+  }
+  function nextSlide() { current = (current + 1) % slides.length; showSlide(current); }
+  showSlide(0);
+  setInterval(nextSlide, SLIDE_DURATION);
+</script>
+</body>
+</html>
