@@ -21,13 +21,13 @@
       --wit:        #FFFFFF;
 
       /* 55" scherm: basisgrootte */
-      --fs-time:    48px;
-      --fs-dir:     26px;
-      --fs-via:     14px;
-      --fs-badge:   13px;
-      --fs-track:   36px;
-      --fs-status:  14px;
-      --row-pad:    18px 0;
+      --fs-time:    56px;
+      --fs-dir:     30px;
+      --fs-via:     16px;
+      --fs-badge:   15px;
+      --fs-track:   42px;
+      --fs-status:  16px;
+      --row-pad:    20px 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -93,14 +93,14 @@
     }
 
     .station-name {
-      font-size: 26px; font-weight: 700;
+      font-size: 30px; font-weight: 700;
       color: var(--wit); letter-spacing: .3px;
     }
 
     .header-right { text-align: right; }
 
     .clock {
-      font-size: 64px; font-weight: 900;
+      font-size: 74px; font-weight: 900;
       color: var(--wit); letter-spacing: 3px;
       line-height: 1; font-variant-numeric: tabular-nums;
     }
@@ -132,13 +132,13 @@
     ════════════════════════════════ */
     .col-head {
       display: grid;
-      grid-template-columns: 150px 1fr 260px 110px 160px;
+      grid-template-columns: 180px 1fr 280px 120px 180px;
       padding: 12px 48px 10px;
       flex-shrink: 0;
     }
 
     .col-head span {
-      font-size: 11px; font-weight: 700;
+      font-size: 12px; font-weight: 700;
       letter-spacing: 2.5px; text-transform: uppercase;
       color: var(--grijs-m);
     }
@@ -165,7 +165,7 @@
     ════════════════════════════════ */
     .row {
       display: grid;
-      grid-template-columns: 150px 1fr 260px 110px 160px;
+      grid-template-columns: 180px 1fr 280px 120px 180px;
       align-items: center;
       padding: var(--row-pad);
       border-bottom: 1px solid rgba(255,255,255,.07);
@@ -217,13 +217,13 @@
       text-decoration: line-through;
     }
     .time-actual {
-      font-size: 42px; font-weight: 700;
+      font-size: 50px; font-weight: 700;
       color: var(--rood); letter-spacing: 1px;
       font-variant-numeric: tabular-nums; line-height: 1;
     }
 
     /* ── RICHTING ── */
-    .cell-dir { padding-right: 20px; }
+    .cell-dir { padding-left: 32px; padding-right: 20px; }
 
     .dir-name {
       font-size: var(--fs-dir);
@@ -254,7 +254,7 @@
     .badge {
       font-size: var(--fs-badge); font-weight: 700;
       letter-spacing: 1px; text-transform: uppercase;
-      padding: 5px 11px; border-radius: 3px;
+      padding: 6px 13px; border-radius: 3px;
     }
     .badge-ic   { background: rgba(255,255,255,.1);  color: var(--wit);      border: 1px solid rgba(255,255,255,.2); }
     .badge-spr  { background: rgba(228,3,45,.15);    color: var(--rood);     border: 1px solid rgba(228,3,45,.5); }
@@ -327,7 +327,7 @@
       letter-spacing: .5px; padding: 6px 14px;
       border-radius: 3px;
     }
-    .s-ok      { color: rgba(255,255,255,.3); }
+    .s-ok      { background: rgba(34,160,80,.25); color: #4cce82; border: 1px solid rgba(34,160,80,.4); }
     .s-late    { color: var(--rood); }
     .s-cancel  { background: var(--rood); color: var(--wit); }
 
@@ -602,8 +602,8 @@
         const statusHtml = can
           ? `<span class="status s-cancel">Rijdt niet</span>`
           : del >= 1
-            ? `<span class="status s-late">${del} min later</span>`
-            : `<span class="status s-ok">Op tijd</span>`;
+            ? `<span class="status s-late">+${del} min</span>`
+            : `<span class="status s-ok">0 min</span>`;
 
         /* Storingsbericht */
         const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
@@ -619,7 +619,6 @@
             <div class="cell-train">
               <div class="train-top">
                 <span class="badge ${badgeCls(cat)}">${cat}</span>
-                ${pill}
               </div>
               ${crowdHtml}
             </div>
