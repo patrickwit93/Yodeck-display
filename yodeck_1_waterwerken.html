@@ -116,27 +116,38 @@
 
 </div>
 <script>
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      location.reload();
-    }
-  });
   const SLIDE_DURATION = 10000;
-  const slides = document.querySelectorAll(".slide");
-  const pbs    = document.querySelectorAll(".progress-bar");
+  const slides = document.querySelectorAll('.slide');
+  const pbs    = document.querySelectorAll('.progress-bar');
   let current  = 0;
+  let timer    = null;
 
   function showSlide(index) {
-    slides.forEach((s, i) => s.classList.toggle("active", i === index));
-    pbs.forEach(pb => { pb.style.transition = "none"; pb.style.width = "0%"; });
+    slides.forEach((s, i) => s.classList.toggle('active', i === index));
+    pbs.forEach(pb => { pb.style.transition = 'none'; pb.style.width = '0%'; });
     requestAnimationFrame(() => requestAnimationFrame(() => {
       pbs[index].style.transition = `width ${SLIDE_DURATION}ms linear`;
-      pbs[index].style.width = "100%";
+      pbs[index].style.width = '100%';
     }));
   }
+
   function nextSlide() { current = (current + 1) % slides.length; showSlide(current); }
-  showSlide(0);
-  setInterval(nextSlide, SLIDE_DURATION);
+
+  function restart() {
+    clearInterval(timer);
+    current = 0;
+    showSlide(0);
+    timer = setInterval(nextSlide, SLIDE_DURATION);
+  }
+
+  // Start altijd vanaf slide 1
+  restart();
+
+  // Reset naar slide 1 zodra Yodeck de pagina weer in beeld brengt
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) restart();
+  });
+  window.addEventListener('focus', restart);
 </script>
 </body>
 </html>
