@@ -116,16 +116,22 @@
 
 </div>
 <script>
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      location.reload();
+    }
+  });
   const SLIDE_DURATION = 10000;
-  const slides = document.querySelectorAll('.slide');
-  const pbs    = document.querySelectorAll('.progress-bar');
+  const slides = document.querySelectorAll(".slide");
+  const pbs    = document.querySelectorAll(".progress-bar");
   let current  = 0;
+
   function showSlide(index) {
-    slides.forEach((s, i) => s.classList.toggle('active', i === index));
-    pbs.forEach(pb => { pb.style.transition = 'none'; pb.style.width = '0%'; });
+    slides.forEach((s, i) => s.classList.toggle("active", i === index));
+    pbs.forEach(pb => { pb.style.transition = "none"; pb.style.width = "0%"; });
     requestAnimationFrame(() => requestAnimationFrame(() => {
       pbs[index].style.transition = `width ${SLIDE_DURATION}ms linear`;
-      pbs[index].style.width = '100%';
+      pbs[index].style.width = "100%";
     }));
   }
   function nextSlide() { current = (current + 1) % slides.length; showSlide(current); }
