@@ -468,22 +468,15 @@ const FLITSPAAL = `<svg width="14" height="20" viewBox="0 0 22 32" fill="none" x
 const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
 // ══ SCHAAL NAAR VIEWPORT ══════════════════════════════════════════
-(function schaal() {
+function pasSchaalAan() {
   const sx = window.innerWidth  / 1920;
   const sy = window.innerHeight / 1080;
   const s  = Math.min(sx, sy);
-  document.body.style.transform = `scale(${s})`;
+  document.body.style.transform  = `scale(${s})`;
   document.body.style.marginLeft = `${(window.innerWidth  - 1920 * s) / 2}px`;
   document.body.style.marginTop  = `${(window.innerHeight - 1080 * s) / 2}px`;
-})();
-window.addEventListener('resize', () => {
-  const sx = window.innerWidth  / 1920;
-  const sy = window.innerHeight / 1080;
-  const s  = Math.min(sx, sy);
-  document.body.style.transform = `scale(${s})`;
-  document.body.style.marginLeft = `${(window.innerWidth  - 1920 * s) / 2}px`;
-  document.body.style.marginTop  = `${(window.innerHeight - 1080 * s) / 2}px`;
-});
+}
+window.addEventListener('resize', pasSchaalAan);
 
 // ══ KLOK ════════════════════════════════════════════════════════════
 (function tick() {
@@ -797,14 +790,18 @@ async function startApp(data) {
   document.getElementById('instellingen-btn').style.display = 'inline-block';
   document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
   tekenLadende();
-  haalAlleReistijden();
+  // Kleine vertraging zodat netwerk en renderer klaar zijn op Yodeck
+  setTimeout(haalAlleReistijden, 800);
 }
 
 // ══ INIT ═══════════════════════════════════════════════════════════
-// Start direct met hardcoded CONFIG — geen setup nodig
-startApp({
-  apiSleutel: CONFIG.apiSleutel,
-  werkAdres:  CONFIG.werkAdres,
+// Wacht tot pagina volledig geladen is voor de eerste render
+window.addEventListener('load', () => {
+  pasSchaalAan();
+  startApp({
+    apiSleutel: CONFIG.apiSleutel,
+    werkAdres:  CONFIG.werkAdres,
+  });
 });
 </script>
 </body>
