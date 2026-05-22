@@ -82,13 +82,13 @@
       position: relative;
       background: #2a2a28 center/cover no-repeat;
     }
-    /* Frosted-glass laag over de kaartafbeelding */
+    /* Lichte was over de kaartafbeelding — kaart blijft zichtbaar */
     .kaart::before {
       content: '';
       position: absolute; inset: 0;
-      background: rgba(255,255,255,.80);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
       z-index: 0;
     }
     .kaart-accent {
@@ -107,8 +107,8 @@
       display: flex; align-items: flex-start;
       justify-content: space-between; margin-bottom: 6px;
     }
-    .plaatsnaam { font-size: 1.4rem; font-weight: 700; color: #1D1D1B; line-height: 1.15; }
-    .regio      { font-size: .72rem; color: #888; font-weight: 300; margin-top: 2px; }
+    .plaatsnaam { font-size: 1.4rem; font-weight: 700; color: #1D1D1B; line-height: 1.15; text-shadow: 0 0 12px rgba(255,255,255,.9), 0 0 4px rgba(255,255,255,1); }
+    .regio      { font-size: .72rem; color: #555; font-weight: 600; margin-top: 2px; text-shadow: 0 0 8px rgba(255,255,255,1); }
     .pin-wrap {
       width: 34px; height: 34px; background: #F5F5F5; border-radius: 50%;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -119,6 +119,7 @@
     .rtijd {
       font-size: 4.6rem; font-weight: 800; line-height: 1;
       letter-spacing: -.03em;
+      text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,.8);
     }
     .rtijd.g { color: #1a7a2e; }
     .rtijd.o { color: #c45e00; }
@@ -360,7 +361,7 @@ function kaartBgUrl(lat, lon) {
   const key = (cfg?.apiSleutel || '').trim();
   if (!key) return '';
   // TomTom Static Image API — zoomlevel 13 geeft mooie stadskaart
-  return `https://api.tomtom.com/map/1/staticimage?key=${key}&zoom=13&center=${lon},${lat}&width=560&height=400&layer=basic&style=main&format=png`;
+  return `https://api.tomtom.com/map/1/staticimage?key=${key}&zoom=14&center=${lon},${lat}&width=600&height=440&layer=basic&style=main&format=png`;
 }
 function setKaartBg(el, lat, lon) {
   const url = kaartBgUrl(lat, lon);
