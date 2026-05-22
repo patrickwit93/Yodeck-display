@@ -1,748 +1,758 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Amstelland Ingenieurs — Tijdweergave</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>Reistijd naar Huis — Amstelland Ingenieurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
-            --rood:        #E4032D;
-            --donkerrood:  #A0021F;
-            --zwart:       #1D1D1B;
-            --donkergrijs: #484848;
-            --middengrijs: #616160;
-            --lichtgrijs:  #D9D9D9;
-            --wit:         #FFFFFF;
-        }
+    html, body {
+      width: 1920px; height: 1080px; overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+      background: #1D1D1B;
+      color: #1D1D1B;
+    }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: var(--zwart);
-            font-family: 'Montserrat', 'Calibri Light', 'Segoe UI', sans-serif;
-            color: var(--wit);
-        }
+    /* ══ SCHERM ══════════════════════════════════════════════════════ */
+    .scherm { display: flex; flex-direction: column; width: 1920px; height: 1080px; }
 
-        /* ── Achtergrond raster ────────────────────────────────────── */
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(228,3,45,0.045) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(228,3,45,0.045) 1px, transparent 1px);
-            background-size: 64px 64px;
-            pointer-events: none;
-            z-index: 0;
-        }
+    /* ══ HEADER ══════════════════════════════════════════════════════ */
+    header {
+      height: 86px; flex-shrink: 0;
+      background: #111110;
+      border-bottom: 3px solid #E4032D;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 44px;
+      position: relative;
+    }
+    header::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 7px; background: #E4032D;
+    }
 
-        /* ── Scanline ──────────────────────────────────────────────── */
-        .scan-line {
-            position: fixed;
-            left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent 0%, rgba(228,3,45,0.55) 40%, rgba(228,3,45,0.55) 60%, transparent 100%);
-            animation: scan 6s linear infinite;
-            pointer-events: none;
-            z-index: 20;
-        }
-        @keyframes scan {
-            0%   { top: -4px; opacity: 0; }
-            3%   { opacity: 1; }
-            97%  { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
+    .logo { display: flex; align-items: center; gap: 20px; padding-left: 8px; }
+    .logo-bars { display: flex; flex-direction: column; gap: 5px; }
+    .lb { border-radius: 2px; }
+    .lb1 { width: 40px; height: 4px; background: #E4032D; }
+    .lb2 { width: 28px; height: 4px; background: rgba(255,255,255,.2); }
+    .lb3 { width: 34px; height: 4px; background: #E4032D; opacity: .45; }
+    .logo-tekst h1 {
+      font-size: 1.25rem; font-weight: 700;
+      color: #fff; letter-spacing: .025em;
+    }
+    .logo-sub {
+      font-size: .72rem; color: rgba(255,255,255,.35);
+      font-weight: 300; margin-top: 3px;
+      max-width: 640px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
-        /* ── Hoekdecoraties ────────────────────────────────────────── */
-        .corner {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .corner-tl { top: 24px; left: 24px;  border-top: 2px solid var(--rood); border-left: 2px solid var(--rood); }
-        .corner-tr { top: 24px; right: 24px;  border-top: 2px solid var(--rood); border-right: 2px solid var(--rood); }
-        .corner-bl { bottom: 24px; left: 24px;  border-bottom: 2px solid var(--rood); border-left: 2px solid var(--rood); }
-        .corner-br { bottom: 24px; right: 24px;  border-bottom: 2px solid var(--rood); border-right: 2px solid var(--rood); }
+    .header-rechts { display: flex; align-items: center; gap: 24px; }
+    .inst-knop {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.45); font-family: inherit;
+      font-size: .7rem; padding: 7px 14px; border-radius: 5px; cursor: pointer;
+      transition: all .15s;
+    }
+    .inst-knop:hover { background: rgba(255,255,255,.13); color: #fff; }
+    .klok-blok { text-align: right; }
+    .klok  { font-size: 2.4rem; font-weight: 800; color: #fff; line-height: 1; }
+    .datum { font-size: .68rem; color: rgba(255,255,255,.35); font-weight: 300; margin-top: 4px; }
 
-        /* ── Coördinaten ───────────────────────────────────────────── */
-        .coord {
-            position: fixed;
-            font-size: 10px;
-            font-weight: 300;
-            letter-spacing: 0.18em;
-            color: var(--middengrijs);
-            z-index: 5;
-            pointer-events: none;
-        }
-        .coord-tl { top: 28px;    left: 100px; }
-        .coord-tr { top: 28px;    right: 100px; }
-        .coord-bl { bottom: 28px; left: 100px; }
-        .coord-br { bottom: 28px; right: 110px; }
+    /* ══ GRID ════════════════════════════════════════════════════════ */
+    .grid-wrapper {
+      flex: 1;
+      padding: 18px 22px 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 13px;
+      height: 100%;
+    }
 
-        /* ── Brugdecoratie (onderkant) ─────────────────────────────── */
-        .bridge-deco {
-            position: fixed;
-            bottom: 0;
-            left: 0; right: 0;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.18;
-        }
+    /* ══ KAART ═══════════════════════════════════════════════════════ */
+    .kaart {
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 28px rgba(0,0,0,.45);
+      position: relative;
+      background: #e8e6e3 center/cover no-repeat;
+    }
+    .kaart::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      z-index: 0;
+    }
+    .kaart-accent {
+      height: 5px; background: #E4032D; flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+    .kaart-body   {
+      flex: 1; padding: 18px 20px 16px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      position: relative; z-index: 1;
+    }
 
-        /* ── Hoofd-layout ──────────────────────────────────────────── */
-        .main {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* — Kop — */
+    .kaart-kop {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 6px;
+    }
+    .plaatsnaam { font-size: 1.9rem; font-weight: 800; color: #1D1D1B; line-height: 1.1; text-shadow: 0 0 18px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,1); }
+    .regio      { font-size: .8rem; color: #333; font-weight: 600; margin-top: 3px; text-shadow: 0 0 10px rgba(255,255,255,1); }
+    .pin-wrap {
+      width: 34px; height: 34px; background: #F5F5F5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
 
-        /* ── Kloksectie ────────────────────────────────────────────── */
-        .clock-section {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 40px 0 60px;
-        }
+    /* — Reistijd — */
+    .rtijd-blok { display: flex; align-items: center; }
+    .rtijd {
+      font-size: 4.6rem; font-weight: 800; line-height: 1;
+      letter-spacing: -.03em;
+      text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,.8);
+    }
+    .rtijd.g { color: #1a7a2e; }
+    .rtijd.o { color: #c45e00; }
+    .rtijd.r { color: #E4032D; }
+    .rtijd.gr { color: #bbb; font-size: 2.4rem; font-weight: 600; }
 
-        .clock-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* — Onderste zone — */
+    .kaart-onder { display: flex; flex-direction: column; gap: 6px; }
 
-        /* Kloppende ring */
-        .pulse-ring {
-            position: absolute;
-            border-radius: 50%;
-            border: 1.5px solid var(--rood);
-            width: 108%;
-            height: 108%;
-            animation: pulse 3.5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .pulse-ring-2 {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(228,3,45,0.35);
-            width: 118%;
-            height: 118%;
-            animation: pulse 3.5s ease-in-out 1.75s infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse {
-            0%   { transform: scale(0.97); opacity: 0.9; }
-            50%  { transform: scale(1.02); opacity: 0.25; }
-            100% { transform: scale(0.97); opacity: 0.9; }
-        }
+    /* Weg-chips */
+    .wegen { display: flex; flex-wrap: wrap; gap: 4px; }
+    .weg {
+      font-size: .65rem; font-weight: 800;
+      padding: 2px 7px; border-radius: 3px;
+      letter-spacing: .04em;
+    }
+    .weg.A { background: #1b3a6b; color: #fff; }
+    .weg.N { background: #e8a000; color: #1D1D1B; }
+    .weg.R { background: #484848; color: #fff; }
 
-        /* Langzaam roterende decoratieve ring */
-        .deco-ring {
-            position: absolute;
-            border-radius: 50%;
-            width: 130%;
-            height: 130%;
-            border: 1px solid rgba(228,3,45,0.15);
-            animation: slow-rotate 90s linear infinite;
-            pointer-events: none;
-        }
-        .deco-ring::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: -6px;
-            width: 10px;
-            height: 2px;
-            background: var(--rood);
-            transform: translateY(-50%);
-            border-radius: 1px;
-        }
-        .deco-ring::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -6px;
-            width: 10px;
-            height: 2px;
-            background: var(--rood);
-            transform: translateY(-50%);
-            border-radius: 1px;
-        }
-        @keyframes slow-rotate {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
+    /* Route quick-guide */
+    .route-tekst {
+      font-size: 1.05rem; color: #1D1D1B; font-weight: 700;
+      line-height: 1.45;
+      background: rgba(255,255,255,.85);
+      border-left: 4px solid #E4032D;
+      border-radius: 4px;
+      padding: 6px 10px;
+    }
 
-        #clockCanvas {
-            display: block;
-            position: relative;
-            z-index: 2;
-            /* Scherp op retina */
-            image-rendering: -webkit-optimize-contrast;
-        }
+    /* Flitspaal badge */
+    .flitspaal-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.88);
+      border: 1.5px solid #e8a000;
+      border-radius: 4px;
+      padding: 2px 7px;
+      width: fit-content;
+    }
+    .flitspaal-badge.veel {
+      border-color: #E4032D;
+      background: rgba(255,232,232,.9);
+    }
+    .flitspaal-nr {
+      font-size: .8rem; font-weight: 800; color: #1D1D1B;
+      line-height: 1;
+    }
+    .flitspaal-label {
+      font-size: .58rem; font-weight: 700; color: #444;
+    }
 
-        /* ── Verticale scheidingslijn ───────────────────────────────── */
-        .divider {
-            flex: 0 0 1px;
-            height: 55vh;
-            background: linear-gradient(to bottom,
-                transparent 0%,
-                rgba(228,3,45,0.6) 20%,
-                rgba(228,3,45,0.6) 80%,
-                transparent 100%);
-            margin: 0 10px;
-        }
+    /* Flitsers */
+    .flitser-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .66rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 4px;
+      background: #fff8e1; color: #7d5a00;
+      border: 1px solid #ffd54f;
+      width: fit-content;
+    }
+    .flitser-badge.veel { background: #fde8ea; color: #a0021f; border-color: #f5b8c0; }
 
-        /* ── Infopaneel (rechts) ───────────────────────────────────── */
-        .info-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 0 50px 0 50px;
-            gap: 10px;
-            min-width: 0;
-        }
+    /* Vertraging */
+    .vertraging {
+      font-size: .73rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .vertraging.o { color: #c45e00; }
+    .vertraging.r { color: #E4032D; }
 
-        .time-label {
-            font-size: clamp(9px, 0.9vw, 13px);
-            font-weight: 400;
-            letter-spacing: 0.42em;
-            color: var(--rood);
-            text-transform: uppercase;
-        }
+    /* Meta */
+    .rmeta {
+      font-size: .82rem; color: #1D1D1B; font-weight: 600;
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      background: rgba(255,255,255,.82);
+      border-radius: 5px;
+      padding: 5px 9px;
+    }
+    .badge {
+      font-size: .7rem; font-weight: 800; padding: 2px 8px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge.g { background: #1a7a2e; color: #fff; }
+    .badge.o { background: #c45e00; color: #fff; }
+    .badge.r { background: #E4032D; color: #fff; }
 
-        /* Grote digitale tijd */
-        .digital-time {
-            display: flex;
-            align-items: baseline;
-            gap: 0;
-            line-height: 1;
-            white-space: nowrap;
-        }
-        .dt-hm {
-            font-size: clamp(72px, 9.5vw, 148px);
-            font-weight: 200;
-            letter-spacing: -0.01em;
-            color: var(--wit);
-            font-variant-numeric: tabular-nums;
-        }
-        .dt-sep {
-            font-size: clamp(72px, 9.5vw, 148px);
-            font-weight: 100;
-            color: var(--rood);
-            margin: 0 2px;
-            animation: blink-sep 1s step-start infinite;
-        }
-        @keyframes blink-sep {
-            0%, 49% { opacity: 1; }
-            50%, 99% { opacity: 0.25; }
-        }
-        .dt-sec {
-            font-size: clamp(28px, 3.8vw, 60px);
-            font-weight: 300;
-            color: var(--rood);
-            font-variant-numeric: tabular-nums;
-            margin-left: 8px;
-            align-self: flex-start;
-            margin-top: 0.12em;
-        }
+    /* Voortgangsbalk */
+    .voortgangsbalk {
+      height: 4px; background: #EFEFEF; border-radius: 2px; overflow: hidden;
+      margin-top: 3px;
+    }
+    .voortgang { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .voortgang.g { background: #1a7a2e; }
+    .voortgang.o { background: #c45e00; }
+    .voortgang.r { background: #E4032D; }
 
-        /* Horizontale lijn */
-        .h-line {
-            width: min(140px, 40%);
-            height: 2px;
-            background: linear-gradient(to right, var(--rood), transparent);
-            margin: 4px 0;
-        }
+    /* Laden */
+    .laden-rij {
+      display: flex; align-items: center; gap: 10px;
+      color: #ccc; font-size: .85rem; font-weight: 300;
+    }
+    .spinner {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2.5px solid #E8E8E8; border-top-color: #E4032D;
+      border-radius: 50%; animation: draaien .7s linear infinite;
+    }
+    @keyframes draaien { to { transform: rotate(360deg); } }
 
-        .day-name {
-            font-size: clamp(22px, 2.8vw, 46px);
-            font-weight: 700;
-            letter-spacing: 0.22em;
-            color: var(--wit);
-            text-transform: uppercase;
-        }
+    /* ══ STATUSBALK ═══════════════════════════════════════════════════ */
+    .statusbar {
+      height: 38px; flex-shrink: 0;
+      background: #111110;
+      border-top: 2px solid #E4032D;
+      padding: 0 44px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .status-links { display: flex; align-items: center; gap: 9px; }
+    .sdot { width: 7px; height: 7px; border-radius: 50%; background: #2e7d32; }
+    .sdot.bezig { background: #c45e00; animation: knip 1s ease infinite; }
+    .sdot.fout  { background: #E4032D; }
+    @keyframes knip { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .stxt { font-size: .68rem; color: rgba(255,255,255,.35); font-weight: 300; }
+    .merk { font-size: .62rem; color: rgba(255,255,255,.18); letter-spacing: .1em; text-transform: uppercase; }
+    .merk em { color: #E4032D; font-style: normal; opacity: .8; }
 
-        .date-display {
-            font-size: clamp(14px, 1.7vw, 26px);
-            font-weight: 300;
-            letter-spacing: 0.14em;
-            color: var(--lichtgrijs);
-        }
+    /* ══ SETUP OVERLAY ════════════════════════════════════════════════ */
+    #setup-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,10,10,.9);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .setup-kaart {
+      background: #fff; border-radius: 12px;
+      border-top: 5px solid #E4032D;
+      padding: 44px; width: 540px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .setup-kaart h2 { font-size: 1.15rem; font-weight: 700; color: #1D1D1B; margin-bottom: 6px; }
+    .setup-intro    { font-size: .85rem; color: #616160; font-weight: 300; margin-bottom: 30px; line-height: 1.6; }
+    label {
+      display: block; font-size: .68rem; font-weight: 700;
+      color: #616160; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    input[type=text], input[type=password] {
+      width: 100%; padding: 12px 15px;
+      border: 1.5px solid #D9D9D9; border-radius: 6px;
+      font-family: inherit; font-size: .9rem; color: #1D1D1B;
+      outline: none; transition: border-color .2s; margin-bottom: 20px;
+    }
+    input:focus { border-color: #E4032D; }
+    .hint { font-size: .73rem; color: #888; font-weight: 300; margin-top: -14px; margin-bottom: 20px; line-height: 1.5; }
+    .hint a { color: #E4032D; text-decoration: none; }
+    .knop-rood {
+      width: 100%; padding: 14px;
+      background: #E4032D; color: #fff; border: none; border-radius: 6px;
+      font-family: inherit; font-size: .95rem; font-weight: 700; cursor: pointer;
+      transition: background .15s;
+    }
+    .knop-rood:hover { background: #A0021F; }
+    .foutmelding {
+      background: #fde8ea; border-left: 4px solid #E4032D;
+      border-radius: 4px; padding: .75rem 1rem;
+      font-size: .8rem; color: #A0021F; margin-top: .75rem;
+      display: none; white-space: pre-wrap;
+    }
 
-        /* Week‑ en UTC-info */
-        .meta-row {
-            display: flex;
-            gap: 24px;
-            margin-top: 6px;
-        }
-        .meta-tag {
-            font-size: clamp(9px, 0.85vw, 12px);
-            font-weight: 400;
-            letter-spacing: 0.3em;
-            color: var(--middengrijs);
-            text-transform: uppercase;
-            border-left: 2px solid var(--rood);
-            padding-left: 8px;
-        }
-
-        /* ── Amstelland logo (rechtsonder) ──────────────────────────── */
-        .logo-container {
-            position: fixed;
-            bottom: 28px;
-            right: 36px;
-            z-index: 15;
-            opacity: 0.92;
-        }
-        .logo-container svg {
-            width: clamp(140px, 12vw, 200px);
-            height: auto;
-        }
-
-        /* ── Rode bovenlijn ─────────────────────────────────────────── */
-        .top-line {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(to right, var(--donkerrood), var(--rood), var(--donkerrood));
-            z-index: 25;
-        }
-
-        /* ── Status indicator (rechtsbovenhoek) ─────────────────────── */
-        .status-dot {
-            position: fixed;
-            top: 22px;
-            right: 100px;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            z-index: 15;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #00E676;
-            box-shadow: 0 0 8px #00E676;
-            animation: dot-pulse 2s ease-in-out infinite;
-        }
-        @keyframes dot-pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 8px #00E676; }
-            50%       { opacity: 0.5; box-shadow: 0 0 2px #00E676; }
-        }
-        .status-text {
-            font-size: 10px;
-            letter-spacing: 0.25em;
-            color: var(--middengrijs);
-            font-weight: 300;
-        }
-    </style>
+    /* ══ MODAL INSTELLINGEN ═══════════════════════════════════════════ */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 10px; border-top: 5px solid #E4032D;
+      padding: 38px; width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+    .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 24px; color: #1D1D1B; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+    .knop-wit {
+      padding: 10px 20px; background: #fff; color: #1D1D1B;
+      border: 1.5px solid #D9D9D9; border-radius: 5px;
+      font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer;
+    }
+    .knop-wit:hover { border-color: #999; }
+    .knop-rood-sm {
+      padding: 10px 20px; background: #E4032D; color: #fff; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer;
+    }
+    .knop-rood-sm:hover { background: #A0021F; }
+    .knop-gevaar {
+      padding: 10px 20px; background: #fde8ea; color: #A0021F; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 600;
+      cursor: pointer; margin-right: auto;
+    }
+    .knop-gevaar:hover { background: #fbc4c4; }
+  </style>
 </head>
 <body>
 
-    <!-- Bovenste rode lijn -->
-    <div class="top-line"></div>
 
-    <!-- Achtergrond raster -->
-    <div class="bg-grid"></div>
-
-    <!-- Scanline -->
-    <div class="scan-line"></div>
-
-    <!-- Hoekdecoraties -->
-    <div class="corner corner-tl"></div>
-    <div class="corner corner-tr"></div>
-    <div class="corner corner-bl"></div>
-    <div class="corner corner-br"></div>
-
-    <!-- Coördinaten -->
-    <div class="coord coord-tl">N 52°22′48″</div>
-    <div class="coord coord-tr">E 04°53′31″</div>
-    <div class="coord coord-bl">AMSTERDAM</div>
-    <div class="coord coord-br">UTC +01:00</div>
-
-    <!-- Live status -->
-    <div class="status-dot">
-        <div class="dot"></div>
-        <span class="status-text">LIVE</span>
+<!-- ══ MODAL INSTELLINGEN ════════════════════════════════════════ -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3>⚙ Instellingen</h3>
+    <label for="m-api">TomTom API-sleutel</label>
+    <input type="password" id="m-api" placeholder="Laat leeg om huidige te behouden" autocomplete="off" />
+    <label for="m-werk">Vertrekadres</label>
+    <input type="text" id="m-werk" />
+    <div class="modal-footer">
+      <button class="knop-gevaar" onclick="resetAlles()">Wissen</button>
+      <button class="knop-wit" onclick="sluitModal()">Annuleren</button>
+      <button class="knop-rood-sm" onclick="slaModalOp()">Opslaan</button>
     </div>
+  </div>
+</div>
 
-    <!-- Brug-silhouet (onderkant, decoratief) -->
-    <div class="bridge-deco">
-        <svg viewBox="0 0 1920 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Wegdek -->
-            <line x1="0" y1="160" x2="1920" y2="160" stroke="#E4032D" stroke-width="2.5"/>
-            <!-- Pylonen -->
-            <rect x="490" y="50"  width="18" height="110" fill="#D9D9D9"/>
-            <rect x="1412" y="50" width="18" height="110" fill="#D9D9D9"/>
-            <!-- Pyloon-toppen -->
-            <polygon points="490,50 499,28 508,50"  fill="#E4032D"/>
-            <polygon points="1412,50 1421,28 1430,50" fill="#E4032D"/>
-            <!-- Hoofdkabels -->
-            <path d="M0,108 Q499,18 960,68 Q1421,18 1920,108"
-                  stroke="#D9D9D9" stroke-width="2.5" fill="none"/>
-            <!-- Hangkabels links -->
-            <line x1="150"  y1="90"  x2="150"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="250"  y1="80"  x2="250"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="350"  y1="67"  x2="350"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="430"  y1="56"  x2="430"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <!-- Hangkabels midden-links -->
-            <line x1="570"  y1="50"  x2="570"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="650"  y1="44"  x2="650"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="730"  y1="41"  x2="730"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="820"  y1="40"  x2="820"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="900"  y1="42"  x2="900"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <!-- Midden -->
-            <line x1="960"  y1="68"  x2="960"  y2="160" stroke="#E4032D"  stroke-width="1"/>
-            <!-- Hangkabels midden-rechts -->
-            <line x1="1020" y1="42"  x2="1020" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1100" y1="40"  x2="1100" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1190" y1="41"  x2="1190" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1270" y1="44"  x2="1270" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1350" y1="50"  x2="1350" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <!-- Hangkabels rechts -->
-            <line x1="1490" y1="56"  x2="1490" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1570" y1="67"  x2="1570" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1670" y1="80"  x2="1670" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <line x1="1770" y1="90"  x2="1770" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
-            <!-- Wateroppervlak -->
-            <line x1="0"    y1="180" x2="1920" y2="180" stroke="#616160" stroke-width="1" stroke-dasharray="6,8"/>
-            <line x1="0"    y1="200" x2="1920" y2="200" stroke="#484848" stroke-width="1" stroke-dasharray="10,12"/>
-        </svg>
+<!-- ══ HOOFDSCHERM ════════════════════════════════════════════════ -->
+<div class="scherm">
+  <header>
+    <div class="logo">
+      <!-- Amstelland Ingenieurs logo (wit) -->
+      <svg height="44" viewBox="0 0 380.77 127.56" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <rect fill="#e4032d" x="99.39" width="2.76" height="127.56"/>
+        <g fill="#ffffff">
+          <path d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
+          <path d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <path d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
+          <path d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
+          <path d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
+          <path d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
+          <path d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
+          <path d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93h0s-.02.03-.03.04l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8,0,0,0,0,0,0,0,.01-.01.02-.02.03-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59,0,0,0-.01.02-.03v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
+        </g>
+        <path fill="#e4032d" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39,0,0,0,0,0,0v11.91h14.3v-14.3h-12.44Z"/>
+      </svg>
+      <div class="logo-sub" id="werk-label" style="margin-left:4px">Reistijd naar Huis</div>
     </div>
+    <div class="header-rechts">
+      <button class="inst-knop" id="instellingen-btn" style="display:none" onclick="openModal()">⚙ Instellingen</button>
+      <div class="klok-blok">
+        <div class="klok" id="klok">--:--</div>
+        <div class="datum" id="datum"></div>
+      </div>
+    </div>
+  </header>
 
-    <!-- Hoofd-layout -->
-    <div class="main">
+  <div class="grid-wrapper">
+    <div class="grid" id="kaarten-rij"></div>
+  </div>
 
-        <!-- Analoge klok -->
-        <div class="clock-section">
-            <div class="clock-wrapper" id="clockWrapper">
-                <div class="deco-ring"></div>
-                <div class="pulse-ring"></div>
-                <div class="pulse-ring-2"></div>
-                <canvas id="clockCanvas"></canvas>
-            </div>
+  <div class="statusbar">
+    <div class="status-links">
+      <div class="sdot" id="sdot"></div>
+      <span class="stxt" id="stxt">Opstarten…</span>
+    </div>
+    <div class="merk"><em>Amstelland</em> Ingenieurs</div>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURATIE — pas hier aan indien nodig                       ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const CONFIG = {
+  apiSleutel: 'ClQP1K2s2boAjxqkXDN3Vq66rLyl5wSj',
+  werkAdres:  'Suikersilo-West 39, Halfweg',
+  originLat:  52.3823,
+  originLon:  4.7348,
+};
+
+// ══ KAARTACHTERGROND ══════════════════════════════════════════════
+// OpenStreetMap static map — gratis, geen API-sleutel nodig
+function setKaartBg(el, lat, lon) {
+  const url = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=14&size=600x440&maptype=osm`;
+  el.style.backgroundImage = `url('${url}')`;
+  el.style.backgroundSize  = 'cover';
+  el.style.backgroundPosition = 'center';
+}
+
+// ══ BESTEMMINGEN ═══════════════════════════════════════════════════
+const BESTEMMINGEN = [
+  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.25908,  lon: 4.76635  },
+  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.63199,  lon: 4.74588  },
+  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.15817,  lon: 5.38682  },
+  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.46965,  lon: 4.74283  },
+  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.55199,  lon: 4.67352  },
+  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.51046,  lon: 4.66997  },
+  { naam: 'Het Kalf',        regio: 'Zaandam',       lat: 52.469008, lon: 4.838422 },
+  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.50788,  lon: 4.84802  },
+  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.219967, lon: 5.481498 },
+  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.694906, lon: 4.874942 },
+];
+
+const OPSLAG = 'ai_reistijd_tt_v2';
+let cfg = null;
+let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
+let verversTimer = null;
+
+// ══ HELPERS ════════════════════════════════════════════════════════
+function e(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function secNaarTekst(sec) {
+  const m = Math.round(sec / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}u ${m%60 > 0 ? ' ' + (m%60) + 'm' : ''}`.trim();
+}
+function kmTekst(m) {
+  return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+}
+function wegKlasse(nr) {
+  if (/^A\d/i.test(nr)) return 'A';
+  if (/^N\d/i.test(nr)) return 'N';
+  return 'R';
+}
+
+const PIN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+// Flitspaal SVG: mast + camera-behuizing + flitser-accent
+const FLITSPAAL = `<svg width="14" height="20" viewBox="0 0 22 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- mast -->
+  <rect x="9.5" y="12" width="3" height="20" rx="1.5" fill="#484848"/>
+  <!-- camera behuizing -->
+  <rect x="2" y="2" width="18" height="12" rx="2.5" fill="#1D1D1B"/>
+  <!-- lens -->
+  <circle cx="11" cy="8" r="3.5" fill="#333"/>
+  <circle cx="11" cy="8" r="2" fill="#555"/>
+  <circle cx="12" cy="7" r=".6" fill="rgba(255,255,255,.4)"/>
+  <!-- flitser accent -->
+  <rect x="2" y="2" width="3" height="12" rx="1.5" fill="#E4032D" opacity=".9"/>
+</svg>`;
+const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+// ══ KLOK ════════════════════════════════════════════════════════════
+(function tick() {
+  const nu = new Date();
+  document.getElementById('klok').textContent =
+    nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('datum').textContent =
+    nu.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+  setTimeout(tick, 1000);
+})();
+
+function setStatus(t, m) {
+  document.getElementById('stxt').textContent = t;
+  const d = document.getElementById('sdot');
+  d.className = 'sdot' + (m && m !== 'ok' ? ' ' + m : '');
+}
+
+// ══ OPSLAG ════════════════════════════════════════════════════════
+function laadOpslag() {
+  try { return JSON.parse(localStorage.getItem(OPSLAG)) || null; } catch { return null; }
+}
+function slaOpSlag(d) { localStorage.setItem(OPSLAG, JSON.stringify(d)); }
+
+// ══ SETUP ════════════════════════════════════════════════════════
+function slaOp() {
+  const el  = document.getElementById('setup-fout');
+  el.style.display = 'none';
+  const api  = document.getElementById('s-api').value.trim();
+  const werk = document.getElementById('s-werk').value.trim();
+  const f = [];
+  if (!api)  f.push('• Vul een TomTom API-sleutel in');
+  if (!werk) f.push('• Vul een vertrekadres in');
+  if (f.length) { el.textContent = f.join('\n'); el.style.display = 'block'; return; }
+  slaOpSlag({ apiSleutel: api, werkAdres: werk });
+  startApp({ apiSleutel: api, werkAdres: werk });
+}
+function openModal() {
+  document.getElementById('m-api').value  = '';
+  document.getElementById('m-werk').value = cfg.werkAdres;
+  document.getElementById('modal').classList.add('open');
+}
+function sluitModal() { document.getElementById('modal').classList.remove('open'); }
+function slaModalOp() {
+  const a = document.getElementById('m-api').value.trim();
+  const w = document.getElementById('m-werk').value.trim();
+  const nc = { apiSleutel: a || cfg.apiSleutel, werkAdres: w || cfg.werkAdres };
+  slaOpSlag(nc); sluitModal();
+  cfg = null; originCoords = null;
+  startApp(nc);
+}
+function resetAlles() {
+  if (!confirm('Alles wissen?')) return;
+  localStorage.removeItem(OPSLAG); location.reload();
+}
+
+// ══ ORIGIN COÖRDINATEN ════════════════════════════════════════════
+// Vaste coördinaten van het Halfweg-kantoor — geen Search API nodig
+const ORIGIN_STANDAARD = { lat: 52.3823, lon: 4.7348 }; // Suikersilo-West 39, Halfweg
+
+// ══ TOMTOM ROUTING ════════════════════════════════════════════════
+function parseWegnummers(instructies) {
+  const gezien = new Set(), wegen = [];
+  (instructies || []).forEach(ins => {
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[ANR]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    });
+    // Fallback: street-naam als het op een wegcode lijkt
+    if (!ins.roadNumbers?.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[AN]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    }
+  });
+  return wegen
+    .sort((a,b) => (a.startsWith('A')?0:a.startsWith('N')?1:2) - (b.startsWith('A')?0:b.startsWith('N')?1:2))
+    .slice(0, 4);
+}
+
+function bouwRouteTekst(instructies) {
+  const segmenten = [], gezien = new Set();
+
+  // Verzamel weg + eerste bord-richting per uniek wegnummer
+  (instructies || []).forEach(ins => {
+    if (['DEPART','ARRIVE','WAYPOINT_REACHED','SPEED_CONTROL'].includes(ins.instructionType)) return;
+    const kandidaten = [];
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
+    });
+    if (!kandidaten.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
+    }
+    kandidaten.forEach(nr => {
+      if (gezien.has(nr)) return;
+      gezien.add(nr);
+      const bord = (ins.signpostText || '').replace(/[-–—|]/g,' ').split(/\s{2,}/)[0].trim();
+      segmenten.push({ nr, richting: (bord && bord.length < 22 && bord.toUpperCase() !== nr) ? bord : null });
+    });
+  });
+
+  const lijst = segmenten.slice(0, 5);
+  if (!lijst.length) return null;
+
+  // Eerste weg krijgt richting mee als beschikbaar, rest alleen wegnummer
+  const eerste = lijst[0];
+  const eersteLabel = eerste.richting ? `${eerste.nr} richting ${eerste.richting}` : eerste.nr;
+
+  if (lijst.length === 1) return `Je rijdt via de ${eersteLabel}.`;
+
+  const rest = lijst.slice(1).map(s => s.nr);
+  const laatste = rest[rest.length - 1];
+  const midden  = rest.slice(0, -1);
+
+  const weglijst = midden.length
+    ? `${eersteLabel}, ${midden.join(', ')} en ${laatste}`
+    : `${eersteLabel} en ${laatste}`;
+
+  return `Je rijdt via de ${weglijst}.`;
+}
+
+function telFlitsers(instructies) {
+  return (instructies || []).filter(ins => ins.instructionType === 'SPEED_CONTROL').length;
+}
+
+async function haalReistijd(b, poging = 1) {
+  const key = (cfg.apiSleutel || '').trim();
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/${originCoords.lat},${originCoords.lon}:${b.lat},${b.lon}/json?key=${key}&traffic=true&travelMode=car&instructionsType=coded&language=nl-NL`;
+  try {
+    const res   = await fetch(url);
+    if (!res.ok) {
+      // Probeer foutmelding uit body te lezen
+      let detail = `HTTP ${res.status}`;
+      try { const j = await res.json(); detail = j?.detailedError?.message || j?.error?.description || detail; } catch {}
+      throw new Error(detail);
+    }
+    const data  = await res.json();
+    const route = data.routes?.[0];
+    const sum   = route?.summary;
+    if (!sum) throw new Error('Geen route in antwoord');
+    const instructies = route?.guidance?.instructions ?? [];
+    return {
+      ok: true,
+      rijSec:         sum.travelTimeInSeconds,
+      normSec:        sum.noTrafficTravelTimeInSeconds ?? sum.travelTimeInSeconds,
+      vertragingSec:  sum.trafficDelayInSeconds ?? 0,
+      afstandM:       sum.lengthInMeters,
+      wegen:          parseWegnummers(instructies),
+      routeSegmenten: bouwRouteTekst(instructies),
+      flitsers:       telFlitsers(instructies),
+    };
+  } catch (err) {
+    if (poging < 2) {
+      await new Promise(r => setTimeout(r, 1800));
+      return haalReistijd(b, poging + 1);
+    }
+    return { ok: false, fout: err.message };
+  }
+}
+
+// ══ KAART HTML ════════════════════════════════════════════════════
+function kaartLadenHTML(b) {
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok"><div class="laden-rij"><div class="spinner"></div>Ophalen…</div></div>
+      <div class="kaart-onder">
+        <div class="voortgangsbalk"><div class="voortgang g" style="width:0%"></div></div>
+      </div>
+    </div>`;
+}
+
+function kaartResultaatHTML(b, r) {
+  if (!r.ok) {
+    return `
+      <div class="kaart-accent"></div>
+      <div class="kaart-body">
+        <div class="kaart-kop">
+          <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+          <div class="pin-wrap">${PIN}</div>
         </div>
-
-        <!-- Scheidingslijn -->
-        <div class="divider"></div>
-
-        <!-- Digitaal paneel -->
-        <div class="info-section">
-            <div class="time-label">LOKALE TIJD</div>
-
-            <div class="digital-time">
-                <span class="dt-hm" id="dt-hm">--:--</span>
-                <span class="dt-sep" id="dt-sep">:</span>
-                <span class="dt-sec" id="dt-sec">--</span>
-            </div>
-
-            <div class="h-line"></div>
-
-            <div class="day-name"  id="day-name">---</div>
-            <div class="date-display" id="date-display">-- --- ----</div>
-
-            <div class="meta-row">
-                <div class="meta-tag" id="week-tag">WEEK --</div>
-                <div class="meta-tag" id="tz-tag">CET / CEST</div>
-            </div>
+        <div class="rtijd-blok"><div class="rtijd gr">—</div></div>
+        <div class="kaart-onder">
+          <div class="rmeta" style="color:#E4032D;font-size:.65rem" title="${e(r.fout)}">${e(r.fout || 'Geen verbinding')}</div>
+          <div class="voortgangsbalk"><div class="voortgang r" style="width:100%"></div></div>
         </div>
-    </div>
+      </div>`;
+  }
 
-    <!-- Amstelland logo (wit) -->
-    <div class="logo-container">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380.77 127.56">
-            <defs>
-                <style>
-                    .al { fill: #FFFFFF; stroke-width: 0px; }
-                    .ar { fill: #E4032D; stroke-width: 0px; }
-                </style>
-            </defs>
-            <g>
-                <rect class="ar" x="99.39" width="2.76" height="127.56"/>
-                <g>
-                    <path class="al" d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
-                    <path class="al" d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
-                    <path class="al" d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
-                    <path class="al" d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
-                    <path class="al" d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-                    <path class="al" d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
-                    <path class="al" d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
-                    <path class="al" d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
-                    <path class="al" d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-                    <path class="al" d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
-                    <path class="al" d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
-                    <path class="al" d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-                    <path class="al" d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
-                    <path class="al" d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-                    <path class="al" d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-                    <path class="al" d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
-                    <path class="al" d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-                    <path class="al" d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
-                    <path class="al" d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
-                    <path class="al" d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
-                </g>
-                <g>
-                    <path class="al" d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93h0s-.02.03-.03.04l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8,0,0,0,0,0,0,0,.01-.01.02-.02.03-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59,0,0,0-.01.02-.03v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
-                    <path class="ar" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39,0,0,0,0,0,0v11.91h14.3v-14.3h-12.44Z"/>
-                </g>
-            </g>
-        </svg>
-    </div>
+  const rat  = r.normSec > 0 ? r.rijSec / r.normSec : 1;
+  const del  = r.vertragingSec;
+  const kls  = (rat > 1.4 || del > 900) ? 'r' : (rat > 1.1 || del > 180) ? 'o' : 'g';
+  const bdg  = kls === 'g' ? 'Vlot' : kls === 'o' ? 'Matig' : 'Druk';
+  const pct  = Math.min(100, Math.round((r.rijSec / Math.max(r.normSec * 2.5, 1)) * 100));
 
-    <script>
-    // ── Constanten ───────────────────────────────────────────────────────
-    const ROOD       = '#E4032D';
-    const DONKERROOD = '#A0021F';
-    const WIT        = '#FFFFFF';
-    const LICHTGRIJS = '#D9D9D9';
-    const MIDGRIJS   = '#616160';
-    const DARKFILL   = '#252523';
-    const ZWART      = '#1D1D1B';
+  // Weg-chips HTML
+  const wegenHTML = r.wegen?.length
+    ? `<div class="wegen">${r.wegen.map(w => `<span class="weg ${wegKlasse(w)}">${e(w)}</span>`).join('')}</div>`
+    : '';
 
-    const DAGEN   = ['ZONDAG','MAANDAG','DINSDAG','WOENSDAG','DONDERDAG','VRIJDAG','ZATERDAG'];
-    const MAANDEN = ['JANUARI','FEBRUARI','MAART','APRIL','MEI','JUNI',
-                     'JULI','AUGUSTUS','SEPTEMBER','OKTOBER','NOVEMBER','DECEMBER'];
+  // Route quick-guide: escape elke segment afzonderlijk, dan samenvoegen met HTML-pijl
+  const routeHTML = r.routeSegmenten
+    ? `<div class="route-tekst">${e(r.routeSegmenten)}</div>`
+    : '';
 
-    // ── Canvas setup ────────────────────────────────────────────────────
-    const canvas  = document.getElementById('clockCanvas');
-    const ctx     = canvas.getContext('2d');
-    const dpr     = window.devicePixelRatio || 1;
+  // Flitspalen — altijd tonen, ook bij 0
+  const flitserHTML = `<div class="flitspaal-badge${r.flitsers >= 3 ? ' veel' : ''}">
+       ${FLITSPAAL}
+       <div>
+         <div class="flitspaal-nr">${r.flitsers}</div>
+         <div class="flitspaal-label">flitspaal${r.flitsers !== 1 ? 'en' : ''}</div>
+       </div>
+     </div>`;
 
-    function getRadius() {
-        // Responsief: 38% van de kleinste dimensie van het viewport, max 300px
-        return Math.min(Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.38), 300);
+  // Vertraging
+  const vertragingHTML = del > 60
+    ? `<div class="vertraging ${kls}">${WARN} +${Math.round(del/60)} min${del > 900 ? ' vertraging' : ' extra'}</div>`
+    : '';
+
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok"><div class="rtijd ${kls}">${e(secNaarTekst(r.rijSec))}</div></div>
+      <div class="kaart-onder">
+        ${routeHTML}
+        ${wegenHTML}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          ${flitserHTML}
+          ${vertragingHTML}
+        </div>
+        <div class="rmeta">
+          ${e(kmTekst(r.afstandM))} &middot; normaal ${e(secNaarTekst(r.normSec))}
+          <span class="badge ${kls}">${bdg}</span>
+        </div>
+        <div class="voortgangsbalk"><div class="voortgang ${kls}" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+// ══ RENDEREN ══════════════════════════════════════════════════════
+function tekenLadende() {
+  const rij = document.getElementById('kaarten-rij');
+  rij.innerHTML = '';
+  BESTEMMINGEN.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'kaart';
+    div.id = 'k-' + b.naam.replace(/\s+/g,'-');
+    div.innerHTML = kaartLadenHTML(b);
+    setKaartBg(div, b.lat, b.lon);
+    rij.appendChild(div);
+  });
+}
+
+async function haalAlleReistijden() {
+  clearTimeout(verversTimer);
+  setStatus('Reistijden ophalen via TomTom…', 'bezig');
+  const resultaten = await Promise.all(BESTEMMINGEN.map(b => haalReistijd(b)));
+  BESTEMMINGEN.forEach((b, i) => {
+    const div = document.getElementById('k-' + b.naam.replace(/\s+/g,'-'));
+    if (div) {
+      div.innerHTML = kaartResultaatHTML(b, resultaten[i]);
+      setKaartBg(div, b.lat, b.lon);
     }
+  });
+  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  setStatus(`Bijgewerkt om ${nu} · volgende update over 10 minuten`, 'ok');
+  verversTimer = setTimeout(haalAlleReistijden, 10 * 60 * 1000);
+}
 
-    function resizeClock() {
-        const r = getRadius();
-        const size = r * 2;
-        canvas.width  = size * dpr;
-        canvas.height = size * dpr;
-        canvas.style.width  = size + 'px';
-        canvas.style.height = size + 'px';
-        ctx.scale(dpr, dpr);
-    }
+// ══ START ══════════════════════════════════════════════════════════
+async function startApp(data) {
+  cfg = { ...data };
+  clearTimeout(verversTimer);
+  document.getElementById('instellingen-btn').style.display = 'inline-block';
+  document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
+  tekenLadende();
+  haalAlleReistijden();
+}
 
-    window.addEventListener('resize', resizeClock);
-    resizeClock();
-
-    // ── Week-nummer ──────────────────────────────────────────────────────
-    function getWeekNumber(d) {
-        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-        const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-    }
-
-    // ── Klok tekenen ────────────────────────────────────────────────────
-    function drawClock() {
-        const now = new Date();
-        const r   = getRadius();
-        const cx  = r, cy = r;
-
-        // Volledig herberekenen bij resize
-        const size = r * 2;
-        if (canvas.width !== size * dpr) {
-            canvas.width  = size * dpr;
-            canvas.height = size * dpr;
-            canvas.style.width  = size + 'px';
-            canvas.style.height = size + 'px';
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(dpr, dpr);
-        }
-
-        ctx.clearRect(0, 0, size, size);
-
-        // ── Klokblad ────────────────────────────────────────────────────
-        // Buitenste donkere cirkel
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 1, 0, 2 * Math.PI);
-        const bgGrad = ctx.createRadialGradient(cx, cy - r*0.2, r*0.05, cx, cy, r);
-        bgGrad.addColorStop(0, '#2c2c2a');
-        bgGrad.addColorStop(1, '#131312');
-        ctx.fillStyle = bgGrad;
-        ctx.fill();
-
-        // Subtiele binnenste glans
-        const glowGrad = ctx.createRadialGradient(cx, cy - r*0.3, r*0.1, cx, cy, r*0.9);
-        glowGrad.addColorStop(0, 'rgba(255,255,255,0.04)');
-        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 2, 0, 2 * Math.PI);
-        ctx.fillStyle = glowGrad;
-        ctx.fill();
-
-        // ── Technische rand ──────────────────────────────────────────────
-        // Buitenste ring
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 1, 0, 2 * Math.PI);
-        ctx.strokeStyle = '#444442';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Rode accentrij
-        ctx.beginPath();
-        ctx.arc(cx, cy, r * 0.95, 0, 2 * Math.PI);
-        ctx.strokeStyle = ROOD;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        // ── Graadmarkeringen (60 stuks) ──────────────────────────────────
-        for (let i = 0; i < 60; i++) {
-            const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
-            const isHour = i % 5 === 0;
-            const isMain = i % 15 === 0;  // 12, 3, 6, 9
-
-            const outer = r * 0.93;
-            const inner = isMain ? r * 0.72 : (isHour ? r * 0.80 : r * 0.87);
-            const lw    = isMain ? 2.5 : (isHour ? 1.5 : 0.8);
-            const col   = isMain ? ROOD : (isHour ? WIT : '#555553');
-
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
-            ctx.lineTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer);
-            ctx.strokeStyle = col;
-            ctx.lineWidth = lw;
-            ctx.stroke();
-        }
-
-        // ── Cijfers (1–12) ───────────────────────────────────────────────
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        const numR = r * 0.65;
-        for (let i = 1; i <= 12; i++) {
-            const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
-            const x = cx + Math.cos(angle) * numR;
-            const y = cy + Math.sin(angle) * numR;
-            const isMain = (i % 3 === 0);
-            ctx.font = `${isMain ? '600' : '300'} ${Math.floor(r * (isMain ? 0.115 : 0.095))}px 'Montserrat', sans-serif`;
-            ctx.fillStyle = isMain ? WIT : '#888886';
-            ctx.fillText(i, x, y);
-        }
-
-        // ── Tijdsberekening (vloeiend) ───────────────────────────────────
-        const h  = now.getHours() % 12;
-        const m  = now.getMinutes();
-        const s  = now.getSeconds();
-        const ms = now.getMilliseconds();
-
-        const secAngle = ((s + ms / 1000) / 60)                * 2 * Math.PI - Math.PI / 2;
-        const minAngle = ((m + (s + ms / 1000) / 60) / 60)     * 2 * Math.PI - Math.PI / 2;
-        const hrAngle  = ((h + (m + s / 60) / 60) / 12)        * 2 * Math.PI - Math.PI / 2;
-
-        // ── Helper: wijs tekenen ─────────────────────────────────────────
-        function drawHand(angle, length, width, color, shadow, tailLen) {
-            const tail = tailLen || length * 0.18;
-            ctx.save();
-            ctx.lineCap = 'round';
-            if (shadow) {
-                ctx.shadowColor   = color;
-                ctx.shadowBlur    = shadow;
-            }
-            ctx.beginPath();
-            ctx.moveTo(cx - Math.cos(angle) * tail, cy - Math.sin(angle) * tail);
-            ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
-            ctx.strokeStyle = color;
-            ctx.lineWidth   = width;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Uurwijs
-        drawHand(hrAngle,  r * 0.52, r * 0.046, WIT,    6);
-        // Rode tip op uurwijs
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(hrAngle) * r * 0.38, cy + Math.sin(hrAngle) * r * 0.38);
-        ctx.lineTo(cx + Math.cos(hrAngle) * r * 0.52, cy + Math.sin(hrAngle) * r * 0.52);
-        ctx.strokeStyle = ROOD;
-        ctx.lineWidth = r * 0.046;
-        ctx.stroke();
-        ctx.restore();
-
-        // Minuutwijs
-        drawHand(minAngle, r * 0.73, r * 0.032, WIT,    5);
-        // Rode tip op minuutwijs
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(minAngle) * r * 0.56, cy + Math.sin(minAngle) * r * 0.56);
-        ctx.lineTo(cx + Math.cos(minAngle) * r * 0.73, cy + Math.sin(minAngle) * r * 0.73);
-        ctx.strokeStyle = ROOD;
-        ctx.lineWidth = r * 0.032;
-        ctx.stroke();
-        ctx.restore();
-
-        // Secondewijs (rood, dun, met gloed)
-        drawHand(secAngle, r * 0.84, r * 0.014, ROOD,   14, r * 0.22);
-
-        // Secondewijs uiteinde-dot
-        ctx.beginPath();
-        ctx.arc(
-            cx + Math.cos(secAngle) * r * 0.84,
-            cy + Math.sin(secAngle) * r * 0.84,
-            r * 0.022, 0, 2 * Math.PI
-        );
-        ctx.fillStyle = ROOD;
-        ctx.shadowColor = ROOD;
-        ctx.shadowBlur  = 10;
-        ctx.fill();
-        ctx.shadowBlur  = 0;
-
-        // ── Middenpunt ────────────────────────────────────────────────────
-        // Buitenste ring
-        ctx.beginPath();
-        ctx.arc(cx, cy, r * 0.055, 0, 2 * Math.PI);
-        ctx.fillStyle = '#252523';
-        ctx.fill();
-
-        // Rode kern
-        ctx.beginPath();
-        ctx.arc(cx, cy, r * 0.036, 0, 2 * Math.PI);
-        ctx.fillStyle = ROOD;
-        ctx.shadowColor = ROOD;
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Wit middenstip
-        ctx.beginPath();
-        ctx.arc(cx, cy, r * 0.012, 0, 2 * Math.PI);
-        ctx.fillStyle = WIT;
-        ctx.fill();
-
-        // ── DOM bijwerken ────────────────────────────────────────────────
-        const pad = n => String(n).padStart(2, '0');
-        document.getElementById('dt-hm').textContent  = `${pad(now.getHours())}:${pad(m)}`;
-        document.getElementById('dt-sec').textContent = pad(s);
-
-        document.getElementById('day-name').textContent    = DAGEN[now.getDay()];
-        document.getElementById('date-display').textContent =
-            `${pad(now.getDate())} ${MAANDEN[now.getMonth()]} ${now.getFullYear()}`;
-
-        document.getElementById('week-tag').textContent = `WEEK ${pad(getWeekNumber(now))}`;
-        document.getElementById('tz-tag').textContent   =
-            now.getTimezoneOffset() <= -120 ? 'CEST / UTC+2' : 'CET / UTC+1';
-
-        requestAnimationFrame(drawClock);
-    }
-
-    drawClock();
-    </script>
+// ══ INIT ═══════════════════════════════════════════════════════════
+// Start direct met hardcoded CONFIG — geen setup nodig
+startApp({
+  apiSleutel: CONFIG.apiSleutel,
+  werkAdres:  CONFIG.werkAdres,
+});
+</script>
 </body>
 </html>
