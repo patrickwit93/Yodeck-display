@@ -8,11 +8,15 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
+    html {
+      background: #1D1D1B;
+    }
+    body {
       width: 1920px; height: 1080px; overflow: hidden;
       font-family: 'Montserrat', sans-serif;
       background: #1D1D1B;
       color: #1D1D1B;
+      transform-origin: top left;
     }
 
     /* ══ SCHERM ══════════════════════════════════════════════════════ */
@@ -463,6 +467,24 @@ const FLITSPAAL = `<svg width="14" height="20" viewBox="0 0 22 32" fill="none" x
 </svg>`;
 const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
+// ══ SCHAAL NAAR VIEWPORT ══════════════════════════════════════════
+(function schaal() {
+  const sx = window.innerWidth  / 1920;
+  const sy = window.innerHeight / 1080;
+  const s  = Math.min(sx, sy);
+  document.body.style.transform = `scale(${s})`;
+  document.body.style.marginLeft = `${(window.innerWidth  - 1920 * s) / 2}px`;
+  document.body.style.marginTop  = `${(window.innerHeight - 1080 * s) / 2}px`;
+})();
+window.addEventListener('resize', () => {
+  const sx = window.innerWidth  / 1920;
+  const sy = window.innerHeight / 1080;
+  const s  = Math.min(sx, sy);
+  document.body.style.transform = `scale(${s})`;
+  document.body.style.marginLeft = `${(window.innerWidth  - 1920 * s) / 2}px`;
+  document.body.style.marginTop  = `${(window.innerHeight - 1080 * s) / 2}px`;
+});
+
 // ══ KLOK ════════════════════════════════════════════════════════════
 (function tick() {
   const nu = new Date();
@@ -754,4 +776,36 @@ async function haalAlleReistijden() {
     const ouderdom = Math.round((Date.now() - cache.tijdstip) / 60000);
     const volgend  = Math.round((CACHE_TTL - (Date.now() - cache.tijdstip)) / 60000);
     setStatus(`Gegevens van ${ouderdom} min geleden · volgende update over ${volgend} min`, 'ok');
-    verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL - (Date.
+    verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL - (Date.now() - cache.tijdstip));
+    return;
+  }
+
+  // Cache verlopen of leeg — haal verse data op
+  setStatus('Reistijden ophalen via TomTom…', 'bezig');
+  const resultaten = await Promise.all(BESTEMMINGEN.map(b => haalReistijd(b)));
+  slaCache(resultaten);
+  toonResultaten(resultaten);
+  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  setStatus(`Bijgewerkt om ${nu} · volgende update over 30 minuten`, 'ok');
+  verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL);
+}
+
+// ══ START ══════════════════════════════════════════════════════════
+async function startApp(data) {
+  cfg = { ...data };
+  clearTimeout(verversTimer);
+  document.getElementById('instellingen-btn').style.display = 'inline-block';
+  document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
+  tekenLadende();
+  haalAlleReistijden();
+}
+
+// ══ INIT ═══════════════════════════════════════════════════════════
+// Start direct met hardcoded CONFIG — geen setup nodig
+startApp({
+  apiSleutel: CONFIG.apiSleutel,
+  werkAdres:  CONFIG.werkAdres,
+});
+</script>
+</body>
+</html>
