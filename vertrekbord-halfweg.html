@@ -1,754 +1,762 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vertrektijden – Halfweg-Zwanenburg</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>Reistijd naar Huis — Amstelland Ingenieurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-
-    /* ═══════════════════════════════
-       AMSTELLAND KLEURPALET
-    ════════════════════════════════ */
-    :root {
-      --rood:       #E4032D;
-      --donkerrood: #A0021F;
-      --zwart:      #1D1D1B;
-      --grijs-d:    #484848;
-      --grijs-m:    #616160;
-      --grijs-l:    #D9D9D9;
-      --grijs-xl:   #F5F5F5;
-      --wit:        #FFFFFF;
-
-      /* 55" scherm: basisgrootte */
-      --fs-time:    62px;
-      --fs-dir:     34px;
-      --fs-via:     17px;
-      --fs-badge:   16px;
-      --fs-track:   46px;
-      --fs-status:  17px;
-      --row-pad:    22px 0;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      width: 100%; height: 100vh;
-      background: var(--zwart);
-      font-family: 'Montserrat', Arial, sans-serif;
-      color: var(--wit);
-      overflow: hidden;
+      width: 1920px; height: 1080px; overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+      background: #1D1D1B;
+      color: #1D1D1B;
     }
 
-    /* subtiele rode gloed bovenaan */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse 70% 40% at 50% -5%,
-        rgba(228,3,45,.10) 0%, transparent 65%);
-      pointer-events: none; z-index: 0;
-    }
+    /* ══ SCHERM ══════════════════════════════════════════════════════ */
+    .scherm { display: flex; flex-direction: column; width: 1920px; height: 1080px; }
 
-    /* rode verticale streep links — verwijzing naar logo */
-    body::after {
-      content: '';
-      position: fixed; top: 0; left: 0;
-      width: 5px; height: 100%;
-      background: linear-gradient(to bottom, var(--rood), var(--donkerrood));
-      z-index: 10;
-    }
-
-    .screen {
-      position: relative; z-index: 1;
-      display: flex; flex-direction: column;
-      height: 100vh;
-      padding-left: 5px;
-    }
-
-    /* ═══════════════════════════════
-       HEADER
-    ════════════════════════════════ */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 22px 48px 20px;
-      flex-shrink: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 100%);
-    }
-
-    .header-left { display: flex; align-items: center; gap: 28px; }
-
-    .logo-svg { height: 48px; width: auto; }
-
-    .divider-v {
-      width: 1px; height: 42px;
-      background: rgba(255,255,255,.18);
-    }
-
-    .station-label {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 3.5px; text-transform: uppercase;
-      color: var(--rood); margin-bottom: 4px;
-    }
-
-    .station-name {
-      font-size: 34px; font-weight: 700;
-      color: var(--wit); letter-spacing: .3px;
-    }
-
-    .header-right { text-align: right; }
-
-    .clock {
-      font-size: 82px; font-weight: 900;
-      color: var(--wit); letter-spacing: 3px;
-      line-height: 1; font-variant-numeric: tabular-nums;
-    }
-
-    .clock-sep {
-      animation: blink 1s step-end infinite;
-      color: var(--rood);
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-
-    .date-str {
-      font-size: 13px; font-weight: 400;
-      color: var(--grijs-m); letter-spacing: 1.5px;
-      text-transform: uppercase; margin-top: 5px;
-    }
-
-    /* ═══════════════════════════════
-       RODE LIJN ONDER HEADER
-    ════════════════════════════════ */
-    .red-line {
-      height: 2px; flex-shrink: 0;
-      margin: 0 48px;
-      background: linear-gradient(90deg,
-        var(--rood) 0%, var(--donkerrood) 55%, transparent 100%);
-    }
-
-    /* ═══════════════════════════════
-       KOLOM HEADERS
-    ════════════════════════════════ */
-    .col-head {
-      display: grid;
-      grid-template-columns: 180px 1fr 280px 120px 180px;
-      padding: 12px 48px 10px;
-      flex-shrink: 0;
-    }
-
-    .col-head span {
-      font-size: 12px; font-weight: 700;
-      letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--grijs-m);
-    }
-    .col-head span.c { text-align: center; }
-    .col-head span.r { text-align: right; }
-
-    .thin-line {
-      height: 1px; flex-shrink: 0;
-      margin: 0 48px;
-      background: rgba(255,255,255,.08);
-    }
-
-    /* ═══════════════════════════════
-       VERTREKTIJDEN CONTAINER
-    ════════════════════════════════ */
-    .departures {
-      flex: 1; overflow: hidden;
-      display: flex; flex-direction: column;
-      padding: 0 48px;
-    }
-
-    /* ═══════════════════════════════
-       RIJ
-    ════════════════════════════════ */
-    .row {
-      display: grid;
-      grid-template-columns: 180px 1fr 280px 120px 180px;
-      align-items: center;
-      padding: var(--row-pad);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      animation: enter .3s ease both;
-      opacity: 0;
+    /* ══ HEADER ══════════════════════════════════════════════════════ */
+    header {
+      height: 86px; flex-shrink: 0;
+      background: #111110;
+      border-bottom: 3px solid #E4032D;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 44px;
       position: relative;
     }
+    header::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 7px; background: #E4032D;
+    }
 
-    /* Subtiele rode highlight eerste rij */
-    .row:first-child::before {
+    .logo { display: flex; align-items: center; gap: 20px; padding-left: 8px; }
+    .logo-bars { display: flex; flex-direction: column; gap: 5px; }
+    .lb { border-radius: 2px; }
+    .lb1 { width: 40px; height: 4px; background: #E4032D; }
+    .lb2 { width: 28px; height: 4px; background: rgba(255,255,255,.2); }
+    .lb3 { width: 34px; height: 4px; background: #E4032D; opacity: .45; }
+    .logo-tekst h1 {
+      font-size: 1.25rem; font-weight: 700;
+      color: #fff; letter-spacing: .025em;
+    }
+    .logo-sub {
+      font-size: .72rem; color: rgba(255,255,255,.35);
+      font-weight: 300; margin-top: 3px;
+      max-width: 640px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .header-rechts { display: flex; align-items: center; gap: 24px; }
+    .inst-knop {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.45); font-family: inherit;
+      font-size: .7rem; padding: 7px 14px; border-radius: 5px; cursor: pointer;
+      transition: all .15s;
+    }
+    .inst-knop:hover { background: rgba(255,255,255,.13); color: #fff; }
+    .klok-blok { text-align: right; }
+    .klok  { font-size: 2.4rem; font-weight: 800; color: #fff; line-height: 1; }
+    .datum { font-size: .68rem; color: rgba(255,255,255,.35); font-weight: 300; margin-top: 4px; }
+
+    /* ══ GRID ════════════════════════════════════════════════════════ */
+    .grid-wrapper {
+      flex: 1;
+      padding: 18px 22px 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 13px;
+      height: 100%;
+    }
+
+    /* ══ KAART ═══════════════════════════════════════════════════════ */
+    .kaart {
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 28px rgba(0,0,0,.45);
+      position: relative;
+      background: #2a2a28 center/cover no-repeat;
+    }
+    /* Lichte was over de kaartafbeelding — kaart blijft zichtbaar */
+    .kaart::before {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(90deg,
-        rgba(228,3,45,.07) 0%, transparent 50%);
-      pointer-events: none;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      z-index: 0;
+    }
+    .kaart-accent {
+      height: 5px; background: #E4032D; flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+    .kaart-body   {
+      flex: 1; padding: 18px 20px 16px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      position: relative; z-index: 1;
     }
 
-    /* Alternerende achtergrond */
-    .row:nth-child(even) {
-      background: rgba(255,255,255,.02);
+    /* — Kop — */
+    .kaart-kop {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 6px;
+    }
+    .plaatsnaam { font-size: 1.9rem; font-weight: 800; color: #1D1D1B; line-height: 1.1; text-shadow: 0 0 18px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,1); }
+    .regio      { font-size: .8rem; color: #333; font-weight: 600; margin-top: 3px; text-shadow: 0 0 10px rgba(255,255,255,1); }
+    .pin-wrap {
+      width: 34px; height: 34px; background: #F5F5F5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
-    @keyframes enter {
-      from { opacity: 0; transform: translateX(-10px); }
-      to   { opacity: 1; transform: translateX(0); }
+    /* — Reistijd — */
+    .rtijd-blok { display: flex; align-items: center; }
+    .rtijd {
+      font-size: 4.6rem; font-weight: 800; line-height: 1;
+      letter-spacing: -.03em;
+      text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,.8);
     }
-    .row:nth-child(1)  { animation-delay: .03s; }
-    .row:nth-child(2)  { animation-delay: .06s; }
-    .row:nth-child(3)  { animation-delay: .09s; }
-    .row:nth-child(4)  { animation-delay: .12s; }
-    .row:nth-child(5)  { animation-delay: .15s; }
-    .row:nth-child(6)  { animation-delay: .18s; }
-    .row:nth-child(7)  { animation-delay: .21s; }
-    .row:nth-child(8)  { animation-delay: .24s; }
-    .row:nth-child(9)  { animation-delay: .27s; }
+    .rtijd.g { color: #1a7a2e; }
+    .rtijd.o { color: #c45e00; }
+    .rtijd.r { color: #E4032D; }
+    .rtijd.gr { color: #bbb; font-size: 2.4rem; font-weight: 600; }
 
-    /* ── TIJD ── */
-    .cell-time { display: flex; flex-direction: column; gap: 2px; }
+    /* — Onderste zone — */
+    .kaart-onder { display: flex; flex-direction: column; gap: 6px; }
 
-    .time-planned {
-      font-size: var(--fs-time);
-      font-weight: 700; color: var(--wit);
-      letter-spacing: 1px; line-height: 1;
-      font-variant-numeric: tabular-nums;
+    /* Weg-chips */
+    .wegen { display: flex; flex-wrap: wrap; gap: 4px; }
+    .weg {
+      font-size: .65rem; font-weight: 800;
+      padding: 2px 7px; border-radius: 3px;
+      letter-spacing: .04em;
     }
-    .time-planned.struck {
-      font-size: 22px; font-weight: 400;
-      color: var(--grijs-m);
-      text-decoration: line-through;
-    }
-    .time-actual {
-      font-size: 56px; font-weight: 700;
-      color: var(--rood); letter-spacing: 1px;
-      font-variant-numeric: tabular-nums; line-height: 1;
-    }
+    .weg.A { background: #1b3a6b; color: #fff; }
+    .weg.N { background: #e8a000; color: #1D1D1B; }
+    .weg.R { background: #484848; color: #fff; }
 
-    /* ── RICHTING ── */
-    .cell-dir { padding-left: 32px; padding-right: 20px; }
-
-    .dir-name {
-      font-size: var(--fs-dir);
-      font-weight: 700; color: var(--wit);
-      white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.2;
+    /* Route quick-guide */
+    .route-tekst {
+      font-size: 1.05rem; color: #1D1D1B; font-weight: 700;
+      line-height: 1.45;
+      background: rgba(255,255,255,.85);
+      border-left: 4px solid #E4032D;
+      border-radius: 4px;
+      padding: 6px 10px;
     }
 
-    .dir-via {
-      font-size: var(--fs-via); font-weight: 400;
-      color: var(--grijs-m); margin-top: 5px;
-      white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis;
+    /* Flitspaal badge */
+    .flitspaal-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.88);
+      border: 1.5px solid #e8a000;
+      border-radius: 4px;
+      padding: 2px 7px;
+      width: fit-content;
+    }
+    .flitspaal-badge.veel {
+      border-color: #E4032D;
+      background: rgba(255,232,232,.9);
+    }
+    .flitspaal-nr {
+      font-size: .8rem; font-weight: 800; color: #1D1D1B;
+      line-height: 1;
+    }
+    .flitspaal-label {
+      font-size: .58rem; font-weight: 700; color: #444;
     }
 
-    /* ── TREIN / DRUKTE ── */
-    .cell-train {
-      display: flex; flex-direction: row;
-      align-items: center; gap: 16px;
+    /* Flitsers */
+    .flitser-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .66rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 4px;
+      background: #fff8e1; color: #7d5a00;
+      border: 1px solid #ffd54f;
+      width: fit-content;
     }
+    .flitser-badge.veel { background: #fde8ea; color: #a0021f; border-color: #f5b8c0; }
 
-    .train-top {
-      display: flex; align-items: center;
-      gap: 10px; flex-shrink: 0;
+    /* Vertraging */
+    .vertraging {
+      font-size: .73rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
     }
+    .vertraging.o { color: #c45e00; }
+    .vertraging.r { color: #E4032D; }
 
+    /* Meta */
+    .rmeta {
+      font-size: .82rem; color: #1D1D1B; font-weight: 600;
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      background: rgba(255,255,255,.82);
+      border-radius: 5px;
+      padding: 5px 9px;
+    }
     .badge {
-      font-size: var(--fs-badge); font-weight: 700;
-      letter-spacing: 1px; text-transform: uppercase;
-      padding: 6px 13px; border-radius: 3px;
+      font-size: .7rem; font-weight: 800; padding: 2px 8px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
     }
-    .badge-ic   { background: rgba(255,255,255,.1);  color: var(--wit);      border: 1px solid rgba(255,255,255,.2); }
-    .badge-spr  { background: rgba(228,3,45,.15);    color: var(--rood);     border: 1px solid rgba(228,3,45,.5); }
-    .badge-int  { background: rgba(228,3,45,.3);     color: var(--wit);      border: 1px solid var(--rood); }
-    .badge-x    { background: rgba(255,255,255,.06); color: var(--grijs-l);  border: 1px solid rgba(255,255,255,.12); }
+    .badge.g { background: #1a7a2e; color: #fff; }
+    .badge.o { background: #c45e00; color: #fff; }
+    .badge.r { background: #E4032D; color: #fff; }
 
-    .delay-pill {
-      font-size: 12px; font-weight: 700;
-      padding: 4px 9px; border-radius: 20px;
-      background: var(--rood); color: var(--wit);
-      letter-spacing: .5px;
+    /* Voortgangsbalk */
+    .voortgangsbalk {
+      height: 4px; background: #EFEFEF; border-radius: 2px; overflow: hidden;
+      margin-top: 3px;
     }
+    .voortgang { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .voortgang.g { background: #1a7a2e; }
+    .voortgang.o { background: #c45e00; }
+    .voortgang.r { background: #E4032D; }
 
-    /* drukte */
-    .crowd {
-      display: flex; align-items: center; gap: 9px;
-    }
-
-    /* Persoon-icoon kleur per niveau */
-    .crowd-none .crowd-icon { color: rgba(255,255,255,.15); }
-    .crowd-low  .crowd-icon { color: rgba(255,255,255,.4); }
-    .crowd-med  .crowd-icon { color: rgba(230,170,0,.95); }
-    .crowd-high .crowd-icon { color: var(--rood); }
-
-    /* Staafjes */
-    .crowd-bars {
-      display: flex; align-items: flex-end; gap: 3px;
-    }
-    .crowd-bars b {
-      display: block; width: 5px; border-radius: 2px;
-      background: rgba(255,255,255,.12);
-    }
-    .crowd-bars b:nth-child(1) { height: 7px;  }
-    .crowd-bars b:nth-child(2) { height: 12px; }
-    .crowd-bars b:nth-child(3) { height: 17px; }
-
-    .crowd-low  .crowd-bars b:nth-child(1)                          { background: rgba(255,255,255,.45); }
-    .crowd-med  .crowd-bars b:nth-child(1),
-    .crowd-med  .crowd-bars b:nth-child(2)                          { background: rgba(230,170,0,.9); }
-    .crowd-high .crowd-bars b                                       { background: var(--rood); }
-
-    .crowd-text {
-      font-size: 12px; font-weight: 600;
-      letter-spacing: 1px; text-transform: uppercase;
-    }
-    .crowd-none .crowd-text { color: rgba(255,255,255,.15); }
-    .crowd-low  .crowd-text { color: rgba(255,255,255,.35); }
-    .crowd-med  .crowd-text { color: rgba(230,170,0,.9); }
-    .crowd-high .crowd-text { color: var(--rood); }
-
-    /* ── SPOOR ── */
-    .cell-track { text-align: center; }
-
-    .track-num {
-      font-size: var(--fs-track); font-weight: 700;
-      color: var(--wit); line-height: 1;
-    }
-    .track-lbl {
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--grijs-m); margin-top: 3px;
-    }
-
-    /* ── STATUS ── */
-    .cell-status { text-align: right; }
-
-    .status {
-      display: inline-block;
-      font-size: var(--fs-status); font-weight: 600;
-      letter-spacing: .5px; padding: 6px 14px;
-      border-radius: 3px;
-    }
-    .s-ok      { background: rgba(34,160,80,.25);  color: #4cce82;     border: 1px solid rgba(34,160,80,.4); }
-    .s-late    { background: rgba(228,3,45,.2);    color: var(--rood); border: 1px solid rgba(228,3,45,.5); }
-    .s-cancel  { background: var(--rood);          color: var(--wit); }
-
-    /* Storingsbericht */
-    .msg-line {
-      font-size: 12px; font-weight: 500;
-      color: rgba(228,3,45,.8);
-      margin-top: 5px; line-height: 1.3;
-      white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ═══════════════════════════════
-       LEGE STAAT
-    ════════════════════════════════ */
-    .empty {
-      flex: 1; display: flex;
-      flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 18px; color: var(--grijs-m);
+    /* Laden */
+    .laden-rij {
+      display: flex; align-items: center; gap: 10px;
+      color: #ccc; font-size: .85rem; font-weight: 300;
     }
     .spinner {
-      width: 44px; height: 44px;
-      border: 3px solid rgba(255,255,255,.08);
-      border-top-color: var(--rood);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2.5px solid #E8E8E8; border-top-color: #E4032D;
+      border-radius: 50%; animation: draaien .7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-lbl { font-size: 16px; letter-spacing: 1px; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
 
-    /* ═══════════════════════════════
-       ERROR BANNER
-    ════════════════════════════════ */
-    .err {
-      display: none; flex-shrink: 0;
-      padding: 10px 48px;
-      background: rgba(228,3,45,.1);
-      border-left: 3px solid var(--rood);
-      font-size: 13px; font-weight: 500;
-      color: var(--rood); letter-spacing: .3px;
+    /* ══ STATUSBALK ═══════════════════════════════════════════════════ */
+    .statusbar {
+      height: 38px; flex-shrink: 0;
+      background: #111110;
+      border-top: 2px solid #E4032D;
+      padding: 0 44px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .status-links { display: flex; align-items: center; gap: 9px; }
+    .sdot { width: 7px; height: 7px; border-radius: 50%; background: #2e7d32; }
+    .sdot.bezig { background: #c45e00; animation: knip 1s ease infinite; }
+    .sdot.fout  { background: #E4032D; }
+    @keyframes knip { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .stxt { font-size: .68rem; color: rgba(255,255,255,.35); font-weight: 300; }
+    .merk { font-size: .62rem; color: rgba(255,255,255,.18); letter-spacing: .1em; text-transform: uppercase; }
+    .merk em { color: #E4032D; font-style: normal; opacity: .8; }
+
+    /* ══ SETUP OVERLAY ════════════════════════════════════════════════ */
+    #setup-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,10,10,.9);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .setup-kaart {
+      background: #fff; border-radius: 12px;
+      border-top: 5px solid #E4032D;
+      padding: 44px; width: 540px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .setup-kaart h2 { font-size: 1.15rem; font-weight: 700; color: #1D1D1B; margin-bottom: 6px; }
+    .setup-intro    { font-size: .85rem; color: #616160; font-weight: 300; margin-bottom: 30px; line-height: 1.6; }
+    label {
+      display: block; font-size: .68rem; font-weight: 700;
+      color: #616160; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    input[type=text], input[type=password] {
+      width: 100%; padding: 12px 15px;
+      border: 1.5px solid #D9D9D9; border-radius: 6px;
+      font-family: inherit; font-size: .9rem; color: #1D1D1B;
+      outline: none; transition: border-color .2s; margin-bottom: 20px;
+    }
+    input:focus { border-color: #E4032D; }
+    .hint { font-size: .73rem; color: #888; font-weight: 300; margin-top: -14px; margin-bottom: 20px; line-height: 1.5; }
+    .hint a { color: #E4032D; text-decoration: none; }
+    .knop-rood {
+      width: 100%; padding: 14px;
+      background: #E4032D; color: #fff; border: none; border-radius: 6px;
+      font-family: inherit; font-size: .95rem; font-weight: 700; cursor: pointer;
+      transition: background .15s;
+    }
+    .knop-rood:hover { background: #A0021F; }
+    .foutmelding {
+      background: #fde8ea; border-left: 4px solid #E4032D;
+      border-radius: 4px; padding: .75rem 1rem;
+      font-size: .8rem; color: #A0021F; margin-top: .75rem;
+      display: none; white-space: pre-wrap;
     }
 
-    /* ═══════════════════════════════
-       FOOTER
-    ════════════════════════════════ */
-    .footer-line {
-      height: 1px; flex-shrink: 0;
-      margin: 0 48px;
-      background: rgba(255,255,255,.07);
+    /* ══ MODAL INSTELLINGEN ═══════════════════════════════════════════ */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 10px; border-top: 5px solid #E4032D;
+      padding: 38px; width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
     }
-
-    .footer {
-      flex-shrink: 0;
-      display: flex; justify-content: space-between;
-      align-items: center; padding: 12px 48px;
-      background: linear-gradient(0deg, rgba(0,0,0,.3) 0%, transparent 100%);
+    .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 24px; color: #1D1D1B; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+    .knop-wit {
+      padding: 10px 20px; background: #fff; color: #1D1D1B;
+      border: 1.5px solid #D9D9D9; border-radius: 5px;
+      font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer;
     }
-
-    .footer-brand {
-      display: flex; align-items: center; gap: 10px;
+    .knop-wit:hover { border-color: #999; }
+    .knop-rood-sm {
+      padding: 10px 20px; background: #E4032D; color: #fff; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer;
     }
-    .footer-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--rood);
+    .knop-rood-sm:hover { background: #A0021F; }
+    .knop-gevaar {
+      padding: 10px 20px; background: #fde8ea; color: #A0021F; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 600;
+      cursor: pointer; margin-right: auto;
     }
-    .footer-name {
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--grijs-m);
-    }
-    .footer-upd {
-      font-size: 11px; font-weight: 400;
-      letter-spacing: 1px; color: rgba(255,255,255,.2);
-    }
-
+    .knop-gevaar:hover { background: #fbc4c4; }
   </style>
 </head>
 <body>
 
-  <!-- ══════════════════════════════════
-       CONFIGURATIE — alleen dit aanpassen
-  ═══════════════════════════════════ -->
-  <script>
-    const NS_API_KEY   = '4ea55d62583e4e18be32816e9ad1787a';
-    const STATION_CODE = 'HWZB';   // Halfweg-Zwanenburg
-    const MAX_ROWS     = 8;
-    const REFRESH_MS   = 60000;
-  </script>
-  <!-- ══════════════════════════════════ -->
 
-  <div class="screen">
-
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-left">
-
-        <!-- Amstelland logo — wit op donker -->
-        <svg class="logo-svg" viewBox="0 0 380.77 127.56" xmlns="http://www.w3.org/2000/svg">
-          <rect fill="#E4032D" x="99.39" width="2.76" height="127.56"/>
-          <g fill="#FFFFFF">
-            <path d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
-            <path d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
-            <path d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
-            <path d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
-            <path d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-            <path d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
-            <path d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
-            <path d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
-            <path d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-            <path d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
-            <path d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
-            <path d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-            <path d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
-            <path d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-            <path d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
-            <path d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
-            <path d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
-            <path d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
-            <path d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
-            <path d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
-            <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
-          </g>
-          <path fill="#E4032D" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39v11.91h14.3v-14.3h-12.44Z"/>
-        </svg>
-
-        <div class="divider-v"></div>
-
-        <div>
-          <div class="station-label">Live vertrektijden</div>
-          <div class="station-name">Halfweg-Zwanenburg</div>
-        </div>
-      </div>
-
-      <div class="header-right">
-        <div class="clock">
-          <span id="hh">--</span><span class="clock-sep">:</span><span id="mm">--</span>
-        </div>
-        <div class="date-str" id="ds">–</div>
-      </div>
-    </header>
-
-    <div class="red-line"></div>
-
-    <div class="col-head">
-      <span>Vertrek</span>
-      <span>Richting</span>
-      <span>Trein &amp; drukte</span>
-      <span class="c">Spoor</span>
-      <span class="r">Status</span>
+<!-- ══ MODAL INSTELLINGEN ════════════════════════════════════════ -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3>⚙ Instellingen</h3>
+    <label for="m-api">TomTom API-sleutel</label>
+    <input type="password" id="m-api" placeholder="Laat leeg om huidige te behouden" autocomplete="off" />
+    <label for="m-werk">Vertrekadres</label>
+    <input type="text" id="m-werk" />
+    <div class="modal-footer">
+      <button class="knop-gevaar" onclick="resetAlles()">Wissen</button>
+      <button class="knop-wit" onclick="sluitModal()">Annuleren</button>
+      <button class="knop-rood-sm" onclick="slaModalOp()">Opslaan</button>
     </div>
+  </div>
+</div>
 
-    <div class="thin-line"></div>
-
-    <div class="err" id="err"></div>
-
-    <div class="departures" id="deps">
-      <div class="empty">
-        <div class="spinner"></div>
-        <div class="empty-lbl">Vertrektijden ophalen…</div>
+<!-- ══ HOOFDSCHERM ════════════════════════════════════════════════ -->
+<div class="scherm">
+  <header>
+    <div class="logo">
+      <!-- Amstelland Ingenieurs logo (wit) -->
+      <svg height="44" viewBox="0 0 380.77 127.56" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <rect fill="#e4032d" x="99.39" width="2.76" height="127.56"/>
+        <g fill="#ffffff">
+          <path d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
+          <path d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <path d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
+          <path d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
+          <path d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
+          <path d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
+          <path d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
+          <path d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93h0s-.02.03-.03.04l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8,0,0,0,0,0,0,0,.01-.01.02-.02.03-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59,0,0,0-.01.02-.03v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
+        </g>
+        <path fill="#e4032d" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39,0,0,0,0,0,0v11.91h14.3v-14.3h-12.44Z"/>
+      </svg>
+      <div class="logo-sub" id="werk-label" style="margin-left:4px">Reistijd naar Huis</div>
+    </div>
+    <div class="header-rechts">
+      <button class="inst-knop" id="instellingen-btn" style="display:none" onclick="openModal()">⚙ Instellingen</button>
+      <div class="klok-blok">
+        <div class="klok" id="klok">--:--</div>
+        <div class="datum" id="datum"></div>
       </div>
     </div>
+  </header>
 
-    <div class="footer-line"></div>
-    <footer class="footer">
-      <div class="footer-brand">
-        <div class="footer-dot"></div>
-        <span class="footer-name">Amstelland Ingenieurs</span>
-      </div>
-      <span class="footer-upd" id="upd">–</span>
-    </footer>
-
+  <div class="grid-wrapper">
+    <div class="grid" id="kaarten-rij"></div>
   </div>
 
-  <script>
-    /* ── Klok ── */
-    const DAYS   = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
-    const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-    const pad = n => String(n).padStart(2,'0');
+  <div class="statusbar">
+    <div class="status-links">
+      <div class="sdot" id="sdot"></div>
+      <span class="stxt" id="stxt">Opstarten…</span>
+    </div>
+    <div class="merk"><em>Amstelland</em> Ingenieurs</div>
+  </div>
+</div>
 
-    function tickClock(){
-      const d = new Date();
-      document.getElementById('hh').textContent = pad(d.getHours());
-      document.getElementById('mm').textContent = pad(d.getMinutes());
-      document.getElementById('ds').textContent =
-        DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURATIE — pas hier aan indien nodig                       ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const CONFIG = {
+  apiSleutel: 'HuEEGgkzW6F9xxfyXFATcRNcEbEzE7oR',
+  werkAdres:  'Suikersilo-West 39, Halfweg',
+  originLat:  52.3823,
+  originLon:  4.7348,
+};
+
+// ══ KAARTACHTERGROND ══════════════════════════════════════════════
+function kaartBgUrl(lat, lon) {
+  const key = (cfg?.apiSleutel || '').trim();
+  if (!key) return '';
+  // TomTom Static Image API — zoomlevel 13 geeft mooie stadskaart
+  return `https://api.tomtom.com/map/1/staticimage?key=${key}&zoom=14&center=${lon},${lat}&width=600&height=440&layer=basic&style=main&format=png`;
+}
+function setKaartBg(el, lat, lon) {
+  const url = kaartBgUrl(lat, lon);
+  if (url) el.style.backgroundImage = `url('${url}')`;
+}
+
+// ══ BESTEMMINGEN ═══════════════════════════════════════════════════
+const BESTEMMINGEN = [
+  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.2652, lon: 4.7611 },
+  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.6313, lon: 4.7477 },
+  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.1561, lon: 5.3875 },
+  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.4628, lon: 4.7564 },
+  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.5461, lon: 4.6576 },
+  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.5094, lon: 4.6804 },
+  { naam: 'Het Kalf',        regio: 'Zaandam',       lat: 52.4544, lon: 4.8337 },
+  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.50788, lon: 4.84802 },
+  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.2146, lon: 5.4894 },
+  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.7040, lon: 4.8777 },
+];
+
+const OPSLAG = 'ai_reistijd_tt_v2';
+let cfg = null;
+let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
+let verversTimer = null;
+
+// ══ HELPERS ════════════════════════════════════════════════════════
+function e(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function secNaarTekst(sec) {
+  const m = Math.round(sec / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}u ${m%60 > 0 ? ' ' + (m%60) + 'm' : ''}`.trim();
+}
+function kmTekst(m) {
+  return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+}
+function wegKlasse(nr) {
+  if (/^A\d/i.test(nr)) return 'A';
+  if (/^N\d/i.test(nr)) return 'N';
+  return 'R';
+}
+
+const PIN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+// Flitspaal SVG: mast + camera-behuizing + flitser-accent
+const FLITSPAAL = `<svg width="14" height="20" viewBox="0 0 22 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- mast -->
+  <rect x="9.5" y="12" width="3" height="20" rx="1.5" fill="#484848"/>
+  <!-- camera behuizing -->
+  <rect x="2" y="2" width="18" height="12" rx="2.5" fill="#1D1D1B"/>
+  <!-- lens -->
+  <circle cx="11" cy="8" r="3.5" fill="#333"/>
+  <circle cx="11" cy="8" r="2" fill="#555"/>
+  <circle cx="12" cy="7" r=".6" fill="rgba(255,255,255,.4)"/>
+  <!-- flitser accent -->
+  <rect x="2" y="2" width="3" height="12" rx="1.5" fill="#E4032D" opacity=".9"/>
+</svg>`;
+const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+// ══ KLOK ════════════════════════════════════════════════════════════
+(function tick() {
+  const nu = new Date();
+  document.getElementById('klok').textContent =
+    nu.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('datum').textContent =
+    nu.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+  setTimeout(tick, 1000);
+})();
+
+function setStatus(t, m) {
+  document.getElementById('stxt').textContent = t;
+  const d = document.getElementById('sdot');
+  d.className = 'sdot' + (m && m !== 'ok' ? ' ' + m : '');
+}
+
+// ══ OPSLAG ════════════════════════════════════════════════════════
+function laadOpslag() {
+  try { return JSON.parse(localStorage.getItem(OPSLAG)) || null; } catch { return null; }
+}
+function slaOpSlag(d) { localStorage.setItem(OPSLAG, JSON.stringify(d)); }
+
+// ══ SETUP ════════════════════════════════════════════════════════
+function slaOp() {
+  const el  = document.getElementById('setup-fout');
+  el.style.display = 'none';
+  const api  = document.getElementById('s-api').value.trim();
+  const werk = document.getElementById('s-werk').value.trim();
+  const f = [];
+  if (!api)  f.push('• Vul een TomTom API-sleutel in');
+  if (!werk) f.push('• Vul een vertrekadres in');
+  if (f.length) { el.textContent = f.join('\n'); el.style.display = 'block'; return; }
+  slaOpSlag({ apiSleutel: api, werkAdres: werk });
+  startApp({ apiSleutel: api, werkAdres: werk });
+}
+function openModal() {
+  document.getElementById('m-api').value  = '';
+  document.getElementById('m-werk').value = cfg.werkAdres;
+  document.getElementById('modal').classList.add('open');
+}
+function sluitModal() { document.getElementById('modal').classList.remove('open'); }
+function slaModalOp() {
+  const a = document.getElementById('m-api').value.trim();
+  const w = document.getElementById('m-werk').value.trim();
+  const nc = { apiSleutel: a || cfg.apiSleutel, werkAdres: w || cfg.werkAdres };
+  slaOpSlag(nc); sluitModal();
+  cfg = null; originCoords = null;
+  startApp(nc);
+}
+function resetAlles() {
+  if (!confirm('Alles wissen?')) return;
+  localStorage.removeItem(OPSLAG); location.reload();
+}
+
+// ══ ORIGIN COÖRDINATEN ════════════════════════════════════════════
+// Vaste coördinaten van het Halfweg-kantoor — geen Search API nodig
+const ORIGIN_STANDAARD = { lat: 52.3823, lon: 4.7348 }; // Suikersilo-West 39, Halfweg
+
+// ══ TOMTOM ROUTING ════════════════════════════════════════════════
+function parseWegnummers(instructies) {
+  const gezien = new Set(), wegen = [];
+  (instructies || []).forEach(ins => {
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[ANR]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    });
+    // Fallback: street-naam als het op een wegcode lijkt
+    if (!ins.roadNumbers?.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[AN]\d/.test(n)) { gezien.add(n); wegen.push(n); }
     }
-    setInterval(tickClock, 1000); tickClock();
+  });
+  return wegen
+    .sort((a,b) => (a.startsWith('A')?0:a.startsWith('N')?1:2) - (b.startsWith('A')?0:b.startsWith('N')?1:2))
+    .slice(0, 4);
+}
 
-    /* ── Helpers ── */
-    function fmtTime(iso){
-      if(!iso) return '--:--';
-      const d = new Date(iso);
-      return pad(d.getHours()) + ':' + pad(d.getMinutes());
+function bouwRouteTekst(instructies) {
+  const segmenten = [], gezien = new Set();
+
+  // Verzamel weg + eerste bord-richting per uniek wegnummer
+  (instructies || []).forEach(ins => {
+    if (['DEPART','ARRIVE','WAYPOINT_REACHED','SPEED_CONTROL'].includes(ins.instructionType)) return;
+    const kandidaten = [];
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
+    });
+    if (!kandidaten.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
     }
+    kandidaten.forEach(nr => {
+      if (gezien.has(nr)) return;
+      gezien.add(nr);
+      const bord = (ins.signpostText || '').replace(/[-–—|]/g,' ').split(/\s{2,}/)[0].trim();
+      segmenten.push({ nr, richting: (bord && bord.length < 22 && bord.toUpperCase() !== nr) ? bord : null });
+    });
+  });
 
-    function delayMin(p, a){
-      if(!p || !a) return 0;
-      return Math.round((new Date(a) - new Date(p)) / 60000);
+  const lijst = segmenten.slice(0, 5);
+  if (!lijst.length) return null;
+
+  // Eerste weg krijgt richting mee als beschikbaar, rest alleen wegnummer
+  const eerste = lijst[0];
+  const eersteLabel = eerste.richting ? `${eerste.nr} richting ${eerste.richting}` : eerste.nr;
+
+  if (lijst.length === 1) return `Je rijdt via de ${eersteLabel}.`;
+
+  const rest = lijst.slice(1).map(s => s.nr);
+  const laatste = rest[rest.length - 1];
+  const midden  = rest.slice(0, -1);
+
+  const weglijst = midden.length
+    ? `${eersteLabel}, ${midden.join(', ')} en ${laatste}`
+    : `${eersteLabel} en ${laatste}`;
+
+  return `Je rijdt via de ${weglijst}.`;
+}
+
+function telFlitsers(instructies) {
+  return (instructies || []).filter(ins => ins.instructionType === 'SPEED_CONTROL').length;
+}
+
+async function haalReistijd(b, poging = 1) {
+  const key = (cfg.apiSleutel || '').trim();
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/${originCoords.lat},${originCoords.lon}:${b.lat},${b.lon}/json?key=${key}&traffic=true&travelMode=car&instructionsType=coded&language=nl-NL`;
+  try {
+    const res   = await fetch(url);
+    if (!res.ok) {
+      // Probeer foutmelding uit body te lezen
+      let detail = `HTTP ${res.status}`;
+      try { const j = await res.json(); detail = j?.detailedError?.message || j?.error?.description || detail; } catch {}
+      throw new Error(detail);
     }
-
-    function badgeCls(cat){
-      const c = (cat||'').toUpperCase();
-      if(c==='IC'||c==='ICD') return 'badge-ic';
-      if(c==='SPR')           return 'badge-spr';
-      if(['INT','ICE','THA','EUR'].includes(c)) return 'badge-int';
-      return 'badge-x';
+    const data  = await res.json();
+    const route = data.routes?.[0];
+    const sum   = route?.summary;
+    if (!sum) throw new Error('Geen route in antwoord');
+    const instructies = route?.guidance?.instructions ?? [];
+    return {
+      ok: true,
+      rijSec:         sum.travelTimeInSeconds,
+      normSec:        sum.noTrafficTravelTimeInSeconds ?? sum.travelTimeInSeconds,
+      vertragingSec:  sum.trafficDelayInSeconds ?? 0,
+      afstandM:       sum.lengthInMeters,
+      wegen:          parseWegnummers(instructies),
+      routeSegmenten: bouwRouteTekst(instructies),
+      flitsers:       telFlitsers(instructies),
+    };
+  } catch (err) {
+    if (poging < 2) {
+      await new Promise(r => setTimeout(r, 1800));
+      return haalReistijd(b, poging + 1);
     }
+    return { ok: false, fout: err.message };
+  }
+}
 
-    function crowdCls(cf){
-      const c = (cf||'').toUpperCase();
-      if(c==='HIGH')   return 'crowd-high';
-      if(c==='MEDIUM') return 'crowd-med';
-      if(c==='LOW')    return 'crowd-low';
-      return '';
+// ══ KAART HTML ════════════════════════════════════════════════════
+function kaartLadenHTML(b) {
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok"><div class="laden-rij"><div class="spinner"></div>Ophalen…</div></div>
+      <div class="kaart-onder">
+        <div class="voortgangsbalk"><div class="voortgang g" style="width:0%"></div></div>
+      </div>
+    </div>`;
+}
+
+function kaartResultaatHTML(b, r) {
+  if (!r.ok) {
+    return `
+      <div class="kaart-accent"></div>
+      <div class="kaart-body">
+        <div class="kaart-kop">
+          <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+          <div class="pin-wrap">${PIN}</div>
+        </div>
+        <div class="rtijd-blok"><div class="rtijd gr">—</div></div>
+        <div class="kaart-onder">
+          <div class="rmeta" style="color:#E4032D;font-size:.65rem" title="${e(r.fout)}">${e(r.fout || 'Geen verbinding')}</div>
+          <div class="voortgangsbalk"><div class="voortgang r" style="width:100%"></div></div>
+        </div>
+      </div>`;
+  }
+
+  const rat  = r.normSec > 0 ? r.rijSec / r.normSec : 1;
+  const del  = r.vertragingSec;
+  const kls  = (rat > 1.5 || del > 1800) ? 'r' : (rat > 1.2 || del > 600) ? 'o' : 'g';
+  const bdg  = kls === 'g' ? 'Vlot' : kls === 'o' ? 'Matig' : 'Druk';
+  const pct  = Math.min(100, Math.round((r.rijSec / Math.max(r.normSec * 2.5, 1)) * 100));
+
+  // Weg-chips HTML
+  const wegenHTML = r.wegen?.length
+    ? `<div class="wegen">${r.wegen.map(w => `<span class="weg ${wegKlasse(w)}">${e(w)}</span>`).join('')}</div>`
+    : '';
+
+  // Route quick-guide: escape elke segment afzonderlijk, dan samenvoegen met HTML-pijl
+  const routeHTML = r.routeSegmenten
+    ? `<div class="route-tekst">${e(r.routeSegmenten)}</div>`
+    : '';
+
+  // Flitspalen — altijd tonen, ook bij 0
+  const flitserHTML = `<div class="flitspaal-badge${r.flitsers >= 3 ? ' veel' : ''}">
+       ${FLITSPAAL}
+       <div>
+         <div class="flitspaal-nr">${r.flitsers}</div>
+         <div class="flitspaal-label">flitspaal${r.flitsers !== 1 ? 'en' : ''}</div>
+       </div>
+     </div>`;
+
+  // Vertraging
+  const vertragingHTML = del > 300
+    ? `<div class="vertraging ${kls}">${WARN} +${Math.round(del/60)} min${del > 1800 ? ' vertraging' : ' extra'}</div>`
+    : '';
+
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok"><div class="rtijd ${kls}">${e(secNaarTekst(r.rijSec))}</div></div>
+      <div class="kaart-onder">
+        ${routeHTML}
+        ${wegenHTML}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          ${flitserHTML}
+          ${vertragingHTML}
+        </div>
+        <div class="rmeta">
+          ${e(kmTekst(r.afstandM))} &middot; normaal ${e(secNaarTekst(r.normSec))}
+          <span class="badge ${kls}">${bdg}</span>
+        </div>
+        <div class="voortgangsbalk"><div class="voortgang ${kls}" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+// ══ RENDEREN ══════════════════════════════════════════════════════
+function tekenLadende() {
+  const rij = document.getElementById('kaarten-rij');
+  rij.innerHTML = '';
+  BESTEMMINGEN.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'kaart';
+    div.id = 'k-' + b.naam.replace(/\s+/g,'-');
+    div.innerHTML = kaartLadenHTML(b);
+    setKaartBg(div, b.lat, b.lon);
+    rij.appendChild(div);
+  });
+}
+
+async function haalAlleReistijden() {
+  clearTimeout(verversTimer);
+  setStatus('Reistijden ophalen via TomTom…', 'bezig');
+  const resultaten = await Promise.all(BESTEMMINGEN.map(b => haalReistijd(b)));
+  BESTEMMINGEN.forEach((b, i) => {
+    const div = document.getElementById('k-' + b.naam.replace(/\s+/g,'-'));
+    if (div) {
+      div.innerHTML = kaartResultaatHTML(b, resultaten[i]);
+      setKaartBg(div, b.lat, b.lon);
     }
-    function crowdLbl(cf){
-      const c = (cf||'').toUpperCase();
-      if(c==='HIGH')   return 'Vol';
-      if(c==='MEDIUM') return 'Druk';
-      if(c==='LOW')    return 'Rustig';
-      return '';
-    }
+  });
+  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  setStatus(`Bijgewerkt om ${nu} · volgende update over 10 minuten`, 'ok');
+  verversTimer = setTimeout(haalAlleReistijden, 10 * 60 * 1000);
+}
 
-    /* ── Render ── */
-    function render(list){
-      const el = document.getElementById('deps');
-      if(!list || !list.length){
-        el.innerHTML = '<div class="empty"><div class="empty-lbl">Geen vertrektijden beschikbaar</div></div>';
-        return;
-      }
+// ══ START ══════════════════════════════════════════════════════════
+async function startApp(data) {
+  cfg = { ...data };
+  clearTimeout(verversTimer);
+  document.getElementById('instellingen-btn').style.display = 'inline-block';
+  document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
+  tekenLadende();
+  haalAlleReistijden();
+}
 
-      el.innerHTML = list.slice(0, MAX_ROWS).map(dep => {
-        const pt  = fmtTime(dep.plannedDateTime);
-        const at  = fmtTime(dep.actualDateTime);
-        const del = delayMin(dep.plannedDateTime, dep.actualDateTime);
-        const can = !!dep.cancelled;
-        const cat = dep.trainCategory || '?';
-        const dir = dep.direction || '–';
-        const via = (dep.routeStations||[]).slice(0,4).map(s=>s.mediumName).join(' · ');
-        const trk = dep.actualTrack || dep.plannedTrack || '–';
-        const msg = dep.messages && dep.messages.length ? dep.messages[0].text || '' : '';
-
-        /* Tijd */
-        const timeHtml = can
-          ? `<div class="time-planned struck">${pt}</div>`
-          : del >= 1
-            ? `<div class="time-planned struck">${pt}</div><div class="time-actual">${at}</div>`
-            : `<div class="time-planned">${pt}</div>`;
-
-        /* Delay pill */
-        const pill = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
-
-        /* Drukte */
-        const cf  = dep.crowdForecast || '';
-        const cc  = crowdCls(cf);
-        const cl  = crowdLbl(cf);
-        // Persoon-SVG icoon (hoofd + lichaam)
-        const personSvg = `<svg class="crowd-icon" width="18" height="22" viewBox="0 0 18 22" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="9" cy="5" r="4"/>
-          <path d="M1 21c0-4.4 3.6-8 8-8s8 3.6 8 8H1z"/>
-        </svg>`;
-
-        const crowdHtml = `
-          <div class="crowd ${cc || 'crowd-none'}">
-            ${personSvg}
-            <div class="crowd-bars"><b></b><b></b><b></b></div>
-            <span class="crowd-text">${cl || '–'}</span>
-          </div>`;
-
-        /* Status */
-        const statusHtml = can
-          ? `<span class="status s-cancel">Rijdt niet</span>`
-          : del >= 1
-            ? `<span class="status s-late">+${del} min</span>`
-            : `<span class="status s-ok">0 min</span>`;
-
-        /* Storingsbericht */
-        const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
-
-        return `
-          <div class="row">
-            <div class="cell-time">${timeHtml}</div>
-            <div class="cell-dir">
-              <div class="dir-name">${dir}</div>
-              ${via ? `<div class="dir-via">via ${via}</div>` : ''}
-              ${msgHtml}
-            </div>
-            <div class="cell-train">
-              <div class="train-top">
-                <span class="badge ${badgeCls(cat)}">${cat}</span>
-              </div>
-              ${crowdHtml}
-            </div>
-            <div class="cell-track">
-              <div class="track-num">${trk}</div>
-              <div class="track-lbl">spoor</div>
-            </div>
-            <div class="cell-status">${statusHtml}</div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ── Crowd forecast via treinnummer ── */
-    async function fetchCrowd(dep){
-      const trainNr = dep.product?.number || dep.trainNumber || '';
-      if(!trainNr){ console.log('Geen treinnummer voor', dep.direction); return ''; }
-
-      try{
-        const url = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey`
-                  + `?train=${trainNr}&omitCrowdForecast=false`;
-
-        const r = await fetch(url, { headers:{ 'Ocp-Apim-Subscription-Key': NS_API_KEY }});
-        if(!r.ok){ console.warn('Journey HTTP', r.status, 'trein', trainNr); return ''; }
-
-        const j = await r.json();
-        const stops = j.payload?.stops || [];
-
-        // Log structuur bij eerste aanroep
-        if(stops.length && !window._crowdLogged){
-          window._crowdLogged = true;
-          console.log('Stop[0] keys:', Object.keys(stops[0]).join(', '));
-          console.log('Stop[0]:', JSON.stringify(stops[0]).substring(0, 500));
-        }
-
-        // Zoek de Halfweg-stop (of neem eerste stop als Halfweg niet gevonden wordt)
-        const hw = stops.find(s =>
-          s.stop?.name?.toLowerCase().includes('halfweg') ||
-          s.stop?.uicCode === '8400272' ||
-          s.stop?.stationCode?.toUpperCase() === 'HWZB'
-        ) || stops[0]; // fallback: eerste stop (vaak vertrekstation met crowd-data)
-
-        if(!hw){ return ''; }
-
-        // coachCrowdForecast kan een string of array zijn
-        const rawCf = hw.coachCrowdForecast
-                   || hw.crowdForecast
-                   || hw.actualStock?.trainParts?.[0]?.crowdForecast
-                   || hw.plannedStock?.trainParts?.[0]?.crowdForecast
-                   || '';
-
-        // Als het een array is: neem het hoogste niveau
-        let cf = '';
-        if(Array.isArray(rawCf)){
-          const order = ['HIGH','MEDIUM','LOW'];
-          cf = order.find(lvl => rawCf.includes(lvl)) || rawCf[0] || '';
-        } else {
-          cf = rawCf;
-        }
-
-        console.log('Crowd', dep.direction, trainNr, '→', cf || '(geen data)',
-                    '| coachCrowdForecast raw:', JSON.stringify(rawCf).substring(0,100));
-        return cf;
-
-      } catch(e){
-        console.warn('fetchCrowd fout:', e.message);
-        return '';
-      }
-    }
-
-    /* ── NS API ── */
-    async function fetchDepartures(){
-      const errEl = document.getElementById('err');
-
-      if(!NS_API_KEY || NS_API_KEY === 'JOUW_NS_API_SLEUTEL_HIER'){
-        errEl.style.display = 'block';
-        errEl.textContent = '⚠  Vul je NS API-sleutel in';
-        return;
-      }
-
-      // Probeer timetable-api, daarna reisinformatie-api als fallback
-      const url1 = `https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
-      const url2 = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
-      const hdrs = { 'Ocp-Apim-Subscription-Key': NS_API_KEY };
-
-      let deps = null;
-
-      // Poging 1
-      try {
-        console.log('Probeer:', url1);
-        const r = await fetch(url1, { headers: hdrs });
-        console.log('Status 1:', r.status);
-        if(r.ok){ const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
-      } catch(e){ console.warn('Endpoint 1 fout:', e.message); }
-
-      // Poging 2 als eerste mislukte
-      if(!deps){
-        try {
-          console.log('Probeer:', url2);
-          const r = await fetch(url2, { headers: hdrs });
-          console.log('Status 2:', r.status);
-          if(r.ok){ const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
-          else { throw new Error('HTTP ' + r.status); }
-        } catch(e){
-          errEl.style.display = 'block';
-          errEl.textContent = '⚠  ' + e.message + ' — controleer console (F12) voor details';
-          document.getElementById('upd').textContent = 'Fout';
-          return;
-        }
-      }
-
-      errEl.style.display = 'none';
-      if(deps.length) console.log('Departure[0]:', JSON.stringify(deps[0]).substring(0,400));
-      render(deps);
-
-      // Crowd data parallel ophalen
-      try {
-        const slice   = deps.slice(0, MAX_ROWS);
-        const crowds  = await Promise.all(slice.map(d => fetchCrowd(d)));
-        const enriched = slice.map((d,i) => ({ ...d, crowdForecast: crowds[i] || '' }));
-        render(enriched);
-      } catch(e){ console.warn('Crowd fout:', e.message); }
-
-      const n = new Date();
-      document.getElementById('upd').textContent =
-        'Bijgewerkt om ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
-    }
-
-    fetchDepartures();
-    setInterval(fetchDepartures, REFRESH_MS);
-  </script>
-
+// ══ INIT ═══════════════════════════════════════════════════════════
+// Start direct met hardcoded CONFIG — geen setup nodig
+startApp({
+  apiSleutel: CONFIG.apiSleutel,
+  werkAdres:  CONFIG.werkAdres,
+});
+</script>
 </body>
 </html>
