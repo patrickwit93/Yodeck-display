@@ -423,7 +423,9 @@ const BESTEMMINGEN = [
   { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.694906, lon: 4.874942 },
 ];
 
-const OPSLAG = 'ai_reistijd_tt_v2';
+const OPSLAG       = 'ai_reistijd_tt_v2';
+const CACHE_SLEUTEL = 'ai_reistijd_cache_v2';
+const CACHE_TTL     = 30 * 60 * 1000; // 30 minuten in ms
 let cfg = null;
 let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
 let verversTimer = null;
@@ -721,10 +723,18 @@ function tekenLadende() {
   });
 }
 
-async function haalAlleReistijden() {
-  clearTimeout(verversTimer);
-  setStatus('Reistijden ophalen via TomTom…', 'bezig');
-  const resultaten = await Promise.all(BESTEMMINGEN.map(b => haalReistijd(b)));
+function laadCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_SLEUTEL));
+    if (c && c.tijdstip && c.resultaten && (Date.now() - c.tijdstip) < CACHE_TTL) return c;
+  } catch {}
+  return null;
+}
+function slaCache(resultaten) {
+  try { localStorage.setItem(CACHE_SLEUTEL, JSON.stringify({ tijdstip: Date.now(), resultaten })); } catch {}
+}
+
+function toonResultaten(resultaten) {
   BESTEMMINGEN.forEach((b, i) => {
     const div = document.getElementById('k-' + b.naam.replace(/\s+/g,'-'));
     if (div) {
@@ -732,27 +742,16 @@ async function haalAlleReistijden() {
       setKaartBg(div, b.lat, b.lon);
     }
   });
-  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-  setStatus(`Bijgewerkt om ${nu} · volgende update over 10 minuten`, 'ok');
-  verversTimer = setTimeout(haalAlleReistijden, 10 * 60 * 1000);
 }
 
-// ══ START ══════════════════════════════════════════════════════════
-async function startApp(data) {
-  cfg = { ...data };
+async function haalAlleReistijden() {
   clearTimeout(verversTimer);
-  document.getElementById('instellingen-btn').style.display = 'inline-block';
-  document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
-  tekenLadende();
-  haalAlleReistijden();
-}
 
-// ══ INIT ═══════════════════════════════════════════════════════════
-// Start direct met hardcoded CONFIG — geen setup nodig
-startApp({
-  apiSleutel: CONFIG.apiSleutel,
-  werkAdres:  CONFIG.werkAdres,
-});
-</script>
-</body>
-</html>
+  // Gebruik cache als die nog vers genoeg is
+  const cache = laadCache();
+  if (cache) {
+    toonResultaten(cache.resultaten);
+    const ouderdom = Math.round((Date.now() - cache.tijdstip) / 60000);
+    const volgend  = Math.round((CACHE_TTL - (Date.now() - cache.tijdstip)) / 60000);
+    setStatus(`Gegevens van ${ouderdom} min geleden · volgende update over ${volgend} min`, 'ok');
+    verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL - (Date.
