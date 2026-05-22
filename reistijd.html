@@ -127,13 +127,13 @@
     .rtijd.gr { color: #bbb; font-size: 2.4rem; font-weight: 600; }
 
     /* — Onderste zone — */
-    .kaart-onder { display: flex; flex-direction: column; gap: 5px; }
+    .kaart-onder { display: flex; flex-direction: column; gap: 6px; }
 
     /* Weg-chips */
-    .wegen { display: flex; flex-wrap: wrap; gap: 5px; }
+    .wegen { display: flex; flex-wrap: wrap; gap: 4px; }
     .weg {
-      font-size: .78rem; font-weight: 800;
-      padding: 3px 10px; border-radius: 4px;
+      font-size: .65rem; font-weight: 800;
+      padding: 2px 7px; border-radius: 3px;
       letter-spacing: .04em;
     }
     .weg.A { background: #1b3a6b; color: #fff; }
@@ -142,9 +142,33 @@
 
     /* Route quick-guide */
     .route-tekst {
-      font-size: 1rem; color: #1D1D1B; font-weight: 600;
-      line-height: 1.5;
-      text-shadow: 0 0 12px rgba(255,255,255,1), 0 0 4px rgba(255,255,255,.9);
+      font-size: 1.05rem; color: #1D1D1B; font-weight: 700;
+      line-height: 1.45;
+      background: rgba(255,255,255,.85);
+      border-left: 4px solid #E4032D;
+      border-radius: 4px;
+      padding: 6px 10px;
+    }
+
+    /* Flitspaal badge */
+    .flitspaal-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.88);
+      border: 1.5px solid #e8a000;
+      border-radius: 4px;
+      padding: 2px 7px;
+      width: fit-content;
+    }
+    .flitspaal-badge.veel {
+      border-color: #E4032D;
+      background: rgba(255,232,232,.9);
+    }
+    .flitspaal-nr {
+      font-size: .8rem; font-weight: 800; color: #1D1D1B;
+      line-height: 1;
+    }
+    .flitspaal-label {
+      font-size: .58rem; font-weight: 700; color: #444;
     }
 
     /* Flitsers */
@@ -168,16 +192,19 @@
 
     /* Meta */
     .rmeta {
-      font-size: .7rem; color: #999; font-weight: 300;
-      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      font-size: .82rem; color: #1D1D1B; font-weight: 600;
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      background: rgba(255,255,255,.82);
+      border-radius: 5px;
+      padding: 5px 9px;
     }
     .badge {
-      font-size: .6rem; font-weight: 700; padding: 1px 6px;
-      border-radius: 3px; text-transform: uppercase; letter-spacing: .04em;
+      font-size: .7rem; font-weight: 800; padding: 2px 8px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
     }
-    .badge.g { background: #e6f4e9; color: #1a5e21; }
-    .badge.o { background: #fff3e0; color: #7d3800; }
-    .badge.r { background: #fde8ea; color: #a0021f; }
+    .badge.g { background: #1a7a2e; color: #fff; }
+    .badge.o { background: #c45e00; color: #fff; }
+    .badge.r { background: #E4032D; color: #fff; }
 
     /* Voortgangsbalk */
     .voortgangsbalk {
@@ -423,7 +450,19 @@ function wegKlasse(nr) {
 }
 
 const PIN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
-const CAM = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`;
+// Flitspaal SVG: mast + camera-behuizing + flitser-accent
+const FLITSPAAL = `<svg width="14" height="20" viewBox="0 0 22 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- mast -->
+  <rect x="9.5" y="12" width="3" height="20" rx="1.5" fill="#484848"/>
+  <!-- camera behuizing -->
+  <rect x="2" y="2" width="18" height="12" rx="2.5" fill="#1D1D1B"/>
+  <!-- lens -->
+  <circle cx="11" cy="8" r="3.5" fill="#333"/>
+  <circle cx="11" cy="8" r="2" fill="#555"/>
+  <circle cx="12" cy="7" r=".6" fill="rgba(255,255,255,.4)"/>
+  <!-- flitser accent -->
+  <rect x="2" y="2" width="3" height="12" rx="1.5" fill="#E4032D" opacity=".9"/>
+</svg>`;
 const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
 // ══ KLOK ════════════════════════════════════════════════════════════
@@ -504,8 +543,9 @@ function parseWegnummers(instructies) {
 }
 
 function bouwRouteTekst(instructies) {
-  const wegen = [], gezien = new Set();
+  const segmenten = [], gezien = new Set();
 
+  // Verzamel weg + eerste bord-richting per uniek wegnummer
   (instructies || []).forEach(ins => {
     if (['DEPART','ARRIVE','WAYPOINT_REACHED','SPEED_CONTROL'].includes(ins.instructionType)) return;
     const kandidaten = [];
@@ -520,21 +560,29 @@ function bouwRouteTekst(instructies) {
     kandidaten.forEach(nr => {
       if (gezien.has(nr)) return;
       gezien.add(nr);
-      const bord = (ins.signpostText || '').trim();
-      const label = (wegen.length === 0 && bord && bord.length < 28 && bord.toUpperCase() !== nr)
-        ? `${nr} richting ${bord}` : nr;
-      wegen.push(label);
+      const bord = (ins.signpostText || '').replace(/[-–—|]/g,' ').split(/\s{2,}/)[0].trim();
+      segmenten.push({ nr, richting: (bord && bord.length < 22 && bord.toUpperCase() !== nr) ? bord : null });
     });
   });
 
-  const lijst = wegen.slice(0, 5);
+  const lijst = segmenten.slice(0, 5);
   if (!lijst.length) return null;
 
-  // Bouw een leesbare zin: "Via A200 richting Haarlem, A9, A2 en A27"
-  if (lijst.length === 1) return `Via ${lijst[0]}`;
-  const laatste = lijst[lijst.length - 1];
-  const rest    = lijst.slice(0, -1);
-  return `Via ${rest.join(', ')} en ${laatste}`;
+  // Eerste weg krijgt richting mee als beschikbaar, rest alleen wegnummer
+  const eerste = lijst[0];
+  const eersteLabel = eerste.richting ? `${eerste.nr} richting ${eerste.richting}` : eerste.nr;
+
+  if (lijst.length === 1) return `Je rijdt via de ${eersteLabel}.`;
+
+  const rest = lijst.slice(1).map(s => s.nr);
+  const laatste = rest[rest.length - 1];
+  const midden  = rest.slice(0, -1);
+
+  const weglijst = midden.length
+    ? `${eersteLabel}, ${midden.join(', ')} en ${laatste}`
+    : `${eersteLabel} en ${laatste}`;
+
+  return `Je rijdt via de ${weglijst}.`;
 }
 
 function telFlitsers(instructies) {
@@ -625,10 +673,14 @@ function kaartResultaatHTML(b, r) {
     ? `<div class="route-tekst">${e(r.routeSegmenten)}</div>`
     : '';
 
-  // Flitsers
-  const flitserHTML = r.flitsers > 0
-    ? `<div class="flitser-badge${r.flitsers >= 3 ? ' veel' : ''}">${CAM} ${r.flitsers} flitser${r.flitsers !== 1 ? 's' : ''}</div>`
-    : '';
+  // Flitspalen — altijd tonen, ook bij 0
+  const flitserHTML = `<div class="flitspaal-badge${r.flitsers >= 3 ? ' veel' : ''}">
+       ${FLITSPAAL}
+       <div>
+         <div class="flitspaal-nr">${r.flitsers}</div>
+         <div class="flitspaal-label">flitspaal${r.flitsers !== 1 ? 'en' : ''}</div>
+       </div>
+     </div>`;
 
   // Vertraging
   const vertragingHTML = del > 300
@@ -646,8 +698,10 @@ function kaartResultaatHTML(b, r) {
       <div class="kaart-onder">
         ${routeHTML}
         ${wegenHTML}
-        ${flitserHTML}
-        ${vertragingHTML}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          ${flitserHTML}
+          ${vertragingHTML}
+        </div>
         <div class="rmeta">
           ${e(kmTekst(r.afstandM))} &middot; normaal ${e(secNaarTekst(r.normSec))}
           <span class="badge ${kls}">${bdg}</span>
