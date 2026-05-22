@@ -80,9 +80,8 @@
       overflow: hidden;
       box-shadow: 0 4px 28px rgba(0,0,0,.45);
       position: relative;
-      background: #2a2a28 center/cover no-repeat;
+      background: #e8e6e3 center/cover no-repeat;
     }
-    /* Lichte was over de kaartafbeelding — kaart blijft zichtbaar */
     .kaart::before {
       content: '';
       position: absolute; inset: 0;
@@ -395,36 +394,33 @@
 // ║  CONFIGURATIE — pas hier aan indien nodig                       ║
 // ╚══════════════════════════════════════════════════════════════════╝
 const CONFIG = {
-  apiSleutel: 'HuEEGgkzW6F9xxfyXFATcRNcEbEzE7oR',
+  apiSleutel: 'ClQP1K2s2boAjxqkXDN3Vq66rLyl5wSj',
   werkAdres:  'Suikersilo-West 39, Halfweg',
   originLat:  52.3823,
   originLon:  4.7348,
 };
 
 // ══ KAARTACHTERGROND ══════════════════════════════════════════════
-function kaartBgUrl(lat, lon) {
-  const key = (cfg?.apiSleutel || '').trim();
-  if (!key) return '';
-  // TomTom Static Image API — zoomlevel 13 geeft mooie stadskaart
-  return `https://api.tomtom.com/map/1/staticimage?key=${key}&zoom=14&center=${lon},${lat}&width=600&height=440&layer=basic&style=main&format=png`;
-}
+// OpenStreetMap static map — gratis, geen API-sleutel nodig
 function setKaartBg(el, lat, lon) {
-  const url = kaartBgUrl(lat, lon);
-  if (url) el.style.backgroundImage = `url('${url}')`;
+  const url = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=14&size=600x440&maptype=osm`;
+  el.style.backgroundImage = `url('${url}')`;
+  el.style.backgroundSize  = 'cover';
+  el.style.backgroundPosition = 'center';
 }
 
 // ══ BESTEMMINGEN ═══════════════════════════════════════════════════
 const BESTEMMINGEN = [
-  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.2652, lon: 4.7611 },
-  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.6313, lon: 4.7477 },
-  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.1561, lon: 5.3875 },
-  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.4628, lon: 4.7564 },
-  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.5461, lon: 4.6576 },
-  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.5094, lon: 4.6804 },
-  { naam: 'Het Kalf',        regio: 'Zaandam',       lat: 52.4544, lon: 4.8337 },
-  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.4694, lon: 4.9543 },
-  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.2146, lon: 5.4894 },
-  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.7040, lon: 4.8777 },
+  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.25908,  lon: 4.76635  },
+  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.63199,  lon: 4.74588  },
+  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.15817,  lon: 5.38682  },
+  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.46965,  lon: 4.74283  },
+  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.55199,  lon: 4.67352  },
+  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.51046,  lon: 4.66997  },
+  { naam: 'Het Kalf',        regio: 'Zaandam',       lat: 52.469008, lon: 4.838422 },
+  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.50788,  lon: 4.84802  },
+  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.219967, lon: 5.481498 },
+  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.694906, lon: 4.874942 },
 ];
 
 const OPSLAG = 'ai_reistijd_tt_v2';
@@ -659,7 +655,7 @@ function kaartResultaatHTML(b, r) {
 
   const rat  = r.normSec > 0 ? r.rijSec / r.normSec : 1;
   const del  = r.vertragingSec;
-  const kls  = (rat > 1.5 || del > 1800) ? 'r' : (rat > 1.2 || del > 600) ? 'o' : 'g';
+  const kls  = (rat > 1.4 || del > 900) ? 'r' : (rat > 1.1 || del > 180) ? 'o' : 'g';
   const bdg  = kls === 'g' ? 'Vlot' : kls === 'o' ? 'Matig' : 'Druk';
   const pct  = Math.min(100, Math.round((r.rijSec / Math.max(r.normSec * 2.5, 1)) * 100));
 
@@ -683,8 +679,8 @@ function kaartResultaatHTML(b, r) {
      </div>`;
 
   // Vertraging
-  const vertragingHTML = del > 300
-    ? `<div class="vertraging ${kls}">${WARN} +${Math.round(del/60)} min${del > 1800 ? ' vertraging' : ' extra'}</div>`
+  const vertragingHTML = del > 60
+    ? `<div class="vertraging ${kls}">${WARN} +${Math.round(del/60)} min${del > 900 ? ' vertraging' : ' extra'}</div>`
     : '';
 
   return `
