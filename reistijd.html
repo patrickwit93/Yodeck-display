@@ -75,17 +75,31 @@
 
     /* ══ KAART ═══════════════════════════════════════════════════════ */
     .kaart {
-      background: #fff;
       border-radius: 10px;
       display: flex; flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,.35);
-      transition: transform .15s;
+      box-shadow: 0 4px 28px rgba(0,0,0,.45);
+      position: relative;
+      background: #2a2a28 center/cover no-repeat;
     }
-    .kaart-accent { height: 5px; background: #E4032D; flex-shrink: 0; }
+    /* Frosted-glass laag over de kaartafbeelding */
+    .kaart::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,.80);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 0;
+    }
+    .kaart-accent {
+      height: 5px; background: #E4032D; flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
     .kaart-body   {
       flex: 1; padding: 18px 20px 16px;
       display: flex; flex-direction: column;
+      justify-content: space-between;
+      position: relative; z-index: 1;
     }
 
     /* — Kop — */
@@ -101,9 +115,9 @@
     }
 
     /* — Reistijd — */
-    .rtijd-blok { flex: 1; display: flex; align-items: center; padding: 4px 0; }
+    .rtijd-blok { display: flex; align-items: center; }
     .rtijd {
-      font-size: 3.6rem; font-weight: 800; line-height: 1;
+      font-size: 4.6rem; font-weight: 800; line-height: 1;
       letter-spacing: -.03em;
     }
     .rtijd.g { color: #1a7a2e; }
@@ -277,20 +291,6 @@
 </head>
 <body>
 
-<!-- ══ SETUP OVERLAY ══════════════════════════════════════════════ -->
-<div id="setup-overlay">
-  <div class="setup-kaart">
-    <h2>Reistijd naar Huis</h2>
-    <p class="setup-intro">Vul je TomTom API-sleutel en het vertrekadres in. Alles wordt alleen lokaal in deze browser opgeslagen — nergens online.</p>
-    <label for="s-api">TomTom API-sleutel</label>
-    <input type="password" id="s-api" placeholder="Jouw TomTom API key…" autocomplete="off" />
-    <p class="hint">Nog geen sleutel? <a href="https://developer.tomtom.com/user/register" target="_blank">Gratis aanmaken via TomTom Developer</a> — activeer de Routing API.</p>
-    <label for="s-werk">Vertrekadres</label>
-    <input type="text" id="s-werk" value="Suikersilo-West 39, 1165 MP Halfweg, Nederland" />
-    <button class="knop-rood" onclick="slaOp()">Opslaan en starten →</button>
-    <div class="foutmelding" id="setup-fout"></div>
-  </div>
-</div>
 
 <!-- ══ MODAL INSTELLINGEN ════════════════════════════════════════ -->
 <div class="overlay" id="modal">
@@ -345,6 +345,28 @@
 </div>
 
 <script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURATIE — pas hier aan indien nodig                       ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const CONFIG = {
+  apiSleutel: 'HuEEGgkzW6F9xxfyXFATcRNcEbEzE7oR',
+  werkAdres:  'Suikersilo-West 39, Halfweg',
+  originLat:  52.3823,
+  originLon:  4.7348,
+};
+
+// ══ KAARTACHTERGROND ══════════════════════════════════════════════
+function kaartBgUrl(lat, lon) {
+  const key = (cfg?.apiSleutel || '').trim();
+  if (!key) return '';
+  // TomTom Static Image API — zoomlevel 13 geeft mooie stadskaart
+  return `https://api.tomtom.com/map/1/staticimage?key=${key}&zoom=13&center=${lon},${lat}&width=560&height=400&layer=basic&style=main&format=png`;
+}
+function setKaartBg(el, lat, lon) {
+  const url = kaartBgUrl(lat, lon);
+  if (url) el.style.backgroundImage = `url('${url}')`;
+}
+
 // ══ BESTEMMINGEN ═══════════════════════════════════════════════════
 const BESTEMMINGEN = [
   { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.2652, lon: 4.7611 },
@@ -361,7 +383,7 @@ const BESTEMMINGEN = [
 
 const OPSLAG = 'ai_reistijd_tt_v2';
 let cfg = null;
-let originCoords = null;
+let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
 let verversTimer = null;
 
 // ══ HELPERS ════════════════════════════════════════════════════════
@@ -625,6 +647,7 @@ function tekenLadende() {
     div.className = 'kaart';
     div.id = 'k-' + b.naam.replace(/\s+/g,'-');
     div.innerHTML = kaartLadenHTML(b);
+    setKaartBg(div, b.lat, b.lon);
     rij.appendChild(div);
   });
 }
@@ -635,7 +658,10 @@ async function haalAlleReistijden() {
   const resultaten = await Promise.all(BESTEMMINGEN.map(b => haalReistijd(b)));
   BESTEMMINGEN.forEach((b, i) => {
     const div = document.getElementById('k-' + b.naam.replace(/\s+/g,'-'));
-    if (div) div.innerHTML = kaartResultaatHTML(b, resultaten[i]);
+    if (div) {
+      div.innerHTML = kaartResultaatHTML(b, resultaten[i]);
+      setKaartBg(div, b.lat, b.lon);
+    }
   });
   const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
   setStatus(`Bijgewerkt om ${nu} · volgende update over 10 minuten`, 'ok');
@@ -646,32 +672,18 @@ async function haalAlleReistijden() {
 async function startApp(data) {
   cfg = { ...data };
   clearTimeout(verversTimer);
-  document.getElementById('setup-overlay').style.display = 'none';
   document.getElementById('instellingen-btn').style.display = 'inline-block';
   document.getElementById('werk-label').textContent = 'Vertrek: ' + cfg.werkAdres;
   tekenLadende();
-  originCoords = ORIGIN_STANDAARD;
   haalAlleReistijden();
 }
 
 // ══ INIT ═══════════════════════════════════════════════════════════
-// Migreer eventueel opgeslagen key uit oudere versie
-function laadOpslagMigreer() {
-  const huidig = laadOpslag();
-  if (huidig) return huidig;
-  // Probeer v1-sleutel over te nemen
-  try {
-    const oud = JSON.parse(localStorage.getItem('ai_reistijd_tt_v1'));
-    if (oud?.apiSleutel) { slaOpSlag(oud); return oud; }
-  } catch {}
-  return null;
-}
-const opgeslagen = laadOpslagMigreer();
-if (opgeslagen?.apiSleutel) {
-  startApp(opgeslagen);
-} else {
-  setStatus('Vul je gegevens in om te starten', '');
-}
+// Start direct met hardcoded CONFIG — geen setup nodig
+startApp({
+  apiSleutel: CONFIG.apiSleutel,
+  werkAdres:  CONFIG.werkAdres,
+});
 </script>
 </body>
 </html>
