@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Amstelland Ingenieurs — Tijdweergave</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --rood:        #E4032D;
+            --donkerrood:  #A0021F;
+            --zwart:       #1D1D1B;
+            --donkergrijs: #484848;
+            --middengrijs: #616160;
+            --lichtgrijs:  #D9D9D9;
+            --wit:         #FFFFFF;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--zwart);
+            font-family: 'Montserrat', 'Calibri Light', 'Segoe UI', sans-serif;
+            color: var(--wit);
+        }
+
+        /* ── Achtergrond raster ────────────────────────────────────── */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(228,3,45,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(228,3,45,0.045) 1px, transparent 1px);
+            background-size: 64px 64px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Scanline ──────────────────────────────────────────────── */
+        .scan-line {
+            position: fixed;
+            left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, rgba(228,3,45,0.55) 40%, rgba(228,3,45,0.55) 60%, transparent 100%);
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+            z-index: 20;
+        }
+        @keyframes scan {
+            0%   { top: -4px; opacity: 0; }
+            3%   { opacity: 1; }
+            97%  { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* ── Hoekdecoraties ────────────────────────────────────────── */
+        .corner {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .corner-tl { top: 24px; left: 24px;  border-top: 2px solid var(--rood); border-left: 2px solid var(--rood); }
+        .corner-tr { top: 24px; right: 24px;  border-top: 2px solid var(--rood); border-right: 2px solid var(--rood); }
+        .corner-bl { bottom: 24px; left: 24px;  border-bottom: 2px solid var(--rood); border-left: 2px solid var(--rood); }
+        .corner-br { bottom: 24px; right: 24px;  border-bottom: 2px solid var(--rood); border-right: 2px solid var(--rood); }
+
+        /* ── Coördinaten ───────────────────────────────────────────── */
+        .coord {
+            position: fixed;
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.18em;
+            color: var(--middengrijs);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .coord-tl { top: 28px;    left: 100px; }
+        .coord-tr { top: 28px;    right: 100px; }
+        .coord-bl { bottom: 28px; left: 100px; }
+        .coord-br { bottom: 28px; right: 110px; }
+
+        /* ── Brugdecoratie (onderkant) ─────────────────────────────── */
+        .bridge-deco {
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.18;
+        }
+
+        /* ── Hoofd-layout ──────────────────────────────────────────── */
+        .main {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Kloksectie ────────────────────────────────────────────── */
+        .clock-section {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 40px 0 60px;
+        }
+
+        .clock-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Kloppende ring */
+        .pulse-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1.5px solid var(--rood);
+            width: 108%;
+            height: 108%;
+            animation: pulse 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .pulse-ring-2 {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(228,3,45,0.35);
+            width: 118%;
+            height: 118%;
+            animation: pulse 3.5s ease-in-out 1.75s infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse {
+            0%   { transform: scale(0.97); opacity: 0.9; }
+            50%  { transform: scale(1.02); opacity: 0.25; }
+            100% { transform: scale(0.97); opacity: 0.9; }
+        }
+
+        /* Langzaam roterende decoratieve ring */
+        .deco-ring {
+            position: absolute;
+            border-radius: 50%;
+            width: 130%;
+            height: 130%;
+            border: 1px solid rgba(228,3,45,0.15);
+            animation: slow-rotate 90s linear infinite;
+            pointer-events: none;
+        }
+        .deco-ring::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -6px;
+            width: 10px;
+            height: 2px;
+            background: var(--rood);
+            transform: translateY(-50%);
+            border-radius: 1px;
+        }
+        .deco-ring::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -6px;
+            width: 10px;
+            height: 2px;
+            background: var(--rood);
+            transform: translateY(-50%);
+            border-radius: 1px;
+        }
+        @keyframes slow-rotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        #clockCanvas {
+            display: block;
+            position: relative;
+            z-index: 2;
+            /* Scherp op retina */
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        /* ── Verticale scheidingslijn ───────────────────────────────── */
+        .divider {
+            flex: 0 0 1px;
+            height: 55vh;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(228,3,45,0.6) 20%,
+                rgba(228,3,45,0.6) 80%,
+                transparent 100%);
+            margin: 0 10px;
+        }
+
+        /* ── Infopaneel (rechts) ───────────────────────────────────── */
+        .info-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0 50px 0 50px;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .time-label {
+            font-size: clamp(9px, 0.9vw, 13px);
+            font-weight: 400;
+            letter-spacing: 0.42em;
+            color: var(--rood);
+            text-transform: uppercase;
+        }
+
+        /* Grote digitale tijd */
+        .digital-time {
+            display: flex;
+            align-items: baseline;
+            gap: 0;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .dt-hm {
+            font-size: clamp(72px, 9.5vw, 148px);
+            font-weight: 200;
+            letter-spacing: -0.01em;
+            color: var(--wit);
+            font-variant-numeric: tabular-nums;
+        }
+        .dt-sep {
+            font-size: clamp(72px, 9.5vw, 148px);
+            font-weight: 100;
+            color: var(--rood);
+            margin: 0 2px;
+            animation: blink-sep 1s step-start infinite;
+        }
+        @keyframes blink-sep {
+            0%, 49% { opacity: 1; }
+            50%, 99% { opacity: 0.25; }
+        }
+        .dt-sec {
+            font-size: clamp(28px, 3.8vw, 60px);
+            font-weight: 300;
+            color: var(--rood);
+            font-variant-numeric: tabular-nums;
+            margin-left: 8px;
+            align-self: flex-start;
+            margin-top: 0.12em;
+        }
+
+        /* Horizontale lijn */
+        .h-line {
+            width: min(140px, 40%);
+            height: 2px;
+            background: linear-gradient(to right, var(--rood), transparent);
+            margin: 4px 0;
+        }
+
+        .day-name {
+            font-size: clamp(22px, 2.8vw, 46px);
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            color: var(--wit);
+            text-transform: uppercase;
+        }
+
+        .date-display {
+            font-size: clamp(14px, 1.7vw, 26px);
+            font-weight: 300;
+            letter-spacing: 0.14em;
+            color: var(--lichtgrijs);
+        }
+
+        /* Week‑ en UTC-info */
+        .meta-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 6px;
+        }
+        .meta-tag {
+            font-size: clamp(9px, 0.85vw, 12px);
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            color: var(--middengrijs);
+            text-transform: uppercase;
+            border-left: 2px solid var(--rood);
+            padding-left: 8px;
+        }
+
+        /* ── Amstelland logo (rechtsonder) ──────────────────────────── */
+        .logo-container {
+            position: fixed;
+            bottom: 28px;
+            right: 36px;
+            z-index: 15;
+            opacity: 0.92;
+        }
+        .logo-container svg {
+            width: clamp(140px, 12vw, 200px);
+            height: auto;
+        }
+
+        /* ── Rode bovenlijn ─────────────────────────────────────────── */
+        .top-line {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--donkerrood), var(--rood), var(--donkerrood));
+            z-index: 25;
+        }
+
+        /* ── Status indicator (rechtsbovenhoek) ─────────────────────── */
+        .status-dot {
+            position: fixed;
+            top: 22px;
+            right: 100px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            z-index: 15;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00E676;
+            box-shadow: 0 0 8px #00E676;
+            animation: dot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px #00E676; }
+            50%       { opacity: 0.5; box-shadow: 0 0 2px #00E676; }
+        }
+        .status-text {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            color: var(--middengrijs);
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Bovenste rode lijn -->
+    <div class="top-line"></div>
+
+    <!-- Achtergrond raster -->
+    <div class="bg-grid"></div>
+
+    <!-- Scanline -->
+    <div class="scan-line"></div>
+
+    <!-- Hoekdecoraties -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Coördinaten -->
+    <div class="coord coord-tl">N 52°22′48″</div>
+    <div class="coord coord-tr">E 04°53′31″</div>
+    <div class="coord coord-bl">AMSTERDAM</div>
+    <div class="coord coord-br">UTC +01:00</div>
+
+    <!-- Live status -->
+    <div class="status-dot">
+        <div class="dot"></div>
+        <span class="status-text">LIVE</span>
+    </div>
+
+    <!-- Brug-silhouet (onderkant, decoratief) -->
+    <div class="bridge-deco">
+        <svg viewBox="0 0 1920 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Wegdek -->
+            <line x1="0" y1="160" x2="1920" y2="160" stroke="#E4032D" stroke-width="2.5"/>
+            <!-- Pylonen -->
+            <rect x="490" y="50"  width="18" height="110" fill="#D9D9D9"/>
+            <rect x="1412" y="50" width="18" height="110" fill="#D9D9D9"/>
+            <!-- Pyloon-toppen -->
+            <polygon points="490,50 499,28 508,50"  fill="#E4032D"/>
+            <polygon points="1412,50 1421,28 1430,50" fill="#E4032D"/>
+            <!-- Hoofdkabels -->
+            <path d="M0,108 Q499,18 960,68 Q1421,18 1920,108"
+                  stroke="#D9D9D9" stroke-width="2.5" fill="none"/>
+            <!-- Hangkabels links -->
+            <line x1="150"  y1="90"  x2="150"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="250"  y1="80"  x2="250"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="350"  y1="67"  x2="350"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="430"  y1="56"  x2="430"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <!-- Hangkabels midden-links -->
+            <line x1="570"  y1="50"  x2="570"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="650"  y1="44"  x2="650"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="730"  y1="41"  x2="730"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="820"  y1="40"  x2="820"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="900"  y1="42"  x2="900"  y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <!-- Midden -->
+            <line x1="960"  y1="68"  x2="960"  y2="160" stroke="#E4032D"  stroke-width="1"/>
+            <!-- Hangkabels midden-rechts -->
+            <line x1="1020" y1="42"  x2="1020" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1100" y1="40"  x2="1100" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1190" y1="41"  x2="1190" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1270" y1="44"  x2="1270" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1350" y1="50"  x2="1350" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <!-- Hangkabels rechts -->
+            <line x1="1490" y1="56"  x2="1490" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1570" y1="67"  x2="1570" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1670" y1="80"  x2="1670" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <line x1="1770" y1="90"  x2="1770" y2="160" stroke="#D9D9D9" stroke-width="0.8"/>
+            <!-- Wateroppervlak -->
+            <line x1="0"    y1="180" x2="1920" y2="180" stroke="#616160" stroke-width="1" stroke-dasharray="6,8"/>
+            <line x1="0"    y1="200" x2="1920" y2="200" stroke="#484848" stroke-width="1" stroke-dasharray="10,12"/>
+        </svg>
+    </div>
+
+    <!-- Hoofd-layout -->
+    <div class="main">
+
+        <!-- Analoge klok -->
+        <div class="clock-section">
+            <div class="clock-wrapper" id="clockWrapper">
+                <div class="deco-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring-2"></div>
+                <canvas id="clockCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Scheidingslijn -->
+        <div class="divider"></div>
+
+        <!-- Digitaal paneel -->
+        <div class="info-section">
+            <div class="time-label">LOKALE TIJD</div>
+
+            <div class="digital-time">
+                <span class="dt-hm" id="dt-hm">--:--</span>
+                <span class="dt-sep" id="dt-sep">:</span>
+                <span class="dt-sec" id="dt-sec">--</span>
+            </div>
+
+            <div class="h-line"></div>
+
+            <div class="day-name"  id="day-name">---</div>
+            <div class="date-display" id="date-display">-- --- ----</div>
+
+            <div class="meta-row">
+                <div class="meta-tag" id="week-tag">WEEK --</div>
+                <div class="meta-tag" id="tz-tag">CET / CEST</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amstelland logo (wit) -->
+    <div class="logo-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380.77 127.56">
+            <defs>
+                <style>
+                    .al { fill: #FFFFFF; stroke-width: 0px; }
+                    .ar { fill: #E4032D; stroke-width: 0px; }
+                </style>
+            </defs>
+            <g>
+                <rect class="ar" x="99.39" width="2.76" height="127.56"/>
+                <g>
+                    <path class="al" d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+                    <path class="al" d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
+                    <path class="al" d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+                    <path class="al" d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
+                    <path class="al" d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+                    <path class="al" d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
+                    <path class="al" d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
+                    <path class="al" d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+                    <path class="al" d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+                    <path class="al" d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
+                    <path class="al" d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+                    <path class="al" d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+                    <path class="al" d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
+                    <path class="al" d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+                    <path class="al" d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+                    <path class="al" d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+                    <path class="al" d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+                    <path class="al" d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
+                    <path class="al" d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
+                    <path class="al" d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+                </g>
+                <g>
+                    <path class="al" d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93h0s-.02.03-.03.04l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8,0,0,0,0,0,0,0,.01-.01.02-.02.03-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59,0,0,0-.01.02-.03v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
+                    <path class="ar" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39,0,0,0,0,0,0v11.91h14.3v-14.3h-12.44Z"/>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+    // ── Constanten ───────────────────────────────────────────────────────
+    const ROOD       = '#E4032D';
+    const DONKERROOD = '#A0021F';
+    const WIT        = '#FFFFFF';
+    const LICHTGRIJS = '#D9D9D9';
+    const MIDGRIJS   = '#616160';
+    const DARKFILL   = '#252523';
+    const ZWART      = '#1D1D1B';
+
+    const DAGEN   = ['ZONDAG','MAANDAG','DINSDAG','WOENSDAG','DONDERDAG','VRIJDAG','ZATERDAG'];
+    const MAANDEN = ['JANUARI','FEBRUARI','MAART','APRIL','MEI','JUNI',
+                     'JULI','AUGUSTUS','SEPTEMBER','OKTOBER','NOVEMBER','DECEMBER'];
+
+    // ── Canvas setup ────────────────────────────────────────────────────
+    const canvas  = document.getElementById('clockCanvas');
+    const ctx     = canvas.getContext('2d');
+    const dpr     = window.devicePixelRatio || 1;
+
+    function getRadius() {
+        // Responsief: 38% van de kleinste dimensie van het viewport, max 300px
+        return Math.min(Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.38), 300);
+    }
+
+    function resizeClock() {
+        const r = getRadius();
+        const size = r * 2;
+        canvas.width  = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width  = size + 'px';
+        canvas.style.height = size + 'px';
+        ctx.scale(dpr, dpr);
+    }
+
+    window.addEventListener('resize', resizeClock);
+    resizeClock();
+
+    // ── Week-nummer ──────────────────────────────────────────────────────
+    function getWeekNumber(d) {
+        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    // ── Klok tekenen ────────────────────────────────────────────────────
+    function drawClock() {
+        const now = new Date();
+        const r   = getRadius();
+        const cx  = r, cy = r;
+
+        // Volledig herberekenen bij resize
+        const size = r * 2;
+        if (canvas.width !== size * dpr) {
+            canvas.width  = size * dpr;
+            canvas.height = size * dpr;
+            canvas.style.width  = size + 'px';
+            canvas.style.height = size + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        ctx.clearRect(0, 0, size, size);
+
+        // ── Klokblad ────────────────────────────────────────────────────
+        // Buitenste donkere cirkel
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 1, 0, 2 * Math.PI);
+        const bgGrad = ctx.createRadialGradient(cx, cy - r*0.2, r*0.05, cx, cy, r);
+        bgGrad.addColorStop(0, '#2c2c2a');
+        bgGrad.addColorStop(1, '#131312');
+        ctx.fillStyle = bgGrad;
+        ctx.fill();
+
+        // Subtiele binnenste glans
+        const glowGrad = ctx.createRadialGradient(cx, cy - r*0.3, r*0.1, cx, cy, r*0.9);
+        glowGrad.addColorStop(0, 'rgba(255,255,255,0.04)');
+        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 2, 0, 2 * Math.PI);
+        ctx.fillStyle = glowGrad;
+        ctx.fill();
+
+        // ── Technische rand ──────────────────────────────────────────────
+        // Buitenste ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 1, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#444442';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Rode accentrij
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.95, 0, 2 * Math.PI);
+        ctx.strokeStyle = ROOD;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // ── Graadmarkeringen (60 stuks) ──────────────────────────────────
+        for (let i = 0; i < 60; i++) {
+            const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
+            const isHour = i % 5 === 0;
+            const isMain = i % 15 === 0;  // 12, 3, 6, 9
+
+            const outer = r * 0.93;
+            const inner = isMain ? r * 0.72 : (isHour ? r * 0.80 : r * 0.87);
+            const lw    = isMain ? 2.5 : (isHour ? 1.5 : 0.8);
+            const col   = isMain ? ROOD : (isHour ? WIT : '#555553');
+
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+            ctx.lineTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer);
+            ctx.strokeStyle = col;
+            ctx.lineWidth = lw;
+            ctx.stroke();
+        }
+
+        // ── Cijfers (1–12) ───────────────────────────────────────────────
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        const numR = r * 0.65;
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+            const x = cx + Math.cos(angle) * numR;
+            const y = cy + Math.sin(angle) * numR;
+            const isMain = (i % 3 === 0);
+            ctx.font = `${isMain ? '600' : '300'} ${Math.floor(r * (isMain ? 0.115 : 0.095))}px 'Montserrat', sans-serif`;
+            ctx.fillStyle = isMain ? WIT : '#888886';
+            ctx.fillText(i, x, y);
+        }
+
+        // ── Tijdsberekening (vloeiend) ───────────────────────────────────
+        const h  = now.getHours() % 12;
+        const m  = now.getMinutes();
+        const s  = now.getSeconds();
+        const ms = now.getMilliseconds();
+
+        const secAngle = ((s + ms / 1000) / 60)                * 2 * Math.PI - Math.PI / 2;
+        const minAngle = ((m + (s + ms / 1000) / 60) / 60)     * 2 * Math.PI - Math.PI / 2;
+        const hrAngle  = ((h + (m + s / 60) / 60) / 12)        * 2 * Math.PI - Math.PI / 2;
+
+        // ── Helper: wijs tekenen ─────────────────────────────────────────
+        function drawHand(angle, length, width, color, shadow, tailLen) {
+            const tail = tailLen || length * 0.18;
+            ctx.save();
+            ctx.lineCap = 'round';
+            if (shadow) {
+                ctx.shadowColor   = color;
+                ctx.shadowBlur    = shadow;
+            }
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(angle) * tail, cy - Math.sin(angle) * tail);
+            ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
+            ctx.strokeStyle = color;
+            ctx.lineWidth   = width;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Uurwijs
+        drawHand(hrAngle,  r * 0.52, r * 0.046, WIT,    6);
+        // Rode tip op uurwijs
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(hrAngle) * r * 0.38, cy + Math.sin(hrAngle) * r * 0.38);
+        ctx.lineTo(cx + Math.cos(hrAngle) * r * 0.52, cy + Math.sin(hrAngle) * r * 0.52);
+        ctx.strokeStyle = ROOD;
+        ctx.lineWidth = r * 0.046;
+        ctx.stroke();
+        ctx.restore();
+
+        // Minuutwijs
+        drawHand(minAngle, r * 0.73, r * 0.032, WIT,    5);
+        // Rode tip op minuutwijs
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(minAngle) * r * 0.56, cy + Math.sin(minAngle) * r * 0.56);
+        ctx.lineTo(cx + Math.cos(minAngle) * r * 0.73, cy + Math.sin(minAngle) * r * 0.73);
+        ctx.strokeStyle = ROOD;
+        ctx.lineWidth = r * 0.032;
+        ctx.stroke();
+        ctx.restore();
+
+        // Secondewijs (rood, dun, met gloed)
+        drawHand(secAngle, r * 0.84, r * 0.014, ROOD,   14, r * 0.22);
+
+        // Secondewijs uiteinde-dot
+        ctx.beginPath();
+        ctx.arc(
+            cx + Math.cos(secAngle) * r * 0.84,
+            cy + Math.sin(secAngle) * r * 0.84,
+            r * 0.022, 0, 2 * Math.PI
+        );
+        ctx.fillStyle = ROOD;
+        ctx.shadowColor = ROOD;
+        ctx.shadowBlur  = 10;
+        ctx.fill();
+        ctx.shadowBlur  = 0;
+
+        // ── Middenpunt ────────────────────────────────────────────────────
+        // Buitenste ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.055, 0, 2 * Math.PI);
+        ctx.fillStyle = '#252523';
+        ctx.fill();
+
+        // Rode kern
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.036, 0, 2 * Math.PI);
+        ctx.fillStyle = ROOD;
+        ctx.shadowColor = ROOD;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Wit middenstip
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.012, 0, 2 * Math.PI);
+        ctx.fillStyle = WIT;
+        ctx.fill();
+
+        // ── DOM bijwerken ────────────────────────────────────────────────
+        const pad = n => String(n).padStart(2, '0');
+        document.getElementById('dt-hm').textContent  = `${pad(now.getHours())}:${pad(m)}`;
+        document.getElementById('dt-sec').textContent = pad(s);
+
+        document.getElementById('day-name').textContent    = DAGEN[now.getDay()];
+        document.getElementById('date-display').textContent =
+            `${pad(now.getDate())} ${MAANDEN[now.getMonth()]} ${now.getFullYear()}`;
+
+        document.getElementById('week-tag').textContent = `WEEK ${pad(getWeekNumber(now))}`;
+        document.getElementById('tz-tag').textContent   =
+            now.getTimezoneOffset() <= -120 ? 'CEST / UTC+2' : 'CET / UTC+1';
+
+        requestAnimationFrame(drawClock);
+    }
+
+    drawClock();
+    </script>
+</body>
+</html>
