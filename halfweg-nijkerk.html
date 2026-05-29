@@ -58,22 +58,22 @@
 
     /* ── GRAP CARD ── */
     .grap-card {
-      background: linear-gradient(135deg, #fff8e1, #fff3cd);
-      border: 2px dashed var(--geel); border-radius: 12px;
-      padding: 10px 20px; flex-shrink: 0;
-      font-size: 15px; line-height: 1.5; font-weight: 500;
+      background: linear-gradient(135deg, #fff3cd, #ffe69c);
+      border: 3px solid var(--geel); border-radius: 12px;
+      padding: 10px 22px; flex-shrink: 0;
+      font-size: 19px; line-height: 1.55; font-weight: 600; color: #2a2a2a;
     }
-    .grap-card .titel { font-weight: 900; font-size: 16px; color: var(--blauw); margin-bottom: 4px; }
+    .grap-card .titel { font-weight: 900; font-size: 21px; color: var(--blauw); margin-bottom: 5px; }
 
     /* ── REFRESH BAR ── */
     .refresh-bar {
       display: flex; align-items: center; justify-content: space-between;
       flex-shrink: 0; gap: 10px;
     }
-    .refresh-bar .lbl { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 800; }
+    .refresh-bar .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 800; }
     .btn-refresh {
       background: var(--blauw); color: white; border: none; border-radius: 7px;
-      padding: 7px 18px; font-size: 14px; font-weight: 800;
+      padding: 7px 18px; font-size: 13px; font-weight: 800;
       cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px;
     }
     .btn-refresh:hover { background: #00256b; }
@@ -107,48 +107,48 @@
     .trip-head {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--blauw); color: white;
-      padding: 6px 24px; gap: 10px; height: 46px;
+      padding: 6px 24px; gap: 10px; height: 50px;
     }
-    .th-vertrek  { font-size: 34px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
-    .th-dur      { font-size: 13px; opacity: .8; font-weight: 600; }
-    .th-mid      { font-size: 14px; font-weight: 700; opacity: .85; text-align: center; }
-    .th-aankomst { font-size: 32px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
-    .th-aank-lbl { font-size: 11px; opacity: .7; text-align: right; }
+    .th-vertrek  { font-size: 42px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .th-dur      { font-size: 17px; opacity: .8; font-weight: 600; }
+    .th-mid      { font-size: 18px; font-weight: 700; opacity: .85; text-align: center; }
+    .th-aankomst { font-size: 40px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+    .th-aank-lbl { font-size: 14px; opacity: .7; text-align: right; }
 
     /* Segment rij: één been per rij (van → naar) */
     .seg {
       display: flex; align-items: center; gap: 12px;
       padding: 4px 24px; border-top: 1px solid #eef2fa;
-      height: 38px;
+      height: 42px;
     }
-    .seg-tijden  { font-size: 20px; font-weight: 900; color: var(--blauw); min-width: 128px; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
-    .seg-tijden .arr { font-size: 17px; font-weight: 600; color: #888; }
-    .seg-icon    { font-size: 20px; min-width: 28px; text-align: center; }
+    .seg-tijden  { font-size: 26px; font-weight: 900; color: var(--blauw); min-width: 152px; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+    .seg-tijden .arr { font-size: 22px; font-weight: 600; color: #888; }
+    .seg-icon    { font-size: 24px; min-width: 30px; text-align: center; }
     .seg-info    { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .seg-van     { font-size: 20px; font-weight: 800; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .seg-pijl    { font-size: 16px; color: var(--blauw); font-weight: 900; flex-shrink: 0; }
-    .seg-naar    { font-size: 20px; font-weight: 800; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seg-van     { font-size: 25px; font-weight: 800; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seg-pijl    { font-size: 20px; color: var(--blauw); font-weight: 900; flex-shrink: 0; }
+    .seg-naar    { font-size: 25px; font-weight: 800; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .seg-badge   { flex-shrink: 0; }
-    .badge { display: inline-block; border-radius: 4px; font-size: 12px; font-weight: 800; padding: 2px 8px; }
+    .badge { display: inline-block; border-radius: 4px; font-size: 14px; font-weight: 800; padding: 2px 10px; }
     .ic    { background: #003082; color: white; }
     .spr   { background: #6c7fd8; color: white; }
     .icd   { background: #c1121f; color: white; }
     .other { background: #666; color: white; }
-    .seg-richting { font-size: 13px; color: #888; white-space: nowrap; }
+    .seg-richting { font-size: 17px; color: #888; white-space: nowrap; }
     .seg-sporen  { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .spoor-badge {
       background: var(--blauw); color: white; border-radius: 6px;
-      padding: 3px 9px; text-align: center; min-width: 40px;
+      padding: 3px 10px; text-align: center; min-width: 44px;
     }
     .spoor-badge.groen { background: var(--groen); }
-    .spoor-badge .sl { font-size: 8px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
-    .spoor-badge .sn { font-size: 20px; font-weight: 900; line-height: 1.1; }
-    .spoor-pijl { font-size: 12px; color: #aaa; }
+    .spoor-badge .sl { font-size: 9px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
+    .spoor-badge .sn { font-size: 26px; font-weight: 900; line-height: 1.1; }
+    .spoor-pijl { font-size: 16px; color: #aaa; }
 
     /* Overstap balk */
     .transfer-bar {
       background: #fff8e1; border-top: 1px solid #ffe082; border-bottom: 1px solid #ffe082;
-      padding: 2px 24px 2px 96px; font-size: 13px; color: #7a5000; font-weight: 700; height: 18px;
+      padding: 2px 24px 2px 96px; font-size: 15px; color: #7a5000; font-weight: 700; height: 18px;
       display: flex; align-items: center;
     }
 
@@ -166,8 +166,8 @@
       text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
     .stat-card .emoji { font-size: 22px; margin-bottom: 2px; }
-    .stat-card .getal { font-size: 30px; font-weight: 900; color: var(--blauw); line-height: 1; }
-    .stat-card .lbl   { font-size: 11px; color: #888; margin-top: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-card .getal { font-size: 34px; font-weight: 900; color: var(--blauw); line-height: 1; }
+    .stat-card .lbl   { font-size: 13px; color: #888; margin-top: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
 
     .tips {
       background: white; border-radius: 10px; padding: 12px 20px;
@@ -175,8 +175,8 @@
     }
     .tips h3     { color: var(--blauw); margin-bottom: 8px; font-size: 16px; font-weight: 800; }
     .tips-grid   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 28px; }
-    .tip-item    { display: flex; gap: 8px; font-size: 13.5px; line-height: 1.4; color: #444; font-weight: 500; align-items: flex-start; }
-    .tip-item span:first-child { font-size: 17px; flex-shrink: 0; }
+    .tip-item    { display: flex; gap: 8px; font-size: 16px; line-height: 1.4; color: #444; font-weight: 500; align-items: flex-start; }
+    .tip-item span:first-child { font-size: 20px; flex-shrink: 0; }
 
     .footer { flex-shrink: 0; text-align: center; font-size: 12px; color: #bbb; font-style: italic; }
   </style>
