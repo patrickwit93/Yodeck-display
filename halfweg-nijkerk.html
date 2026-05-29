@@ -6,173 +6,179 @@
   <title>🚂 Peter's Treinreis | Halfweg → Nijkerk</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
   <style>
-    /* ── Alles geschaald op 1920×1080, leesbaar vanaf 2–3 meter ── */
+    /* ── Exact 1920×1080, geen scroll ── */
     :root {
       --blauw:  #003082;
       --geel:   #FFC917;
       --oranje: #e85d04;
       --groen:  #2d6a4f;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
-    body {
+    html, body {
+      width: 1920px; height: 1080px;
+      overflow: hidden;
       font-family: 'Montserrat', 'Segoe UI', sans-serif;
       background: #f0f4f8;
-      width: 1920px; /* vaste breedte voor 55" */
-      min-height: 1080px;
     }
 
     /* ── HERO ── */
     .hero {
       background: var(--blauw); color: white;
-      padding: 22px 60px 18px; text-align: center;
-      overflow: hidden; position: relative;
+      padding: 12px 60px 10px; text-align: center;
+      position: relative; overflow: hidden; height: 88px;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
     }
     .hero::before {
-      content: "🚂💨"; position: absolute; font-size: 120px; opacity: 0.06;
-      top: -5px; left: 0; animation: trein 9s linear infinite; line-height: 1;
+      content: "🚂💨"; position: absolute; font-size: 110px; opacity: 0.06;
+      top: -8px; left: 0; animation: trein 9s linear infinite; line-height: 1;
     }
     @keyframes trein { from { transform: translateX(-200px); } to { transform: translateX(110vw); } }
     .ns-logo {
       display: inline-block; background: var(--geel); color: var(--blauw);
-      font-weight: 900; font-size: 26px; padding: 5px 16px; border-radius: 5px;
-      letter-spacing: 2px; margin-bottom: 8px;
+      font-weight: 900; font-size: 22px; padding: 3px 14px; border-radius: 5px;
+      letter-spacing: 2px; margin-bottom: 4px;
     }
-    .hero h1   { font-size: 46px; font-weight: 900; margin-bottom: 4px; }
-    .hero .tag { font-size: 19px; opacity: 0.7; font-style: italic; font-weight: 300; }
+    .hero h1  { font-size: 36px; font-weight: 900; line-height: 1; }
 
     /* ── ALERT ── */
     .alert {
       background: var(--geel); color: var(--blauw);
-      padding: 10px 60px; text-align: center;
-      font-weight: 800; font-size: 19px;
+      padding: 8px 60px; text-align: center;
+      font-weight: 800; font-size: 17px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── CONTAINER ── */
-    .wrap { padding: 18px 60px; }
+    /* ── WRAPPER ── */
+    /* 1080 - 88 - 38 = 954px beschikbaar */
+    .wrap {
+      height: 954px;
+      padding: 10px 52px 8px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
 
     /* ── GRAP CARD ── */
     .grap-card {
       background: linear-gradient(135deg, #fff8e1, #fff3cd);
-      border: 3px dashed var(--geel); border-radius: 14px;
-      padding: 16px 26px; margin-bottom: 18px;
-      font-size: 17px; line-height: 1.65; font-weight: 500;
+      border: 2px dashed var(--geel); border-radius: 12px;
+      padding: 10px 20px; flex-shrink: 0;
+      font-size: 15px; line-height: 1.5; font-weight: 500;
     }
-    .grap-card .titel { font-weight: 900; font-size: 20px; color: var(--blauw); margin-bottom: 8px; }
+    .grap-card .titel { font-weight: 900; font-size: 16px; color: var(--blauw); margin-bottom: 4px; }
 
     /* ── REFRESH BAR ── */
     .refresh-bar {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 14px; gap: 12px;
+      flex-shrink: 0; gap: 10px;
     }
-    .refresh-bar .lbl { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 800; }
+    .refresh-bar .lbl { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: #666; font-weight: 800; }
     .btn-refresh {
-      background: var(--blauw); color: white; border: none; border-radius: 8px;
-      padding: 10px 22px; font-size: 16px; font-weight: 800;
-      cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 7px;
+      background: var(--blauw); color: white; border: none; border-radius: 7px;
+      padding: 7px 18px; font-size: 14px; font-weight: 800;
+      cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px;
     }
-    .btn-refresh:hover  { background: #00256b; }
+    .btn-refresh:hover { background: #00256b; }
     .btn-refresh:disabled { opacity: 0.6; cursor: default; }
-    #last-updated { font-size: 13px; color: #999; font-style: italic; }
+    #last-updated { font-size: 12px; color: #999; font-style: italic; }
 
     /* ── LOADING / ERROR ── */
-    #loading { text-align: center; padding: 40px; color: #888; font-size: 20px; display: none; }
+    #loading { text-align: center; padding: 20px; color: #888; font-size: 18px; display: none; flex-shrink: 0; }
     .spinner {
-      display: inline-block; width: 40px; height: 40px;
-      border: 4px solid #ddd; border-top-color: var(--blauw);
-      border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 12px;
+      display: inline-block; width: 32px; height: 32px;
+      border: 3px solid #ddd; border-top-color: var(--blauw);
+      border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     #error-msg {
       background: #fef2f2; border: 2px solid #fca5a5; border-radius: 10px;
-      padding: 16px 22px; color: #991b1b; font-size: 16px;
-      display: none; margin-bottom: 16px; line-height: 1.6;
+      padding: 12px 20px; color: #991b1b; font-size: 15px;
+      display: none; flex-shrink: 0; line-height: 1.5;
     }
 
     /* ── TRIPS ── */
-    #trips-container { display: none; }
+    #trips-container { display: none; flex-direction: column; gap: 8px; flex-shrink: 0; }
 
     .trip-block {
-      background: white; border-radius: 14px; margin-bottom: 14px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.09); overflow: hidden;
+      background: white; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.09); overflow: hidden;
+      flex-shrink: 0;
     }
 
-    /* Trip header: vertrek ← → aankomst */
+    /* Trip header */
     .trip-head {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--blauw); color: white;
-      padding: 12px 30px; gap: 12px;
+      padding: 8px 24px; gap: 10px; height: 52px;
     }
-    .th-vertrek { font-size: 58px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
-    .th-dur     { font-size: 16px; opacity: .8; font-weight: 600; margin-top: 2px; }
-    .th-mid     { text-align: center; font-size: 16px; font-weight: 700; opacity: .85; }
-    .th-aankomst{ font-size: 54px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
-    .th-aank-lbl{ font-size: 13px; opacity: .7; text-align: right; margin-top: 2px; }
+    .th-vertrek  { font-size: 34px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .th-dur      { font-size: 13px; opacity: .8; font-weight: 600; }
+    .th-mid      { font-size: 14px; font-weight: 700; opacity: .85; text-align: center; }
+    .th-aankomst { font-size: 32px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+    .th-aank-lbl { font-size: 11px; opacity: .7; text-align: right; }
 
-    /* Legs */
-    .leg {
-      display: flex; align-items: center; gap: 14px;
-      padding: 12px 30px; border-top: 1px solid #eef2fa;
+    /* Segment rij: één been per rij (van → naar) */
+    .seg {
+      display: flex; align-items: center; gap: 12px;
+      padding: 7px 24px; border-top: 1px solid #eef2fa;
+      height: 46px;
     }
-    .leg-tijd    { font-size: 42px; font-weight: 900; color: var(--blauw); min-width: 106px; font-variant-numeric: tabular-nums; line-height: 1; }
-    .leg-icon    { font-size: 28px; min-width: 36px; text-align: center; }
-    .leg-info    { flex: 1; }
-    .leg-type    { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #aaa; margin-bottom: 2px; }
-    .leg-station { font-size: 28px; font-weight: 800; color: #1a1a2e; line-height: 1.2; }
-    .leg-detail  { font-size: 15px; color: #666; margin-top: 3px; }
-    .leg-spoor   { background: var(--blauw); color: white; border-radius: 9px; padding: 6px 14px; text-align: center; min-width: 70px; }
-    .leg-spoor .sl { font-size: 10px; opacity: .8; text-transform: uppercase; letter-spacing: 1px; }
-    .leg-spoor .sn { font-size: 34px; font-weight: 900; line-height: 1.1; }
-
-    .badge { display: inline-block; border-radius: 4px; font-size: 13px; font-weight: 800; padding: 2px 9px; margin-right: 5px; }
+    .seg-tijden  { font-size: 20px; font-weight: 900; color: var(--blauw); min-width: 128px; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+    .seg-tijden .arr { font-size: 17px; font-weight: 600; color: #888; }
+    .seg-icon    { font-size: 20px; min-width: 28px; text-align: center; }
+    .seg-info    { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .seg-van     { font-size: 20px; font-weight: 800; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seg-pijl    { font-size: 16px; color: var(--blauw); font-weight: 900; flex-shrink: 0; }
+    .seg-naar    { font-size: 20px; font-weight: 800; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .seg-badge   { flex-shrink: 0; }
+    .badge { display: inline-block; border-radius: 4px; font-size: 12px; font-weight: 800; padding: 2px 8px; }
     .ic    { background: #003082; color: white; }
     .spr   { background: #6c7fd8; color: white; }
     .icd   { background: #c1121f; color: white; }
     .other { background: #666; color: white; }
+    .seg-richting { font-size: 13px; color: #888; white-space: nowrap; }
+    .seg-sporen  { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .spoor-badge {
+      background: var(--blauw); color: white; border-radius: 6px;
+      padding: 3px 9px; text-align: center; min-width: 40px;
+    }
+    .spoor-badge.groen { background: var(--groen); }
+    .spoor-badge .sl { font-size: 8px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
+    .spoor-badge .sn { font-size: 20px; font-weight: 900; line-height: 1.1; }
+    .spoor-pijl { font-size: 12px; color: #aaa; }
 
+    /* Overstap balk */
     .transfer-bar {
-      background: #fff8e1; border-top: 2px solid #ffe082; border-bottom: 2px solid #ffe082;
-      padding: 8px 30px 8px 112px;
-      font-size: 15px; color: #7a5000; font-weight: 700;
+      background: #fff8e1; border-top: 1px solid #ffe082; border-bottom: 1px solid #ffe082;
+      padding: 4px 24px 4px 96px; font-size: 13px; color: #7a5000; font-weight: 700; height: 24px;
+      display: flex; align-items: center;
     }
 
-    .aankomst-leg .leg-tijd  { color: var(--groen); }
-    .aankomst-leg .leg-spoor { background: var(--groen); }
+    /* ── STATS + TIPS in 1 rij ── */
+    .bottom-row {
+      display: flex; gap: 14px; flex-shrink: 0; align-items: stretch;
+    }
 
-    /* ── STATS ── */
     .stats-grid {
       display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 14px; margin: 14px 0;
+      gap: 10px; flex: 0 0 auto; width: 520px;
     }
     .stat-card {
-      background: white; border-radius: 12px; padding: 16px 14px;
-      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      background: white; border-radius: 10px; padding: 10px 12px;
+      text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.07);
     }
-    .stat-card .emoji { font-size: 30px; margin-bottom: 4px; }
-    .stat-card .getal { font-size: 40px; font-weight: 900; color: var(--blauw); line-height: 1; }
-    .stat-card .lbl   { font-size: 13px; color: #888; margin-top: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-card .emoji { font-size: 22px; margin-bottom: 2px; }
+    .stat-card .getal { font-size: 30px; font-weight: 900; color: var(--blauw); line-height: 1; }
+    .stat-card .lbl   { font-size: 11px; color: #888; margin-top: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
 
-    /* ── TIPS ── */
-    .tips { background: white; border-radius: 14px; padding: 18px 28px; margin-top: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-    .tips h3 { color: var(--blauw); margin-bottom: 12px; font-size: 20px; font-weight: 800; }
-    .tips-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 40px; }
-    .tip-item { display: flex; gap: 12px; font-size: 16px; line-height: 1.5; color: #444; font-weight: 500; align-items: flex-start; }
-    .tip-item span:first-child { font-size: 22px; flex-shrink: 0; }
-
-    .disclaimer { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 16px; font-size: 13px; color: #991b1b; margin-top: 14px; line-height: 1.4; }
-    .footer     { text-align: center; padding: 16px; font-size: 14px; color: #aaa; font-style: italic; }
-
-    /* ── AUTO-SCROLL indicator ── */
-    .scroll-pill {
-      position: fixed; bottom: 22px; right: 36px;
-      background: rgba(0,48,130,.75); color: white;
-      font-size: 13px; font-weight: 700; padding: 6px 14px;
-      border-radius: 20px; letter-spacing: 1px;
-      opacity: 0; transition: opacity .4s;
-      pointer-events: none;
+    .tips {
+      background: white; border-radius: 10px; padding: 12px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07); flex: 1;
     }
-    .scroll-pill.show { opacity: 1; }
+    .tips h3     { color: var(--blauw); margin-bottom: 8px; font-size: 16px; font-weight: 800; }
+    .tips-grid   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 28px; }
+    .tip-item    { display: flex; gap: 8px; font-size: 13.5px; line-height: 1.4; color: #444; font-weight: 500; align-items: flex-start; }
+    .tip-item span:first-child { font-size: 17px; flex-shrink: 0; }
+
+    .footer { flex-shrink: 0; text-align: center; font-size: 12px; color: #bbb; font-style: italic; }
   </style>
 </head>
 <body>
@@ -185,18 +191,13 @@
     const FROM_STATION = 'HWZB';  // Halfweg-Zwanenburg
     const TO_STATION   = 'NKK';   // Nijkerk
     const MAX_TRIPS    = 3;
-    const REFRESH_MS   = 120000;  // elke 2 minuten data verversen
-    const SCROLL_PX    = 1;       // pixels per stap (lager = trager)
-    const SCROLL_MS    = 30;      // ms per stap
-    const PAUSE_TOP_MS = 4000;    // pauze bovenaan (ms)
-    const PAUSE_BOT_MS = 4000;    // pauze onderaan (ms)
+    const REFRESH_MS   = 120000;
   </script>
   <!-- ══════════════════════════════ -->
 
   <div class="hero">
     <div class="ns-logo">NS</div>
     <h1>🚂 Peter's Grote Werkreis 2026</h1>
-    <p class="tag">Een held. Een missie. Een Sprinter richting Zwolle.</p>
   </div>
 
   <div class="alert">
@@ -207,15 +208,14 @@
 
     <div class="grap-card">
       <div class="titel">📖 Het verhaal van Peter en de trein naar Nijkerk</div>
-      Er was eens een dappere reiziger genaamd <strong>Peter</strong>. Hij werkte in het magische dorp <strong>Halfweg</strong> — zo
-      genoemd omdat het precies op de helft ligt van de weg naar nergens. Op een dag kreeg Peter een roeping: hij moest naar <strong>Nijkerk</strong>.
-      "Dat is toch zo gepiept," dacht Peter. Hij had het mis. Want de NS had bepaald: wie naar Nijkerk wil, reist eerst naar
+      Peter werkt in het magische dorp <strong>Halfweg</strong>. Op een dag kreeg hij een roeping: hij moest naar <strong>Nijkerk</strong>.
+      "Dat is toch zo gepiept," dacht Peter. Hij had het mis. De NS had bepaald: wie naar Nijkerk wil, reist eerst naar
       <strong>Amsterdam</strong> en dan naar <strong>Amersfoort</strong>. Hemelsbreed 50 km, reistijd: méér dan een uur. Zo zijn de wetten van het spoor. 🙏
     </div>
 
     <div class="refresh-bar">
       <span class="lbl">🕐 Live reisadvies vandaag</span>
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
         <span id="last-updated"></span>
         <button class="btn-refresh" id="btn-refresh" onclick="fetchTrips()">🔄 Ververs</button>
       </div>
@@ -225,22 +225,21 @@
     <div id="loading"><div class="spinner"></div><div>Live reistijden ophalen…</div></div>
     <div id="trips-container"></div>
 
-    <div class="tips">
-      <h3>📜 De Wijsheden van het Spoor</h3>
-      <div class="tips-grid">
-        <div class="tip-item"><span>⚔️</span><span>De held die in Amersfoort koffie haalt, mist zijn Sprinter. Wees de held die doorloopt naar het juiste spoor.</span></div>
-        <div class="tip-item"><span>🧙</span><span>IC 3+ minuten vertraging vanuit Amsterdam? Dan is de overstap in Amersfoort verloren. Peters queeste duurt dan wat langer.</span></div>
-        <div class="tip-item"><span>🐉</span><span>Er zijn geruchten over een route via de A1. Maar de A1 op een drukke ochtend is een draak die niemand wil temmen.</span></div>
-        <div class="tip-item"><span>🗡️</span><span>Neem je OV-chipkaart mee. En je telefoon. En misschien een boek — het is een lang avontuur voor 50 km.</span></div>
+    <div class="bottom-row" id="bottom-row" style="display:none;">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="tips">
+        <h3>📜 De Wijsheden van het Spoor</h3>
+        <div class="tips-grid">
+          <div class="tip-item"><span>⚔️</span><span>De held die in Amersfoort koffie haalt, mist zijn Sprinter. Wees de held die doorloopt.</span></div>
+          <div class="tip-item"><span>🧙</span><span>IC 3+ min vertraging uit Amsterdam? De overstap in Amersfoort is dan verloren.</span></div>
+          <div class="tip-item"><span>🐉</span><span>De A1 op een drukke ochtend is een draak die niemand wil temmen.</span></div>
+          <div class="tip-item"><span>🗡️</span><span>Neem je OV-chipkaart mee. En een boek — het is een avontuur voor 50 km.</span></div>
+        </div>
       </div>
     </div>
 
-    <div class="disclaimer">⚠️ Reisdata rechtstreeks van de NS API. Verifieer bij storingen altijd in de NS-app.</div>
+    <div class="footer">🚂 En zo reisde Peter naar Nijkerk. En hij leefde nog lang en gelukkig. · © 2026 Amstelland Sprookjesboek voor Treinreizigers™</div>
   </div>
-
-  <div class="footer">🚂 En zo reisde Peter naar Nijkerk. En hij leefde nog lang en gelukkig. · © 2026 Amstelland Sprookjesboek voor Treinreizigers™</div>
-
-  <div class="scroll-pill" id="scroll-pill">↕ SCROLLT</div>
 
   <script>
     const pad = n => String(n).padStart(2,'0');
@@ -251,17 +250,19 @@
       const c=(cat||'').toUpperCase();
       return `<span class="badge ${c==='ICD'?'icd':c==='IC'?'ic':c==='SPR'?'spr':'other'}">${c==='ICD'?'IC Direct':cat||'?'}</span>`;
     }
+    function spoorHtml(s, groen){ return `<div class="spoor-badge${groen?' groen':''}"><div class="sl">spoor</div><div class="sn">${s||'–'}</div></div>`; }
 
     function renderTrips(trips){
-      const container = document.getElementById('trips-container');
+      const cont = document.getElementById('trips-container');
+      const bot  = document.getElementById('bottom-row');
       if(!trips||!trips.length){
-        container.innerHTML = '<p style="text-align:center;color:#888;padding:30px;font-size:20px;">Geen reisopties gevonden.</p>';
-        container.style.display = 'block'; return;
+        cont.innerHTML = '<p style="color:#888;font-size:18px;padding:10px;">Geen reisopties gevonden.</p>';
+        cont.style.display = 'flex'; return;
       }
 
       let html = '';
       trips.slice(0, MAX_TRIPS).forEach(trip => {
-        const legs  = trip.legs||[]; if(!legs.length) return;
+        const legs = trip.legs||[]; if(!legs.length) return;
         const first = legs[0], last = legs[legs.length-1];
         const totalMin = durMin(first.origin?.plannedDateTime, last.destination?.plannedDateTime);
         const nOver    = legs.length - 1;
@@ -279,30 +280,25 @@
           const richting = leg.direction || '';
           const depSpoor = leg.origin?.plannedTrack      || leg.origin?.actualTrack      || '–';
           const arrSpoor = leg.destination?.plannedTrack || leg.destination?.actualTrack || '–';
-          const legMin   = durMin(leg.origin?.plannedDateTime, leg.destination?.plannedDateTime);
+          const depTijd  = fmt(leg.origin?.plannedDateTime);
+          const arrTijd  = fmt(leg.destination?.plannedDateTime);
+          const vanNaam  = leg.origin?.name      || '';
+          const naarNaam = leg.destination?.name || '';
 
-          html += `<div class="leg">
-            <div class="leg-tijd">${fmt(leg.origin?.plannedDateTime)}</div>
-            <div class="leg-icon">${i===0?'🚉':'🚆'}</div>
-            <div class="leg-info">
-              <div class="leg-type" style="color:var(--blauw)">Vertrek</div>
-              <div class="leg-station">${leg.origin?.name||''}</div>
-              <div class="leg-detail">${badgeHtml(cat)} ${richting?'Richting '+richting:''} ${legMin?'· '+fmtDur(legMin):''}</div>
+          html += `<div class="seg">
+            <div class="seg-tijden">${depTijd} <span class="arr">→ ${arrTijd}</span></div>
+            <div class="seg-icon">${i===0?'🚉':isLast?'🎉':'🚆'}</div>
+            <div class="seg-info">
+              <div class="seg-van">${vanNaam}</div>
+              <div class="seg-pijl">→</div>
+              <div class="seg-naar">${naarNaam}</div>
+              <div class="seg-badge">${badgeHtml(cat)}</div>
+              ${richting?`<div class="seg-richting">${richting}</div>`:''}
             </div>
-            <div class="leg-spoor"><div class="sl">Spoor</div><div class="sn">${depSpoor}</div></div>
-          </div>`;
-
-          html += `<div class="leg${isLast?' aankomst-leg':''}">
-            <div class="leg-tijd">${fmt(leg.destination?.plannedDateTime)}</div>
-            <div class="leg-icon">${isLast?'🎉':'🏙️'}</div>
-            <div class="leg-info">
-              <div class="leg-type" style="color:${isLast?'var(--groen)':'var(--oranje)'}">
-                ${isLast?'Aankomst — je bent er!':'Aankomst + overstap'}</div>
-              <div class="leg-station">${leg.destination?.name||''}</div>
-              <div class="leg-detail">${isLast?'🎊 Het koninkrijk Nijkerk wacht.':'Overstap naar volgende trein'}</div>
-            </div>
-            <div class="leg-spoor" style="${isLast?'background:var(--groen)':''}">
-              <div class="sl">Spoor</div><div class="sn">${arrSpoor}</div>
+            <div class="seg-sporen">
+              ${spoorHtml(depSpoor, false)}
+              <span class="spoor-pijl">→</span>
+              ${spoorHtml(arrSpoor, isLast)}
             </div>
           </div>`;
 
@@ -310,34 +306,35 @@
             const volgend = legs[i+1];
             const oMin = durMin(leg.destination?.plannedDateTime, volgend?.origin?.plannedDateTime);
             html += `<div class="transfer-bar">
-              🔄 <strong>Overstap:</strong> ${oMin!==null?oMin+' min overstaptijd':''}
-              ${oMin<8?' — ⚡ <em>Krap! Rennen mag.</em>':oMin>=15?' — ☕ Tijd voor een bakkie.':''}
+              🔄 <strong>Overstap:</strong> ${oMin!==null?oMin+' min':''} ${oMin<8?' — ⚡ Krap! Rennen mag.':oMin>=15?' — ☕ Tijd voor een bakkie.':''}
             </div>`;
           }
         });
         html += '</div>';
       });
 
+      cont.innerHTML = html;
+      cont.style.display = 'flex';
+
+      // Stats
       const fLegs = trips[0].legs||[];
       const fMin  = durMin(fLegs[0]?.origin?.plannedDateTime, fLegs[fLegs.length-1]?.destination?.plannedDateTime);
-      html += `<div class="stats-grid">
+      document.getElementById('stats-grid').innerHTML = `
         <div class="stat-card"><div class="emoji">⏱️</div><div class="getal">${fMin||'?'}</div><div class="lbl">min snelste</div></div>
         <div class="stat-card"><div class="emoji">🔄</div><div class="getal">${fLegs.length-1}</div><div class="lbl">overstappen</div></div>
         <div class="stat-card"><div class="emoji">🚆</div><div class="getal">${fLegs.length}</div><div class="lbl">treinen</div></div>
-        <div class="stat-card"><div class="emoji">📏</div><div class="getal">~50</div><div class="lbl">km hemelsbreed</div></div>
-      </div>`;
-
-      container.innerHTML = html;
-      container.style.display = 'block';
+        <div class="stat-card"><div class="emoji">📏</div><div class="getal">~50</div><div class="lbl">km hemels</div></div>`;
+      bot.style.display = 'flex';
     }
 
     async function fetchTrips(){
-      const btn = document.getElementById('btn-refresh');
-      const loading = document.getElementById('loading');
-      const errDiv  = document.getElementById('error-msg');
-      const cont    = document.getElementById('trips-container');
-      btn.disabled = true; loading.style.display = 'block';
-      errDiv.style.display = 'none'; cont.style.display = 'none';
+      const btn   = document.getElementById('btn-refresh');
+      const load  = document.getElementById('loading');
+      const err   = document.getElementById('error-msg');
+      const cont  = document.getElementById('trips-container');
+      const bot   = document.getElementById('bottom-row');
+      btn.disabled=true; load.style.display='block';
+      err.style.display='none'; cont.style.display='none'; bot.style.display='none';
 
       try {
         const now = new Date().toISOString().slice(0,16);
@@ -349,56 +346,12 @@
         const n = new Date();
         document.getElementById('last-updated').textContent = 'Bijgewerkt: '+pad(n.getHours())+':'+pad(n.getMinutes());
       } catch(e) {
-        errDiv.innerHTML = `⚠️ <strong>Kon geen data ophalen:</strong> ${e.message}<br>Start lokale server: <code>python -m http.server 8000</code>`;
-        errDiv.style.display = 'block';
-      } finally {
-        loading.style.display = 'none'; btn.disabled = false;
-      }
+        err.innerHTML = `⚠️ <strong>Kon geen data ophalen:</strong> ${e.message} — start lokaal: <code>python -m http.server 8000</code>`;
+        err.style.display='block';
+      } finally { load.style.display='none'; btn.disabled=false; }
     }
 
-    /* ── AUTO-SCROLL ── */
-    let scrollDir = 1;
-    let scrollTimer = null;
-    const pill = document.getElementById('scroll-pill');
-
-    function startScroll(delay) {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(doScroll, delay);
-    }
-
-    function doScroll() {
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      if(maxScroll <= 0){ startScroll(2000); return; } // past op scherm: geen scroll nodig
-
-      pill.classList.add('show');
-      window.scrollBy(0, SCROLL_PX * scrollDir);
-      const pos = window.scrollY;
-
-      if(pos >= maxScroll - 2 && scrollDir === 1){
-        scrollDir = -1;
-        pill.classList.remove('show');
-        startScroll(PAUSE_BOT_MS);
-      } else if(pos <= 1 && scrollDir === -1){
-        scrollDir = 1;
-        pill.classList.remove('show');
-        startScroll(PAUSE_TOP_MS);
-      } else {
-        startScroll(SCROLL_MS);
-      }
-    }
-
-    // Pauzeer scroll bij muisbeweging, hervat na 5s stilstand
-    let mouseTimer;
-    document.addEventListener('mousemove', () => {
-      clearTimeout(scrollTimer); clearTimeout(mouseTimer);
-      pill.classList.remove('show');
-      mouseTimer = setTimeout(() => startScroll(2000), 5000);
-    });
-
-    window.addEventListener('load', () => {
-      fetchTrips();
-      startScroll(PAUSE_TOP_MS);
-    });
+    window.addEventListener('load', fetchTrips);
     setInterval(fetchTrips, REFRESH_MS);
   </script>
 
