@@ -57,13 +57,13 @@
 <body>
 <div class="slideshow">
 
-  <!-- SLIDE 1: Afsluitdijk -->
+  <!-- SLIDE 1: Maeslantkering -->
   <div class="slide dark active" id="slide-0">
     <div class="deco"></div>
     <div class="label">Wist je dat…</div>
-    <div class="big-number">3<span class="accent">2</span> km</div>
-    <div class="headline">De Afsluitdijk lang is en al in gebruik is sinds 1932</div>
-    <div class="sub">Na voltooiing verdween de Zuiderzee en ontstond het IJsselmeer.</div>
+    <div class="big-number">6<span class="accent">.</span>800 t</div>
+    <div class="headline">Elke arm van de Maeslantkering 6.800 ton weegt — net zo zwaar als de Eiffeltoren</div>
+    <div class="sub">De stormvloedkering bij Rotterdam is de grootste beweegbare waterkering ter wereld en sluit automatisch bij dreigende storm.</div>
     <div class="tag">Waterwerken</div>
     <div class="slide-counter">01 / 03</div>
     <div class="logo-block">
@@ -76,13 +76,13 @@
     <div class="progress-bar" id="pb-0"></div>
   </div>
 
-  <!-- SLIDE 2: Deltawerken -->
+  <!-- SLIDE 2: Gemalen -->
   <div class="slide red" id="slide-1">
     <div class="deco"></div>
     <div class="label">Wist je dat…</div>
-    <div class="big-number">7<span class="accent">e</span></div>
-    <div class="headline">De Deltawerken gelden als het 7e wonder van de civiele techniek</div>
-    <div class="sub">Erkend door de American Society of Civil Engineers als een van de<br>zeven wonderen van de moderne civiele techniek. Negen deelprojecten, decennia werk.</div>
+    <div class="big-number">3<span class="accent">.</span>200<span class="accent">+</span></div>
+    <div class="headline">Nederland meer dan 3.200 gemalen heeft</div>
+    <div class="sub">Zonder die gemalen zou een groot deel van het land onder water staan. Ze vormen de ruggengraat van ons waterbeheer.</div>
     <div class="tag">Waterwerken</div>
     <div class="slide-counter">02 / 03</div>
     <div class="logo-block">
@@ -95,13 +95,13 @@
     <div class="progress-bar" id="pb-1"></div>
   </div>
 
-  <!-- SLIDE 3: Krammersluizen -->
+  <!-- SLIDE 3: Waterkeringen -->
   <div class="slide dark" id="slide-2">
     <div class="deco"></div>
     <div class="label">Wist je dat…</div>
-    <div class="big-number"><span class="accent">1</span>987</div>
-    <div class="headline">De Krammersluizen in gebruik werden genomen in 1987</div>
-    <div class="sub">Onderdeel van de Deltawerken, met 4 sluiskolken die het Volkerak scheiden van het Krammer.</div>
+    <div class="big-number">17<span class="accent">.</span>500 km</div>
+    <div class="headline">Nederland ruim 17.500 km aan waterkeringen heeft</div>
+    <div class="sub">Waterschappen en Rijkswaterstaat inspecteren en onderhouden dit netwerk continu om Nederland droog te houden.</div>
     <div class="tag">Waterwerken</div>
     <div class="slide-counter">03 / 03</div>
     <div class="logo-block">
@@ -116,7 +116,7 @@
 
 </div>
 <script>
-  const SLIDE_DURATION = 9500;
+  const SLIDE_DURATION = 10000;
   const slides = document.querySelectorAll('.slide');
   const pbs    = document.querySelectorAll('.progress-bar');
   let current  = 0;
@@ -140,10 +140,8 @@
     timer = setInterval(nextSlide, SLIDE_DURATION);
   }
 
-  // Start altijd vanaf slide 1
   restart();
 
-  // Reset naar slide 1 zodra Yodeck de pagina weer in beeld brengt
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) restart();
   });
