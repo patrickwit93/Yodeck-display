@@ -65,13 +65,6 @@ canvas#clk{display:block}
   </div>
   <div class="datum" id="datum"></div>
 </div>
-<div class="logo-bar">
-  <div class="logo-line"></div>
-  <div class="logo-text">
-    <span class="ln">Amstelland</span>
-    <span class="lt">Ingenieurs</span>
-  </div>
-</div>
 <script>
 (function(){
   const cv=document.getElementById('clk'), ctx=cv.getContext('2d');
@@ -137,12 +130,14 @@ canvas#clk{display:block}
 
     // uurcijfers
     [12,1,2,3,4,5,6,7,8,9,10,11].forEach((n,i)=>{
-      const a=i/12*Math.PI*2-Math.PI/2,r=R-56;
-      ctx.font=`${i%3===0?500:300} ${i%3===0?16:13}px ${nf}`;
-      ctx.fillStyle=i===0?RED:i%3===0?WHITE:GREY;
+      const a=i/12*Math.PI*2-Math.PI/2,r=R-120;
+      const isMain=i%3===0;
+      ctx.font=`${isMain?600:400} ${isMain?104:76}px ${nf}`;
+      ctx.fillStyle=i===0?'rgba(228,3,45,.85)':isMain?'rgba(255,255,255,.8)':GREY;
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(String(n),cx+r*Math.cos(a),cy+r*Math.sin(a));
     });
+
 
     // kruislijnen
     ctx.save();ctx.globalAlpha=.03;ctx.strokeStyle=RED;ctx.lineWidth=1;
@@ -150,37 +145,50 @@ canvas#clk{display:block}
     ctx.beginPath();ctx.moveTo(cx-R+28,cy);ctx.lineTo(cx+R-28,cy);ctx.stroke();
     ctx.restore();
 
-    // merkbalk
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(cx-54,cy+66,108,17,3);else ctx.rect(cx-54,cy+66,108,17);
-    ctx.fillStyle='rgba(228,3,45,.08)';ctx.fill();
-    ctx.font=`500 7.5px ${nf}`;ctx.fillStyle='rgba(228,3,45,.55)';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('AMSTELLAND · AI',cx,cy+74.5);
+    // logo in de klok (rode balk + tekst, onder middelpunt)
+    const lx=cx, ly=cy+R*0.52;
+    // rode verticale balk
+    ctx.fillStyle='#E4032D';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(lx-70,ly-22,5,44,2);
+    else ctx.rect(lx-70,ly-22,5,44);
+    ctx.fill();
+    // "Amstelland"
+    ctx.font=`600 22px ${nf}`;
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText('Amstelland',lx-58,ly-8);
+    // "Ingenieurs"
+    ctx.font=`300 14px ${nf}`;
+    ctx.fillStyle='rgba(255,255,255,.38)';
+    ctx.letterSpacing='0.1em';
+    ctx.fillText('Ingenieurs',lx-58,ly+12);
+    ctx.letterSpacing='0';
 
     // uurwijzer
-    hand((h+m/60+s/3600)*30,R*.46,7,WHITE,.95);
+    hand((h+m/60+s/3600)*30,R*.46,16,WHITE,.95);
     // minuutwijzer
-    hand((m+s/60)*6,R*.68,4,WHITE,1);
+    hand((m+s/60)*6,R*.70,9,WHITE,1);
     // secondewijzer
     const sa=(s+ms/1000)*6;
-    const rad=(sa-90)*Math.PI/180,sl=R*.78,st=R*.20;
-    ctx.save();ctx.shadowColor=RED;ctx.shadowBlur=8;
+    const rad=(sa-90)*Math.PI/180,sl=R*.80,st=R*.22;
+    ctx.save();ctx.shadowColor=RED;ctx.shadowBlur=18;
     ctx.beginPath();
     ctx.moveTo(cx-st*Math.cos(rad),cy-st*Math.sin(rad));
     ctx.lineTo(cx+sl*Math.cos(rad),cy+sl*Math.sin(rad));
-    ctx.strokeStyle=RED;ctx.lineWidth=1.8;ctx.lineCap='round';ctx.stroke();
-    ctx.beginPath();ctx.arc(cx+(sl-14)*Math.cos(rad),cy+(sl-14)*Math.sin(rad),4,0,Math.PI*2);
-    ctx.fillStyle=RED;ctx.shadowBlur=12;ctx.fill();
+    ctx.strokeStyle=RED;ctx.lineWidth=4;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.arc(cx+(sl-28)*Math.cos(rad),cy+(sl-28)*Math.sin(rad),9,0,Math.PI*2);
+    ctx.fillStyle=RED;ctx.shadowBlur=24;ctx.fill();
     ctx.restore();
 
     // seconde-arc
-    ctx.beginPath();ctx.arc(cx,cy,R+2,A,A+(s+ms/1000)/60*Math.PI*2);
-    ctx.strokeStyle='rgba(228,3,45,.38)';ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R+3,A,A+(s+ms/1000)/60*Math.PI*2);
+    ctx.strokeStyle='rgba(228,3,45,.38)';ctx.lineWidth=4;ctx.lineCap='round';ctx.stroke();
 
     // middelpunt
-    ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fillStyle='#141412';ctx.fill();
-    ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fillStyle=RED;ctx.fill();
-    ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fillStyle=WHITE;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,22,0,Math.PI*2);ctx.fillStyle='#141412';ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);ctx.fillStyle=RED;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fillStyle=WHITE;ctx.fill();
 
     // digitaal
     const p=n=>String(n).padStart(2,'0');
