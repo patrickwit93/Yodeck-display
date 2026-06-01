@@ -56,7 +56,7 @@ canvas#clk{display:block}
 <div class="live"><div class="livdot"></div><span class="livtxt">LIVE</span></div>
 <div class="center">
   <div class="ring-wrap">
-    <canvas id="clk" width="500" height="500"></canvas>
+    <canvas id="clk" width="1000" height="1000" style="max-width:90vmin;max-height:90vmin"></canvas>
   </div>
   <div class="digital">
     <span class="dhm" id="dhm">--:--</span>
@@ -75,7 +75,7 @@ canvas#clk{display:block}
 <script>
 (function(){
   const cv=document.getElementById('clk'), ctx=cv.getContext('2d');
-  const S=500,cx=250,cy=250,R=232;
+  const S=1000,cx=500,cy=500,R=464;
   const RED='#E4032D',WHITE='#FFFFFF',GREY='#484848';
   const nf="'Montserrat',sans-serif";
   const days=['ZONDAG','MAANDAG','DINSDAG','WOENSDAG','DONDERDAG','VRIJDAG','ZATERDAG'];
