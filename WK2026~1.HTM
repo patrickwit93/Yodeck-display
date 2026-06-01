@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <title>WK 2026 Countdown — Amstelland Ingenieurs</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rood:       #E4032D;
+      --donkerrood: #A0021F;
+      --zwart:      #1D1D1B;
+      --grijs:      #484848;
+      --lichtgrijs: #D9D9D9;
+      --wit:        #FFFFFF;
+      --oranje:     #FF6B00;
+      --oranje-licht: #FF8C00;
+    }
+
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--zwart);
+      font-family: 'Montserrat', 'Calibri Light', sans-serif;
+      color: var(--wit);
+    }
+
+    /* Achtergrond */
+    .bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 900px 600px at 15% 50%, rgba(228,3,45,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 700px 500px at 85% 50%, rgba(255,107,0,0.10) 0%, transparent 70%),
+        var(--zwart);
+    }
+
+    /* Subtiele voetbalpatroon overlay */
+    .bg-pattern {
+      position: absolute; inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='white' stroke-width='3'/%3E%3Cpolygon points='60,5 75,50 115,50 83,76 95,115 60,90 25,115 37,76 5,50 45,50' fill='none' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E");
+      background-size: 120px 120px;
+    }
+
+    /* Rode streep links — Amstelland signatuur */
+    .stripe-left {
+      position: absolute;
+      left: 72px; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--rood);
+    }
+
+    /* Oranje streep rechts — Nederlands elftal */
+    .stripe-right {
+      position: absolute;
+      right: 72px; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--oranje);
+    }
+
+    /* Layout */
+    .layout {
+      position: relative;
+      width: 1920px; height: 1080px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 52px 120px 44px;
+      z-index: 10;
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-svg {
+      width: 320px;
+      height: auto;
+    }
+
+    /* WK badge */
+    .wk-badge {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,107,0,0.12);
+      border: 1.5px solid rgba(255,107,0,0.4);
+      border-radius: 12px;
+      padding: 12px 28px;
+    }
+
+    .wk-badge .flag {
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    .wk-badge .label {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--oranje-licht);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .wk-badge .label strong {
+      display: block;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--wit);
+      letter-spacing: 1px;
+    }
+
+    /* Centrale sectie */
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Voetbal icoon */
+    .football {
+      font-size: 56px;
+      animation: spin 8s linear infinite;
+    }
+
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Headline */
+    .headline {
+      text-align: center;
+      line-height: 1.05;
+    }
+
+    .headline .sub {
+      font-size: 20px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--lichtgrijs);
+      margin-bottom: 10px;
+    }
+
+    .headline h1 {
+      font-size: 82px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--wit) 0%, var(--oranje-licht) 50%, var(--rood) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .headline .startdatum {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--lichtgrijs);
+      letter-spacing: 2px;
+      margin-top: 6px;
+    }
+
+    .headline .startdatum span {
+      color: var(--oranje-licht);
+      font-weight: 700;
+    }
+
+    /* Countdown blokken */
+    .countdown {
+      display: flex;
+      gap: 28px;
+      align-items: flex-end;
+    }
+
+    .block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .block .number {
+      font-size: 120px;
+      font-weight: 900;
+      line-height: 1;
+      width: 200px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--wit) 0%, rgba(255,255,255,0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .block .number::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 10%; right: 10%;
+      height: 3px;
+      background: var(--rood);
+      border-radius: 2px;
+    }
+
+    .block .label {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--lichtgrijs);
+      margin-top: 6px;
+    }
+
+    .separator {
+      font-size: 100px;
+      font-weight: 300;
+      color: var(--rood);
+      line-height: 1;
+      padding-bottom: 16px;
+      opacity: 0.8;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.8; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* Oranje banner — Nederland */
+    .oranje-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(90deg, rgba(255,107,0,0.0) 0%, rgba(255,107,0,0.18) 30%, rgba(255,107,0,0.18) 70%, rgba(255,107,0,0.0) 100%);
+      border-top: 1px solid rgba(255,107,0,0.25);
+      border-bottom: 1px solid rgba(255,107,0,0.25);
+      padding: 10px 60px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .oranje-banner .flags {
+      font-size: 22px;
+      letter-spacing: 6px;
+    }
+
+    .oranje-banner .text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--oranje-licht);
+    }
+
+    /* Pool-banner */
+    .pool-banner {
+      width: 100%;
+      background: linear-gradient(135deg, var(--rood) 0%, var(--donkerrood) 100%);
+      border-radius: 16px;
+      padding: 28px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+    }
+
+    .pool-banner .icon {
+      font-size: 40px;
+      flex-shrink: 0;
+      animation: bounce 1.4s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    .pool-banner .content {
+      flex: 1;
+    }
+
+    .pool-banner .content .pool-title {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 4px;
+    }
+
+    .pool-banner .content .pool-msg {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .pool-banner .content .pool-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+      margin-top: 4px;
+    }
+
+    .pool-banner .cta {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 10px;
+      padding: 12px 32px;
+      text-align: center;
+    }
+
+    .pool-banner .cta .cta-main {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .pool-banner .cta .cta-sub {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Footer */
+    .footer {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer .ai-label {
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--grijs);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .footer .live-dot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--grijs);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      background: #00C851;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="bg-pattern"></div>
+<div class="stripe-left"></div>
+<div class="stripe-right"></div>
+
+<div class="layout">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-wrap">
+      <!-- Amstelland Ingenieurs logo (wit op donker) -->
+      <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380.77 127.56" style="filter: drop-shadow(0 2px 12px rgba(0,0,0,0.6));">
+        <rect fill="#E4032D" x="99.39" width="2.76" height="127.56"/>
+        <g fill="#FFFFFF">
+          <path d="m143.7,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m188.76,37.7v11.35h-2.64v-11.09c0-4.13-2.08-6.25-5.62-6.25-4.02,0-6.55,2.61-6.55,7.07v10.27h-2.64v-11.09c0-4.13-2.08-6.25-5.66-6.25-3.98,0-6.55,2.61-6.55,7.07v10.27h-2.64v-19.57h2.53v3.57c1.38-2.34,3.91-3.72,7.18-3.72s5.77,1.38,6.96,4.13c1.41-2.53,4.21-4.13,7.74-4.13,4.76,0,7.89,2.75,7.89,8.37Z"/>
+          <path d="m198.81,46.82l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <path d="m235.61,47.86c-1.04.93-2.6,1.38-4.13,1.38-3.68,0-5.73-2.08-5.73-5.69v-11.83h-3.5v-2.23h3.5v-4.28h2.64v4.28h5.95v2.23h-5.95v11.69c0,2.31,1.19,3.57,3.39,3.57,1.08,0,2.16-.34,2.9-1l.93,1.9Z"/>
+          <path d="m262.33,40.09h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m273.34,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m288.93,21.44h2.64v27.61h-2.64v-27.61Z"/>
+          <path d="m319.3,36.92v12.13h-2.53v-3.05c-1.19,2.01-3.5,3.24-6.74,3.24-4.43,0-7.15-2.31-7.15-5.69,0-3.01,1.94-5.54,7.55-5.54h6.22v-1.19c0-3.35-1.9-5.17-5.54-5.17-2.53,0-4.91.89-6.51,2.31l-1.19-1.97c1.97-1.67,4.87-2.64,7.96-2.64,5.06,0,7.93,2.53,7.93,7.59Zm-2.64,6.25v-3.2h-6.14c-3.8,0-5.02,1.49-5.02,3.5,0,2.27,1.82,3.68,4.95,3.68s5.17-1.41,6.22-3.98Z"/>
+          <path d="m350.07,37.7v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m380.77,21.44v27.61h-2.53v-3.87c-1.6,2.64-4.32,4.06-7.55,4.06-5.58,0-9.75-4.06-9.75-9.97s4.17-9.94,9.75-9.94c3.13,0,5.81,1.34,7.44,3.87v-11.76h2.64Zm-2.61,17.83c0-4.58-3.13-7.63-7.26-7.63s-7.29,3.05-7.29,7.63,3.13,7.63,7.29,7.63,7.26-3.05,7.26-7.63Z"/>
+          <path d="m128.33,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m162.53,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m193.49,79.14v17.19c0,6.74-3.31,9.79-9.79,9.79-3.57,0-7.07-1.08-9.12-3.01l1.34-2.01c1.86,1.67,4.69,2.68,7.7,2.68,4.95,0,7.22-2.27,7.22-7.11v-2.49c-1.64,2.49-4.43,3.8-7.63,3.8-5.58,0-9.83-3.91-9.83-9.53s4.24-9.45,9.83-9.45c3.27,0,6.1,1.34,7.74,3.91v-3.76h2.53Zm-2.57,9.3c0-4.24-3.13-7.15-7.44-7.15s-7.41,2.9-7.41,7.15,3.09,7.18,7.41,7.18,7.44-2.94,7.44-7.18Z"/>
+          <path d="m223.52,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m252.54,87.36v11.35h-2.64v-11.09c0-4.13-2.16-6.25-5.88-6.25-4.21,0-6.85,2.61-6.85,7.07v10.27h-2.64v-19.57h2.53v3.61c1.41-2.38,4.06-3.76,7.44-3.76,4.76,0,8.04,2.75,8.04,8.37Z"/>
+          <path d="m264.71,72.96c0-1,.86-1.86,1.94-1.86s1.93.82,1.93,1.82c0,1.08-.82,1.93-1.93,1.93s-1.94-.86-1.94-1.9Zm.6,6.18h2.64v19.57h-2.64v-19.57Z"/>
+          <path d="m297.94,89.74h-16.37c.3,4.09,3.42,6.81,7.7,6.81,2.38,0,4.5-.86,5.99-2.57l1.49,1.71c-1.75,2.08-4.47,3.2-7.55,3.2-6.1,0-10.27-4.17-10.27-9.97s4.06-9.94,9.56-9.94,9.49,4.06,9.49,9.94c0,.22-.04.52-.04.82Zm-16.37-1.97h13.88c-.33-3.83-3.13-6.51-6.96-6.51s-6.59,2.68-6.92,6.51Z"/>
+          <path d="m326.59,79.14v19.57h-2.53v-3.57c-1.38,2.38-3.91,3.76-7.03,3.76-4.99,0-8.26-2.79-8.26-8.41v-11.35h2.64v11.09c0,4.17,2.16,6.29,5.88,6.29,4.09,0,6.66-2.64,6.66-7.11v-10.27h2.64Z"/>
+          <path d="m349.44,78.99v2.57c-.22,0-.45-.04-.63-.04-4.09,0-6.59,2.6-6.59,7.22v9.97h-2.64v-19.57h2.53v3.83c1.23-2.6,3.72-3.98,7.33-3.98Z"/>
+          <path d="m357.22,96.48l1.19-2.08c1.56,1.23,4.21,2.2,6.96,2.2,3.72,0,5.25-1.27,5.25-3.2,0-5.1-12.69-1.08-12.69-8.82,0-3.2,2.75-5.58,7.74-5.58,2.53,0,5.28.71,6.92,1.82l-1.15,2.12c-1.71-1.19-3.76-1.67-5.77-1.67-3.54,0-5.1,1.38-5.1,3.24,0,5.28,12.69,1.3,12.69,8.82,0,3.39-2.98,5.58-8.08,5.58-3.24,0-6.36-1.04-7.96-2.42Z"/>
+          <!-- A-beeldmerk -->
+          <path d="m72.46,88.73v-33.68c0-11.42-3.09-19.9-9.27-25.45-6.18-5.55-14.98-8.33-26.4-8.33-6.6,0-12.91.92-18.93,2.75-6.03,1.83-11.18,4.48-15.48,7.93l6.29,11.31c3.25-2.72,7.23-4.9,11.94-6.52,4.71-1.62,9.53-2.44,14.46-2.44,7.44,0,13.01,1.76,16.73,5.26,3.72,3.51,5.58,8.46,5.58,14.85v2.95h-23.86c-8.28,0-14.85,1.1-19.72,3.3-4.87,2.2-8.38,5.13-10.53,8.8-2.15,3.67-3.22,7.75-3.22,12.25s1.26,8.93,3.77,12.65c2.51,3.72,6.1,6.63,10.76,8.72,4.66,2.1,10.08,3.14,16.26,3.14,7.65,0,13.98-1.44,19.01-4.32,3.53-2.02,6.3-4.56,8.33-7.59v10.96h14.3v-13.36h-12.43c.72-.92,1.6-2.03,2.57-3.24h9.86Zm-24.28,2.14c-4.24,2.52-9.19,3.77-14.85,3.77s-10.27-1.23-13.51-3.69c-3.25-2.46-4.87-5.73-4.87-9.82,0-2.66.73-5.02,2.19-7.09.49-.69,1.06-1.36,1.72-1.98,2.62-2.51,7.7-3.77,15.24-3.77h23.25v11.63c-.47,1.2-1.02,2.34-1.63,3.4-1.85,3.17-4.37,5.69-7.54,7.57Z"/>
+          <path fill="#E4032D" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39v11.91h14.3v-14.3h-12.44Z"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wk-badge">
+      <div class="flag">&#127942;</div>
+      <div class="label">
+        <span>FIFA World Cup</span>
+        <strong>USA · CAN · MEX 2026</strong>
+      </div>
+      <div class="flag">&#127942;</div>
+    </div>
+  </div>
+
+  <!-- CENTRAAL: COUNTDOWN -->
+  <div class="center">
+    <div class="football">&#9917;</div>
+
+    <div class="headline">
+      <div class="sub">Het aftellen is begonnen</div>
+      <h1>WK 2026 START OVER</h1>
+      <div class="startdatum">Aftrap: <span>donderdag 11 juni 2026 — openingswedstrijd Mexico vs Canada</span></div>
+    </div>
+
+    <div class="countdown">
+      <div class="block">
+        <div class="number" id="days">--</div>
+        <div class="label">Dagen</div>
+      </div>
+      <div class="separator">:</div>
+      <div class="block">
+        <div class="number" id="hours">--</div>
+        <div class="label">Uren</div>
+      </div>
+      <div class="separator">:</div>
+      <div class="block">
+        <div class="number" id="minutes">--</div>
+        <div class="label">Minuten</div>
+      </div>
+      <div class="separator">:</div>
+      <div class="block">
+        <div class="number" id="seconds">--</div>
+        <div class="label">Seconden</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORANJE BANNER -->
+  <div class="oranje-banner">
+    <div class="flags">&#127475;&#127473; &#127475;&#127473; &#127475;&#127473;</div>
+    <div class="text">Hup Holland Hup &nbsp;—&nbsp; Kom op Oranje</div>
+    <div class="flags">&#127475;&#127473; &#127475;&#127473; &#127475;&#127473;</div>
+  </div>
+
+  <!-- WK POOL BANNER -->
+  <div class="pool-banner">
+    <div class="icon">&#127381;</div>
+    <div class="content">
+      <div class="pool-title">Niet vergeten</div>
+      <div class="pool-msg">Doe mee met de WK Pool!</div>
+    </div>
+    <div class="cta">
+      <div class="cta-main">Aanmelding zit</div>
+      <div class="cta-main">in je mail</div>
+      <div class="cta-sub">WK Pool 2026</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="ai-label">Amstelland Ingenieurs &nbsp;·&nbsp; 2026</div>
+    <div class="live-dot">
+      <div class="dot"></div>
+      Live countdown
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // WK 2026 openingswedstrijd: 11 juni 2026, 21:00 lokale tijd Mexico City = 04:00 UTC+2 (CEST) op 12 juni
+  // Kickoff Mexico vs Canada: 11 juni 2026, 19:00 ET = 12 juni 01:00 CEST
+  // Voor NL: gebruiken we 11 juni 2026 21:00 CET als richtpunt (lokale aftrap prime time)
+  const TARGET = new Date('2026-06-11T21:00:00+02:00');
+
+  function pad(n) {
+    return String(Math.floor(n)).padStart(2, '0');
+  }
+
+  function update() {
+    const now  = new Date();
+    const diff = TARGET - now;
+
+    if (diff <= 0) {
+      document.getElementById('days').textContent    = '00';
+      document.getElementById('hours').textContent   = '00';
+      document.getElementById('minutes').textContent = '00';
+      document.getElementById('seconds').textContent = '00';
+      document.querySelector('.headline h1').textContent = 'HET WK IS BEGONNEN!';
+      return;
+    }
+
+    const days    = Math.floor(diff / 86400000);
+    const hours   = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000)  / 60000);
+    const seconds = Math.floor((diff % 60000)    / 1000);
+
+    document.getElementById('days').textContent    = pad(days);
+    document.getElementById('hours').textContent   = pad(hours);
+    document.getElementById('minutes').textContent = pad(minutes);
+    document.getElementById('seconds').textContent = pad(seconds);
+  }
+
+  update();
+  setInterval(update, 1000);
+</script>
+</body>
+</html>
