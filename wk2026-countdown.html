@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, initial-scale=1.0">
   <title>WK 2026 Countdown — Amstelland Ingenieurs</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap');
 
@@ -275,11 +276,19 @@
       width: 100%;
       background: linear-gradient(135deg, var(--rood) 0%, var(--donkerrood) 100%);
       border-radius: 16px;
-      padding: 28px 56px;
+      padding: 20px 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 40px;
+    }
+
+    /* Links: icoon + tekst */
+    .pool-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
     .pool-banner .icon {
@@ -291,10 +300,6 @@
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-6px); }
-    }
-
-    .pool-banner .content {
-      flex: 1;
     }
 
     .pool-banner .content .pool-title {
@@ -312,34 +317,71 @@
       line-height: 1.2;
     }
 
-    .pool-banner .content .pool-sub {
-      font-size: 15px;
-      font-weight: 300;
-      color: rgba(255,255,255,0.8);
-      margin-top: 4px;
-    }
-
-    .pool-banner .cta {
-      flex-shrink: 0;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.5);
-      border-radius: 10px;
-      padding: 12px 32px;
-      text-align: center;
-    }
-
-    .pool-banner .cta .cta-main {
+    .pool-banner .content .pool-urgency {
       font-size: 19px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.9);
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .pool-banner .content .pool-urgency strong {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Midden: QR code */
+    .pool-center {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qr-label {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .qr-wrap {
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    #qrcode canvas, #qrcode img {
+      display: block;
+      border-radius: 4px;
+    }
+
+    /* Rechts: CTA tekst */
+    .pool-right {
+      flex: 1;
+      text-align: right;
+    }
+
+    .pool-right .cta-main {
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: 1px;
+      line-height: 1.3;
     }
 
-    .pool-banner .cta .cta-sub {
+    .pool-right .cta-sub {
       font-size: 12px;
       font-weight: 300;
       color: rgba(255,255,255,0.8);
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       text-transform: uppercase;
+      margin-top: 4px;
     }
 
     /* Footer */
@@ -470,21 +512,29 @@
 
   <!-- ORANJE BANNER -->
   <div class="oranje-banner">
-    <div class="flags">&#127475;&#127473; &#127475;&#127473; &#127475;&#127473;</div>
+    <div class="flags">&#127475;&#127473;</div>
     <div class="text">Hup Holland Hup &nbsp;—&nbsp; Kom op Oranje</div>
-    <div class="flags">&#127475;&#127473; &#127475;&#127473; &#127475;&#127473;</div>
+    <div class="flags">&#127475;&#127473;</div>
   </div>
 
   <!-- WK POOL BANNER -->
   <div class="pool-banner">
-    <div class="icon">&#127381;</div>
-    <div class="content">
-      <div class="pool-title">Niet vergeten</div>
-      <div class="pool-msg">Doe mee met de WK Pool!</div>
+    <div class="pool-left">
+      <div class="icon">&#127381;</div>
+      <div class="content">
+        <div class="pool-title">Niet vergeten</div>
+        <div class="pool-msg">Doe mee met de WK Pool!</div>
+        <div class="pool-urgency">&#128293; Al <strong>8 collega's</strong> zijn je voor &nbsp;—&nbsp; wees er snel bij!</div>
+      </div>
     </div>
-    <div class="cta">
-      <div class="cta-main">Aanmelding zit</div>
-      <div class="cta-main">in je mail</div>
+    <div class="pool-center">
+      <div class="qr-wrap">
+        <div id="qrcode"></div>
+      </div>
+      <div class="qr-label">Scan &amp; meld je aan</div>
+    </div>
+    <div class="pool-right">
+      <div class="cta-main">Aanmelding zit in je mail</div>
       <div class="cta-sub">WK Pool 2026</div>
     </div>
   </div>
@@ -536,6 +586,16 @@
 
   update();
   setInterval(update, 1000);
+
+  // QR code genereren
+  new QRCode(document.getElementById('qrcode'), {
+    text: 'https://link.voetbalpoules.nl/cVt7um',
+    width: 130,
+    height: 130,
+    colorDark: '#1D1D1B',
+    colorLight: '#FFFFFF',
+    correctLevel: QRCode.CorrectLevel.M
+  });
 </script>
 </body>
 </html>
