@@ -524,56 +524,25 @@
       }).join('');
     }
 
-    async function fetchCrowd(dep){
-      // Stap 1: kijk of crowd al direct op het departure-object zit
-      const direct = dep.crowdForecast || dep.crowdForecastLabel || '';
-      if(direct){ console.log('[crowd] direct op dep:', dep.direction, '→', direct); return direct; }
+    function fetchCrowd(dep){
+      // NS levert geen drukte-data voor Halfweg-Zwanenburg.
+      // Schatting op basis van vertrektijd + richting.
+      const dt = new Date(dep.plannedDateTime);
+      const h  = dt.getHours();
+      const min = dt.getMinutes();
+      const mins = h * 60 + min;
+      const dir = (dep.direction || '').toLowerCase();
+      const naarAms = dir.includes('amsterdam') || dir.includes('sloterdijk');
 
-      // Stap 2: haal via journey-API op
-      const trainNr = dep.product?.number
-                   || dep.product?.displayName
-                   || dep.trainNumber
-                   || dep.name
-                   || '';
-      console.log('[crowd] dep velden:', Object.keys(dep).join(', '));
-      console.log('[crowd] product:', JSON.stringify(dep.product));
-      if(!trainNr){ console.warn('[crowd] geen treinnummer voor', dep.direction); return ''; }
-
-      try{
-        const url = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey?train=${trainNr}&omitCrowdForecast=false`;
-        console.log('[crowd] fetch:', url);
-        const r = await fetch(url, {headers:{'Ocp-Apim-Subscription-Key':NS_API_KEY}});
-        console.log('[crowd] HTTP', r.status, 'voor trein', trainNr, dep.direction);
-        if(!r.ok) return '';
-        const j = await r.json();
-        const stops = j.payload?.stops || [];
-
-        // Log eerste stop voor debug
-        if(stops[0]) console.log('[crowd] stop[0] keys:', Object.keys(stops[0]).join(', '));
-
-        const hw = stops.find(s =>
-          s.stop?.name?.toLowerCase().includes('halfweg') ||
-          s.stop?.stationCode?.toUpperCase() === 'HWZB'
-        ) || stops[0];
-        if(!hw){ console.warn('[crowd] Halfweg-stop niet gevonden'); return ''; }
-
-        // Probeer alle bekende veldnamen
-        const rawCf = hw.crowdForecast
-                   || hw.coachCrowdForecast
-                   || hw.actualStock?.trainParts?.[0]?.crowdForecast
-                   || hw.plannedStock?.trainParts?.[0]?.crowdForecast
-                   || hw.actualStock?.crowdForecast
-                   || '';
-        console.log('[crowd] rawCf voor', dep.direction, ':', JSON.stringify(rawCf).substring(0,80));
-        if(Array.isArray(rawCf)){
-          const o=['HIGH','MEDIUM','LOW'];
-          return o.find(l=>rawCf.some(x=>x?.toUpperCase()===l)) || rawCf[0] || '';
-        }
-        return rawCf;
-      }catch(e){
-        console.error('[crowd] fout voor', dep.direction, ':', e.message);
-        return '';
-      }
+      // Ochtendspits richting Amsterdam (07:00-09:30)
+      if(naarAms && mins >= 420 && mins <= 570) return 'HIGH';
+      // Avondspits weg van Amsterdam (16:00-19:00)
+      if(!naarAms && mins >= 960 && mins <= 1140) return 'HIGH';
+      // Omgekeerd medium
+      if(mins >= 390 && mins <= 600) return 'MEDIUM';
+      if(mins >= 940 && mins <= 1160) return 'MEDIUM';
+      // Dal
+      return 'LOW';
     }
 
     async function fetchDepartures(){
@@ -589,7 +558,7 @@
       render(deps);
       try{
         const slice=deps.slice(0,MAX_ROWS);
-        const crowds=await Promise.all(slice.map(d=>fetchCrowd(d)));
+        const crowds=slice.map(d=>fetchCrowd(d));
         render(slice.map((d,i)=>({...d,crowdForecast:crowds[i]||''})));
       }catch(e){}
       const n=new Date();
