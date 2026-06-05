@@ -344,7 +344,8 @@
        Elk kaartje = één teken, karakteristieke middellijn
     ═══════════════════════════════════════════════════════ */
 
-    /* Basis kaartje */
+    /* Basis kaartje
+       translateZ(0) = eigen GPU-laag → geen witte flarden bij scaleY */
     .sf {
       display: inline-flex;
       align-items: center;
@@ -358,18 +359,13 @@
       padding: 0.04em 0.09em;
       min-width: 0.62em;
       vertical-align: middle;
-      box-shadow:
-        0 3px 10px rgba(0,0,0,.7),
-        inset 0 1px 0 rgba(255,255,255,.07),
-        inset 0 -1px 0 rgba(0,0,0,.45);
-      /* Subtiel verloop: boven iets lichter */
-      background-image: linear-gradient(
-        180deg,
-        rgba(255,255,255,.045) 0%,
-        rgba(255,255,255,.01) 46%,
-        rgba(0,0,0,0) 50%,
-        rgba(0,0,0,.14) 100%
-      );
+      box-shadow: 0 3px 10px rgba(0,0,0,.7);
+      /* Eigen compositing-laag: voorkomt Chromium/Yodeck artefacten */
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
     }
 
     /* De kenmerkende horizontale middellijn */
@@ -380,38 +376,38 @@
       top: calc(50% - 0.5px);
       height: 1.5px;
       background: rgba(0,0,0,.65);
-      box-shadow: 0 0.5px 0 rgba(255,255,255,.04);
       pointer-events: none;
     }
 
     /* Kleurvarianten */
     .sf-white { color: var(--wit); }
-    .sf-red   { color: var(--rood); text-shadow: 0 0 16px rgba(228,3,45,.35); }
+    .sf-red   { color: var(--rood); }
     .sf-grey  { color: var(--grijs-m); }
 
-    /* ── Flip-animatie: kaart klapt dicht, nieuw teken verschijnt, klapt open ── */
+    /* ── Flip-animatie: alleen transform, geen filter ──
+       filter veroorzaakt extra compositing-lagen → witte flarden op Yodeck */
     @keyframes sf-flip {
-      0%   { transform: scaleY(1);    filter: brightness(1); }
-      38%  { transform: scaleY(0.05); filter: brightness(0.22); }
-      62%  { transform: scaleY(0.05); filter: brightness(0.22); }
-      88%  { transform: scaleY(1.04); filter: brightness(1.18); }
-      100% { transform: scaleY(1);    filter: brightness(1); }
+      0%   { transform: translateZ(0) scaleY(1); }
+      40%  { transform: translateZ(0) scaleY(0.04); }
+      60%  { transform: translateZ(0) scaleY(0.04); }
+      85%  { transform: translateZ(0) scaleY(1.03); }
+      100% { transform: translateZ(0) scaleY(1); }
     }
 
     .sf.sf-flipping {
-      animation: sf-flip 0.14s cubic-bezier(.4,0,.2,1);
+      animation: sf-flip 0.15s cubic-bezier(.4,0,.2,1);
     }
 
-    /* ── Snelle flip (voor secondes, elke seconde) ── */
+    /* ── Snelle flip (boot-animatie) ── */
     @keyframes sf-flip-fast {
-      0%   { transform: scaleY(1);    filter: brightness(1); }
-      40%  { transform: scaleY(0.05); filter: brightness(0.2); }
-      60%  { transform: scaleY(0.05); filter: brightness(0.2); }
-      100% { transform: scaleY(1);    filter: brightness(1); }
+      0%   { transform: translateZ(0) scaleY(1); }
+      42%  { transform: translateZ(0) scaleY(0.04); }
+      58%  { transform: translateZ(0) scaleY(0.04); }
+      100% { transform: translateZ(0) scaleY(1); }
     }
 
     .sf.sf-flipping-fast {
-      animation: sf-flip-fast 0.10s ease-in-out;
+      animation: sf-flip-fast 0.11s ease-in-out;
     }
 
     /* ── Container span voor een groep kaartjes ── */
