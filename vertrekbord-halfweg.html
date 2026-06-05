@@ -6,15 +6,20 @@
   <title>Vertrektijden – Halfweg-Zwanenburg</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
   <style>
+
+    /* ═══════════════════════════════
+       AMSTELLAND KLEURPALET
+    ════════════════════════════════ */
     :root {
       --rood:       #E4032D;
       --donkerrood: #A0021F;
       --zwart:      #1D1D1B;
+      --grijs-d:    #484848;
       --grijs-m:    #616160;
       --grijs-l:    #D9D9D9;
+      --grijs-xl:   #F5F5F5;
       --wit:        #FFFFFF;
-      --ns-geel:    #FFC917;
-      --ns-blauw:   #003082;
+
       --fs-time:    62px;
       --fs-dir:     34px;
       --fs-via:     17px;
@@ -23,128 +28,445 @@
       --fs-status:  17px;
       --row-pad:    22px 0;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     html, body {
       width: 100%; height: 100vh;
       background: var(--zwart);
       font-family: 'Montserrat', Arial, sans-serif;
-      color: var(--wit); overflow: hidden;
+      color: var(--wit);
+      overflow: hidden;
     }
+
     body::before {
-      content: ''; position: fixed; inset: 0;
-      background: radial-gradient(ellipse 70% 40% at 50% -5%, rgba(228,3,45,.10) 0%, transparent 65%);
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% -5%,
+        rgba(228,3,45,.10) 0%, transparent 65%);
       pointer-events: none; z-index: 0;
     }
+
     body::after {
-      content: ''; position: fixed; top: 0; left: 0;
+      content: '';
+      position: fixed; top: 0; left: 0;
       width: 5px; height: 100%;
       background: linear-gradient(to bottom, var(--rood), var(--donkerrood));
       z-index: 10;
     }
+
     .screen {
       position: relative; z-index: 1;
       display: flex; flex-direction: column;
-      height: 100vh; padding-left: 5px;
+      height: 100vh;
+      padding-left: 5px;
     }
 
-    /* ── HEADER ── */
+    /* ═══════════════════════════════
+       HEADER
+    ════════════════════════════════ */
     .header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 22px 48px 20px; flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 48px 20px;
+      flex-shrink: 0;
       background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 100%);
     }
+
     .header-left { display: flex; align-items: center; gap: 28px; }
     .logo-svg { height: 48px; width: auto; }
-    .divider-v { width: 1px; height: 42px; background: rgba(255,255,255,.18); }
-    .station-label { font-size: 11px; font-weight: 600; letter-spacing: 3.5px; text-transform: uppercase; color: var(--rood); margin-bottom: 4px; }
-    .station-name { font-size: 34px; font-weight: 700; color: var(--wit); letter-spacing: .3px; }
-    .header-right { text-align: right; }
-    .clock { font-size: 82px; font-weight: 900; color: var(--wit); letter-spacing: 3px; line-height: 1; font-variant-numeric: tabular-nums; }
-    .clock-sep { animation: blink 1s step-end infinite; color: var(--rood); }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-    .date-str { font-size: 13px; font-weight: 400; color: var(--grijs-m); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 5px; }
-    /* ── RODE LIJN ── */
 
-    /* ── KOLOM HEADERS ── */
+    .divider-v {
+      width: 1px; height: 42px;
+      background: rgba(255,255,255,.18);
+    }
+
+    .station-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 3.5px; text-transform: uppercase;
+      color: var(--rood); margin-bottom: 4px;
+    }
+
+    .station-name {
+      font-size: 34px; font-weight: 700;
+      color: var(--wit); letter-spacing: .3px;
+    }
+
+    .header-right { text-align: right; }
+
+    .clock {
+      font-size: 82px; font-weight: 900;
+      color: var(--wit); letter-spacing: 3px;
+      line-height: 1; font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+    }
+
+    .clock-sep {
+      animation: blink 1s step-end infinite;
+      color: var(--rood);
+      margin: 0 2px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    .date-str {
+      font-size: 13px; font-weight: 400;
+      color: var(--grijs-m); letter-spacing: 1.5px;
+      text-transform: uppercase; margin-top: 5px;
+    }
+
+    /* ═══════════════════════════════
+       RODE LIJN ONDER HEADER
+    ════════════════════════════════ */
+    .red-line {
+      height: 2px; flex-shrink: 0;
+      margin: 0 48px;
+      background: linear-gradient(90deg,
+        var(--rood) 0%, var(--donkerrood) 55%, transparent 100%);
+    }
+
+    /* ═══════════════════════════════
+       KOLOM HEADERS
+    ════════════════════════════════ */
     .col-head {
       display: grid;
-      grid-template-columns: 180px 1fr 280px 120px 180px;
-      padding: 12px 48px 10px; flex-shrink: 0;
+      grid-template-columns: 215px 1fr 260px 110px 160px;
+      padding: 12px 48px 10px;
+      flex-shrink: 0;
     }
-    .col-head span { font-size: 12px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--grijs-m); }
+
+    .col-head span {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m);
+    }
     .col-head span.c { text-align: center; }
     .col-head span.r { text-align: right; }
-    .thin-line { height: 1px; flex-shrink: 0; margin: 0 48px; background: rgba(255,255,255,.08); }
 
-    /* ── DEPARTURES ── */
-    .departures { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 0 48px; }
-    .row {
-      display: grid; grid-template-columns: 180px 1fr 280px 120px 180px;
-      align-items: center; padding: var(--row-pad);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      animation: enter .3s ease both; opacity: 0; position: relative;
+    .thin-line {
+      height: 1px; flex-shrink: 0;
+      margin: 0 48px;
+      background: rgba(255,255,255,.08);
     }
-    .row:first-child::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(228,3,45,.07) 0%, transparent 50%); pointer-events: none; }
-    .row:nth-child(even) { background: rgba(255,255,255,.02); }
-    @keyframes enter { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
-    .row:nth-child(1){animation-delay:.03s}.row:nth-child(2){animation-delay:.06s}.row:nth-child(3){animation-delay:.09s}
-    .row:nth-child(4){animation-delay:.12s}.row:nth-child(5){animation-delay:.15s}.row:nth-child(6){animation-delay:.18s}
-    .row:nth-child(7){animation-delay:.21s}.row:nth-child(8){animation-delay:.24s}.row:nth-child(9){animation-delay:.27s}
 
-    .cell-time { display: flex; flex-direction: column; gap: 2px; }
-    .time-planned { font-size: var(--fs-time); font-weight: 700; color: var(--wit); letter-spacing: 1px; line-height: 1; font-variant-numeric: tabular-nums; }
-    .time-planned.struck { font-size: 22px; font-weight: 400; color: var(--grijs-m); text-decoration: line-through; }
-    .time-actual { font-size: 56px; font-weight: 700; color: var(--rood); letter-spacing: 1px; font-variant-numeric: tabular-nums; line-height: 1; }
+    /* ═══════════════════════════════
+       VERTREKTIJDEN CONTAINER
+    ════════════════════════════════ */
+    .departures {
+      flex: 1; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 0 48px;
+    }
+
+    /* ═══════════════════════════════
+       RIJ
+    ════════════════════════════════ */
+    .row {
+      display: grid;
+      grid-template-columns: 215px 1fr 260px 110px 160px;
+      align-items: center;
+      padding: var(--row-pad);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      position: relative;
+      transition: opacity 0.3s ease;
+    }
+
+    .row:first-child::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg,
+        rgba(228,3,45,.07) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .row:nth-child(even) {
+      background: rgba(255,255,255,.02);
+    }
+
+    /* ── TIJD ── */
+    .cell-time {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .time-planned {
+      font-size: var(--fs-time);
+      font-weight: 700; color: var(--wit);
+      letter-spacing: 1px; line-height: 1;
+      font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .time-planned.struck {
+      font-size: 22px; font-weight: 400;
+      color: var(--grijs-m);
+      text-decoration: line-through;
+      display: block;
+    }
+    .time-actual {
+      font-size: var(--fs-time); font-weight: 700;
+      color: var(--rood); letter-spacing: 1px;
+      font-variant-numeric: tabular-nums; line-height: 1;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ── RICHTING ── */
     .cell-dir { padding-left: 32px; padding-right: 20px; }
-    .dir-name { font-size: var(--fs-dir); font-weight: 700; color: var(--wit); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-    .dir-via { font-size: var(--fs-via); font-weight: 400; color: var(--grijs-m); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cell-train { display: flex; flex-direction: row; align-items: center; gap: 16px; }
-    .train-top { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .badge { font-size: var(--fs-badge); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 6px 13px; border-radius: 3px; }
-    .badge-ic  { background: rgba(255,255,255,.1); color: var(--wit);     border: 1px solid rgba(255,255,255,.2); }
-    .badge-spr { background: rgba(228,3,45,.10);   color: rgba(228,3,45,0.75);    border: 1px solid rgba(228,3,45,.3); }
-    .badge-int { background: rgba(228,3,45,.3);     color: var(--wit);     border: 1px solid var(--rood); }
-    .badge-x   { background: rgba(255,255,255,.06); color: var(--grijs-l); border: 1px solid rgba(255,255,255,.12); }
+
+    .dir-name {
+      font-size: var(--fs-dir);
+      font-weight: 700; color: var(--wit);
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+      letter-spacing: .5px;
+    }
+
+    .dir-via {
+      font-size: var(--fs-via); font-weight: 400;
+      color: var(--grijs-m); margin-top: 5px;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── TREIN / DRUKTE ── */
+    .cell-train {
+      display: flex; flex-direction: row;
+      align-items: center; gap: 16px;
+    }
+
+    .train-top {
+      display: flex; align-items: center;
+      gap: 10px; flex-shrink: 0;
+    }
+
+    .badge {
+      font-size: var(--fs-badge); font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 6px 13px; border-radius: 3px;
+    }
+    .badge-ic   { background: rgba(255,255,255,.1);  color: var(--wit);      border: 1px solid rgba(255,255,255,.2); }
+    .badge-spr  { background: rgba(228,3,45,.15);    color: var(--rood);     border: 1px solid rgba(228,3,45,.5); }
+    .badge-int  { background: rgba(228,3,45,.3);     color: var(--wit);      border: 1px solid var(--rood); }
+    .badge-x    { background: rgba(255,255,255,.06); color: var(--grijs-l);  border: 1px solid rgba(255,255,255,.12); }
+
+    .delay-pill {
+      font-size: 12px; font-weight: 700;
+      padding: 4px 9px; border-radius: 20px;
+      background: var(--rood); color: var(--wit);
+      letter-spacing: .5px;
+    }
+
     .crowd { display: flex; align-items: center; gap: 9px; }
     .crowd-none .crowd-icon { color: rgba(255,255,255,.15); }
     .crowd-low  .crowd-icon { color: rgba(255,255,255,.4); }
     .crowd-med  .crowd-icon { color: rgba(230,170,0,.95); }
     .crowd-high .crowd-icon { color: var(--rood); }
+
     .crowd-bars { display: flex; align-items: flex-end; gap: 3px; }
     .crowd-bars b { display: block; width: 5px; border-radius: 2px; background: rgba(255,255,255,.12); }
-    .crowd-bars b:nth-child(1){height:7px}.crowd-bars b:nth-child(2){height:12px}.crowd-bars b:nth-child(3){height:17px}
-    .crowd-low  .crowd-bars b:nth-child(1)                { background: rgba(255,255,255,.45); }
+    .crowd-bars b:nth-child(1) { height: 7px; }
+    .crowd-bars b:nth-child(2) { height: 12px; }
+    .crowd-bars b:nth-child(3) { height: 17px; }
+
+    .crowd-low  .crowd-bars b:nth-child(1)                  { background: rgba(255,255,255,.45); }
     .crowd-med  .crowd-bars b:nth-child(1),
-    .crowd-med  .crowd-bars b:nth-child(2)                { background: rgba(230,170,0,.9); }
-    .crowd-high .crowd-bars b                             { background: var(--rood); }
-    .crowd-text { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .crowd-med  .crowd-bars b:nth-child(2)                  { background: rgba(230,170,0,.9); }
+    .crowd-high .crowd-bars b                               { background: var(--rood); }
+
+    .crowd-text {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
     .crowd-none .crowd-text { color: rgba(255,255,255,.15); }
     .crowd-low  .crowd-text { color: rgba(255,255,255,.35); }
     .crowd-med  .crowd-text { color: rgba(230,170,0,.9); }
     .crowd-high .crowd-text { color: var(--rood); }
+
+    /* ── SPOOR ── */
     .cell-track { text-align: center; }
-    .track-num { font-size: var(--fs-track); font-weight: 700; color: var(--wit); line-height: 1; }
-    .track-lbl { font-size: 10px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--grijs-m); margin-top: 3px; }
+
+    .track-num {
+      font-size: var(--fs-track); font-weight: 700;
+      color: var(--wit); line-height: 1;
+      display: flex; justify-content: center; gap: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .track-lbl {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m); margin-top: 3px;
+    }
+
+    /* ── STATUS ── */
     .cell-status { text-align: right; }
-    .status { display: inline-block; font-size: var(--fs-status); font-weight: 600; letter-spacing: .5px; padding: 6px 14px; border-radius: 3px; }
-    .s-ok     { background: rgba(34,160,80,.12); color: rgba(76,206,130,0.75); border: 1px solid rgba(34,160,80,.22); }
-    .s-late   { background: rgba(228,3,45,.12);  color: rgba(228,3,45,0.80); border: 1px solid rgba(228,3,45,.3); }
-    .s-cancel { background: var(--rood); color: var(--wit); }
-    .msg-line { font-size: 12px; font-weight: 500; color: rgba(228,3,45,.8); margin-top: 5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: var(--grijs-m); }
-    .spinner { width: 44px; height: 44px; border: 3px solid rgba(255,255,255,.08); border-top-color: var(--rood); border-radius: 50%; animation: spin .8s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg)} }
+
+    .status {
+      display: inline-block;
+      font-size: var(--fs-status); font-weight: 600;
+      letter-spacing: .5px; padding: 6px 14px;
+      border-radius: 3px;
+    }
+    .s-ok      { background: rgba(34,160,80,.25);  color: #4cce82;     border: 1px solid rgba(34,160,80,.4); }
+    .s-late    { background: rgba(228,3,45,.2);    color: var(--rood); border: 1px solid rgba(228,3,45,.5); }
+    .s-cancel  { background: var(--rood);          color: var(--wit); }
+
+    .msg-line {
+      font-size: 12px; font-weight: 500;
+      color: rgba(228,3,45,.8);
+      margin-top: 5px; line-height: 1.3;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ═══════════════════════════════
+       LEGE STAAT
+    ════════════════════════════════ */
+    .empty {
+      flex: 1; display: flex;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px; color: var(--grijs-m);
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid rgba(255,255,255,.08);
+      border-top-color: var(--rood);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .empty-lbl { font-size: 16px; letter-spacing: 1px; }
-    .err { display: none; flex-shrink: 0; padding: 10px 48px; background: rgba(228,3,45,.1); border-left: 3px solid var(--rood); font-size: 13px; font-weight: 500; color: var(--rood); letter-spacing: .3px; }
-    .footer-line { height: 1px; flex-shrink: 0; margin: 0 48px; background: rgba(255,255,255,.07); }
-    .footer { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 48px; background: linear-gradient(0deg, rgba(0,0,0,.3) 0%, transparent 100%); }
+
+    /* ═══════════════════════════════
+       ERROR BANNER
+    ════════════════════════════════ */
+    .err {
+      display: none; flex-shrink: 0;
+      padding: 10px 48px;
+      background: rgba(228,3,45,.1);
+      border-left: 3px solid var(--rood);
+      font-size: 13px; font-weight: 500;
+      color: var(--rood); letter-spacing: .3px;
+    }
+
+    /* ═══════════════════════════════
+       FOOTER
+    ════════════════════════════════ */
+    .footer-line {
+      height: 1px; flex-shrink: 0;
+      margin: 0 48px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .footer {
+      flex-shrink: 0;
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 12px 48px;
+      background: linear-gradient(0deg, rgba(0,0,0,.3) 0%, transparent 100%);
+    }
+
     .footer-brand { display: flex; align-items: center; gap: 10px; }
     .footer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rood); }
-    .footer-name { font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--grijs-m); }
-    .footer-upd { font-size: 11px; font-weight: 400; letter-spacing: 1px; color: rgba(255,255,255,.2); }
+    .footer-name {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m);
+    }
+    .footer-upd {
+      font-size: 11px; font-weight: 400;
+      letter-spacing: 1px; color: rgba(255,255,255,.2);
+    }
+
+    /* ═══════════════════════════════
+       SPLIT-FLAP DISPLAY
+    ════════════════════════════════ */
+
+    /* Individuele kaartje */
+    .sf {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #242422;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 4px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      vertical-align: middle;
+      padding: 0.04em 0.09em;
+      min-width: 0.65em;
+      box-shadow:
+        0 3px 10px rgba(0,0,0,.7),
+        inset 0 1px 0 rgba(255,255,255,.06),
+        inset 0 -1px 0 rgba(0,0,0,.4);
+      /* Subtiel verloop: boven iets lichter, onder donkerder */
+      background-image: linear-gradient(
+        180deg,
+        rgba(255,255,255,.04) 0%,
+        rgba(255,255,255,.01) 48%,
+        rgba(0,0,0,0) 50%,
+        rgba(0,0,0,.12) 100%
+      );
+    }
+
+    /* De karakteristieke middellijn */
+    .sf::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: calc(50% - 0.5px);
+      height: 1.5px;
+      background: rgba(0,0,0,.65);
+      box-shadow: 0 0.5px 0 rgba(255,255,255,.04);
+      pointer-events: none;
+    }
+
+    /* Kleurvarianten */
+    .sf-white  { color: var(--wit); }
+    .sf-red    { color: var(--rood); text-shadow: 0 0 16px rgba(228,3,45,.35); }
+    .sf-grey   { color: var(--grijs-m); }
+
+    /* Flip-animatie: kaartje klapt dicht, nieuw teken verschijnt, klapt open */
+    @keyframes sf-flip {
+      0%   { transform: scaleY(1); filter: brightness(1); }
+      38%  { transform: scaleY(0.05); filter: brightness(0.25); }
+      62%  { transform: scaleY(0.05); filter: brightness(0.25); }
+      88%  { transform: scaleY(1.04); filter: brightness(1.15); }
+      100% { transform: scaleY(1); filter: brightness(1); }
+    }
+
+    .sf.sf-flipping {
+      animation: sf-flip 0.14s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Tijdweergave: HH groep + MM groep */
+    .sf-time-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sf-colon {
+      font-size: inherit;
+      font-weight: 700;
+      color: var(--rood);
+      animation: blink 1s step-end infinite;
+      margin: 0 1px;
+      line-height: 1;
+    }
+    .sf-colon-grey  { color: var(--grijs-m); animation: none; }
+    .sf-colon-red   { color: var(--rood); }
+
+    .sf-grp {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+    }
+
   </style>
 </head>
 <body>
+
   <script>
     const NS_API_KEY   = '4ea55d62583e4e18be32816e9ad1787a';
     const STATION_CODE = 'HWZB';
@@ -153,8 +475,11 @@
   </script>
 
   <div class="screen">
+
+    <!-- HEADER -->
     <header class="header">
       <div class="header-left">
+
         <svg class="logo-svg" viewBox="0 0 380.77 127.56" xmlns="http://www.w3.org/2000/svg">
           <rect fill="#E4032D" x="99.39" width="2.76" height="127.56"/>
           <g fill="#FFFFFF">
@@ -182,35 +507,44 @@
           </g>
           <path fill="#E4032D" d="m60.02,91.96c-1.14,1.45-1.86,2.39-1.86,2.39v11.91h14.3v-14.3h-12.44Z"/>
         </svg>
+
         <div class="divider-v"></div>
+
         <div>
           <div class="station-label">Live vertrektijden</div>
           <div class="station-name">Halfweg-Zwanenburg</div>
         </div>
       </div>
+
       <div class="header-right">
         <div class="clock">
-          <span id="hh">--</span><span class="clock-sep">:</span><span id="mm">--</span>
+          <span id="sf-clock-h" class="sf-grp"></span><span class="clock-sep">:</span><span id="sf-clock-m" class="sf-grp"></span>
         </div>
         <div class="date-str" id="ds">–</div>
       </div>
     </header>
 
-    <div class="red-line" style="height:2px;margin:0 48px;background:linear-gradient(90deg,var(--rood) 0%,var(--donkerrood) 55%,transparent 100%);flex-shrink:0"></div>
+    <div class="red-line"></div>
 
     <div class="col-head">
-      <span>Vertrek</span><span>Richting</span>
+      <span>Vertrek</span>
+      <span>Richting</span>
       <span>Trein &amp; drukte</span>
-      <span class="c">Spoor</span><span class="r">Status</span>
+      <span class="c">Spoor</span>
+      <span class="r">Status</span>
     </div>
+
     <div class="thin-line"></div>
+
     <div class="err" id="err"></div>
+
     <div class="departures" id="deps">
       <div class="empty">
         <div class="spinner"></div>
         <div class="empty-lbl">Vertrektijden ophalen…</div>
       </div>
     </div>
+
     <div class="footer-line"></div>
     <footer class="footer">
       <div class="footer-brand">
@@ -219,94 +553,434 @@
       </div>
       <span class="footer-upd" id="upd">–</span>
     </footer>
+
   </div>
 
   <script>
-    const DAYS=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
-    const MONTHS=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-    const pad=n=>String(n).padStart(2,'0');
-    function tickClock(){
-      const d=new Date();
-      document.getElementById('hh').textContent=pad(d.getHours());
-      document.getElementById('mm').textContent=pad(d.getMinutes());
-      document.getElementById('ds').textContent=DAYS[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
-    }
-    setInterval(tickClock,1000);tickClock();
+    /* ══════════════════════════════════════════════════════════
+       SPLIT-FLAP ENGINE
+    ══════════════════════════════════════════════════════════ */
+    const SF_POOL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
 
-    function fmtTime(iso){if(!iso)return'--:--';const d=new Date(iso);return pad(d.getHours())+':'+pad(d.getMinutes());}
-    function delayMin(p,a){if(!p||!a)return 0;return Math.round((new Date(a)-new Date(p))/60000);}
-    function badgeCls(cat){const c=(cat||'').toUpperCase();if(c==='IC'||c==='ICD')return'badge-ic';if(c==='SPR')return'badge-spr';if(['INT','ICE','THA','EUR'].includes(c))return'badge-int';return'badge-x';}
-    function crowdCls(cf){const c=(cf||'').toUpperCase();if(c==='HIGH')return'crowd-high';if(c==='MEDIUM')return'crowd-med';if(c==='LOW')return'crowd-low';return'';}
-    function crowdLbl(cf){const c=(cf||'').toUpperCase();if(c==='HIGH')return'Vol';if(c==='MEDIUM')return'Druk';if(c==='LOW')return'Rustig';return'';}
-
-    function render(list){
-      const el=document.getElementById('deps');
-      if(!list||!list.length){el.innerHTML='<div class="empty"><div class="empty-lbl">Geen vertrektijden beschikbaar</div></div>';return;}
-      el.innerHTML=list.slice(0,MAX_ROWS).map(dep=>{
-        const pt=fmtTime(dep.plannedDateTime),at=fmtTime(dep.actualDateTime);
-        const del=delayMin(dep.plannedDateTime,dep.actualDateTime),can=!!dep.cancelled;
-        const cat=dep.trainCategory||'?',dir=dep.direction||'–';
-        const via=(dep.routeStations||[]).slice(0,4).map(s=>s.mediumName).join(' · ');
-        const trk=dep.actualTrack||dep.plannedTrack||'–';
-        const msg=dep.messages&&dep.messages.length?dep.messages[0].text||'':'';
-        const timeHtml=can?`<div class="time-planned struck">${pt}</div>`:del>=1?`<div class="time-planned struck">${pt}</div><div class="time-actual">${at}</div>`:`<div class="time-planned">${pt}</div>`;
-        const cf=dep.crowdForecast||'',cc=crowdCls(cf),cl=crowdLbl(cf);
-        const personSvg=`<svg class="crowd-icon" width="18" height="22" viewBox="0 0 18 22" fill="currentColor"><circle cx="9" cy="5" r="4"/><path d="M1 21c0-4.4 3.6-8 8-8s8 3.6 8 8H1z"/></svg>`;
-        const crowdHtml=`<div class="crowd ${cc||'crowd-none'}">${personSvg}<div class="crowd-bars"><b></b><b></b><b></b></div><span class="crowd-text">${cl||'–'}</span></div>`;
-        const statusHtml=can?`<span class="status s-cancel">Rijdt niet</span>`:del>=1?`<span class="status s-late">+${del} min</span>`:`<span class="status s-ok">0 min</span>`;
-        const msgHtml=msg?`<div class="msg-line">⚠ ${msg}</div>`:'';
-        return`<div class="row">
-          <div class="cell-time">${timeHtml}</div>
-          <div class="cell-dir"><div class="dir-name">${dir}</div>${via?`<div class="dir-via">via ${via}</div>`:''}${msgHtml}</div>
-          <div class="cell-train"><div class="train-top"><span class="badge ${badgeCls(cat)}">${cat}</span></div>${crowdHtml}</div>
-          <div class="cell-track"><div class="track-num">${trk}</div><div class="track-lbl">spoor</div></div>
-          <div class="cell-status">${statusHtml}</div>
-        </div>`;
-      }).join('');
-    }
-
-    function fetchCrowd(dep){
-      // NS levert geen drukte-data voor Halfweg-Zwanenburg.
-      // Schatting op basis van vertrektijd + richting.
-      const dt = new Date(dep.plannedDateTime);
-      const h  = dt.getHours();
-      const min = dt.getMinutes();
-      const mins = h * 60 + min;
-      const dir = (dep.direction || '').toLowerCase();
-      const naarAms = dir.includes('amsterdam') || dir.includes('sloterdijk');
-
-      // Ochtendspits richting Amsterdam (07:00-09:30)
-      if(naarAms && mins >= 420 && mins <= 570) return 'HIGH';
-      // Avondspits weg van Amsterdam (16:00-19:00)
-      if(!naarAms && mins >= 960 && mins <= 1140) return 'HIGH';
-      // Omgekeerd medium
-      if(mins >= 390 && mins <= 600) return 'MEDIUM';
-      if(mins >= 940 && mins <= 1160) return 'MEDIUM';
-      // Dal
-      return 'LOW';
-    }
-
-    async function fetchDepartures(){
-      const errEl=document.getElementById('err');
-      const hdrs={'Ocp-Apim-Subscription-Key':NS_API_KEY};
-      let deps=null;
-      try{const r=await fetch(`https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`,{headers:hdrs});if(r.ok){const j=await r.json();deps=j.payload?.departures||j.departures||[];}}catch(e){}
-      if(!deps){
-        try{const r=await fetch(`https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`,{headers:hdrs});if(r.ok){const j=await r.json();deps=j.payload?.departures||j.departures||[];}else{throw new Error('HTTP '+r.status);}}
-        catch(e){errEl.style.display='block';errEl.textContent='⚠  '+e.message;document.getElementById('upd').textContent='Fout';return;}
+    /**
+     * SplitFlap – beheert een reeks kaartjes binnen een container-element.
+     * @param {HTMLElement} el       – container
+     * @param {string}      colorCls – 'sf-white' | 'sf-red' | 'sf-grey'
+     */
+    class SplitFlap {
+      constructor(el, colorCls = 'sf-white') {
+        this.el = el;
+        this.el.style.display   = 'inline-flex';
+        this.el.style.gap       = '3px';
+        this.el.style.alignItems = 'center';
+        this.colorCls = colorCls;
+        this.cards    = [];
+        this.current  = '';
       }
-      errEl.style.display='none';
-      render(deps);
-      try{
-        const slice=deps.slice(0,MAX_ROWS);
-        const crowds=slice.map(d=>fetchCrowd(d));
-        render(slice.map((d,i)=>({...d,crowdForecast:crowds[i]||''})));
-      }catch(e){}
-      const n=new Date();
-      document.getElementById('upd').textContent='Bijgewerkt om '+pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+
+      /* Maak één kaartje */
+      _card() {
+        const c = document.createElement('span');
+        c.className = `sf ${this.colorCls}`;
+        c.textContent = ' ';
+        this.el.appendChild(c);
+        return c;
+      }
+
+      /* Zorg voor exact n kaartjes */
+      _resize(n) {
+        while (this.cards.length < n) this.cards.push(this._card());
+        while (this.cards.length > n) this.cards.pop().remove();
+      }
+
+      /* Toon tekst zonder animatie */
+      set(text) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        s.split('').forEach((ch, i) => { this.cards[i].textContent = ch; });
+        this.current = s;
+      }
+
+      /**
+       * Animeer naar nieuwe tekst.
+       * @param {string} text
+       * @param {number} baseDelay – startvertraging in ms
+       */
+      animate(text, baseDelay = 0) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        this.current = s;
+
+        s.split('').forEach((target, i) => {
+          const card   = this.cards[i];
+          const delay  = baseDelay + i * 55;
+          const flips  = 4 + Math.floor(Math.random() * 5); // 4-8 tussenstappen
+          let   count  = 0;
+
+          const doFlip = () => {
+            card.classList.add('sf-flipping');
+            setTimeout(() => {
+              card.textContent = (count >= flips - 1)
+                ? target
+                : SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
+              card.classList.remove('sf-flipping');
+              count++;
+              if (count < flips) setTimeout(doFlip, 85 + Math.random() * 55);
+            }, 60);
+          };
+
+          setTimeout(doFlip, delay);
+        });
+      }
     }
-    fetchDepartures();
-    setInterval(fetchDepartures,REFRESH_MS);
+
+    /* ── Text-scramble voor richting (geen kaartjes, vloeiende tekst) ── */
+    function scramble(el, target, baseDelay = 0) {
+      const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ';
+      const str   = target.toUpperCase();
+      const len   = str.length;
+      let   iter  = 0;
+      const TOTAL = 22;
+
+      el.textContent = Array(len).fill(' ').join('');
+
+      setTimeout(() => {
+        const id = setInterval(() => {
+          el.textContent = str.split('').map((ch, i) => {
+            return iter >= Math.round((i / Math.max(len - 1, 1)) * TOTAL * 0.75)
+              ? ch
+              : ALPHA[Math.floor(Math.random() * ALPHA.length)];
+          }).join('');
+          iter++;
+          if (iter > TOTAL) { clearInterval(id); el.textContent = str; }
+        }, 42);
+      }, baseDelay);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       KLOK (met split-flap animatie)
+    ══════════════════════════════════════════════════════════ */
+    const DAYS   = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+    const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const pad    = n => String(n).padStart(2,'0');
+
+    let clockH = null, clockM = null;
+    let lastH  = '',   lastM  = '';
+
+    function initClock() {
+      clockH = new SplitFlap(document.getElementById('sf-clock-h'), 'sf-white');
+      clockM = new SplitFlap(document.getElementById('sf-clock-m'), 'sf-white');
+      /* Pas lettergrootte aan: klok erft 82px van .clock */
+    }
+
+    function tickClock() {
+      const d = new Date();
+      const h = pad(d.getHours());
+      const m = pad(d.getMinutes());
+
+      document.getElementById('ds').textContent =
+        DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+
+      if (!clockH || !clockM) return;
+      if (h !== lastH) { clockH.animate(h); lastH = h; }
+      if (m !== lastM) { clockM.animate(m); lastM = m; }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════ */
+    function fmtTime(iso) {
+      if (!iso) return '--:--';
+      const d = new Date(iso);
+      return pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function delayMin(p, a) {
+      if (!p || !a) return 0;
+      return Math.round((new Date(a) - new Date(p)) / 60000);
+    }
+
+    function badgeCls(cat) {
+      const c = (cat || '').toUpperCase();
+      if (c === 'IC' || c === 'ICD') return 'badge-ic';
+      if (c === 'SPR')               return 'badge-spr';
+      if (['INT','ICE','THA','EUR'].includes(c)) return 'badge-int';
+      return 'badge-x';
+    }
+
+    function crowdCls(cf) {
+      const c = (cf || '').toUpperCase();
+      if (c === 'HIGH')   return 'crowd-high';
+      if (c === 'MEDIUM') return 'crowd-med';
+      if (c === 'LOW')    return 'crowd-low';
+      return '';
+    }
+
+    function crowdLbl(cf) {
+      const c = (cf || '').toUpperCase();
+      if (c === 'HIGH')   return 'Vol';
+      if (c === 'MEDIUM') return 'Druk';
+      if (c === 'LOW')    return 'Rustig';
+      return '';
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RENDER
+    ══════════════════════════════════════════════════════════ */
+    function render(list) {
+      const container = document.getElementById('deps');
+
+      if (!list || !list.length) {
+        container.innerHTML =
+          '<div class="empty"><div class="empty-lbl">Geen vertrektijden beschikbaar</div></div>';
+        return;
+      }
+
+      const rows = list.slice(0, MAX_ROWS);
+
+      /* Bouw HTML-skelet: SF-containers zijn leeg, tekst wordt via JS ingevuld */
+      container.innerHTML = rows.map((dep, idx) => {
+        const pt  = fmtTime(dep.plannedDateTime);
+        const at  = fmtTime(dep.actualDateTime);
+        const del = delayMin(dep.plannedDateTime, dep.actualDateTime);
+        const can = !!dep.cancelled;
+        const cat = dep.trainCategory || '?';
+        const dir = dep.direction     || '–';
+        const via = (dep.routeStations || []).slice(0, 4).map(s => s.mediumName).join(' · ');
+        const trk = String(dep.actualTrack || dep.plannedTrack || '–').toUpperCase();
+        const msg = (dep.messages && dep.messages.length) ? dep.messages[0].text || '' : '';
+        const cf  = dep.crowdForecast || '';
+
+        /* ── Tijdcel ── */
+        let timeCell;
+        if (can) {
+          /* Geannuleerd: doorgestreepte tijd in grijs */
+          timeCell = `
+            <div class="time-planned">
+              <span class="sf-grp" data-sf data-text="${pt.replace(':','|')}" data-color="sf-grey" data-delay="${idx*90}"></span>
+            </div>`;
+        } else if (del >= 1) {
+          /* Vertraagd: origineel doorgestreept + actuele tijd rood */
+          timeCell = `
+            <div class="time-planned struck">${pt}</div>
+            <div class="time-actual">
+              <span class="sf-grp" data-sf data-text="${at.replace(':','|')}" data-color="sf-red" data-delay="${idx*90}"></span>
+            </div>`;
+        } else {
+          /* Op tijd */
+          timeCell = `
+            <div class="time-planned">
+              <span class="sf-grp" data-sf data-text="${pt.replace(':','|')}" data-color="sf-white" data-delay="${idx*90}"></span>
+            </div>`;
+        }
+
+        /* ── Delay pill ── */
+        const pill = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
+
+        /* ── Drukte ── */
+        const cc = crowdCls(cf);
+        const cl = crowdLbl(cf);
+        const personSvg = `<svg class="crowd-icon" width="18" height="22" viewBox="0 0 18 22" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="5" r="4"/>
+          <path d="M1 21c0-4.4 3.6-8 8-8s8 3.6 8 8H1z"/>
+        </svg>`;
+        const crowdHtml = `
+          <div class="crowd ${cc || 'crowd-none'}">
+            ${personSvg}
+            <div class="crowd-bars"><b></b><b></b><b></b></div>
+            <span class="crowd-text">${cl || '–'}</span>
+          </div>`;
+
+        /* ── Status ── */
+        const statusHtml = can
+          ? `<span class="status s-cancel">Rijdt niet</span>`
+          : del >= 1
+            ? `<span class="status s-late">+${del} min</span>`
+            : `<span class="status s-ok">Op tijd</span>`;
+
+        const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
+
+        return `
+          <div class="row" style="opacity:0">
+            <div class="cell-time">${timeCell}</div>
+            <div class="cell-dir">
+              <div class="dir-name" data-scramble="${dir}" data-delay="${idx*90}">&nbsp;</div>
+              ${via ? `<div class="dir-via">via ${via.toLowerCase()}</div>` : ''}
+              ${msgHtml}
+            </div>
+            <div class="cell-train">
+              <div class="train-top">
+                <span class="badge ${badgeCls(cat)}">${cat}</span>
+                ${pill}
+              </div>
+              ${crowdHtml}
+            </div>
+            <div class="cell-track">
+              <div class="track-num">
+                <span class="sf-grp" data-sf data-text="${trk}" data-color="sf-white" data-delay="${idx*90+180}"></span>
+              </div>
+              <div class="track-lbl">spoor</div>
+            </div>
+            <div class="cell-status">${statusHtml}</div>
+          </div>`;
+      }).join('');
+
+      /* ── Post-render: initialiseer alle SF-containers ── */
+      container.querySelectorAll('[data-sf]').forEach(el => {
+        const raw   = el.dataset.text  || '';
+        const color = el.dataset.color || 'sf-white';
+        const delay = parseInt(el.dataset.delay) || 0;
+
+        /* Splits op '|' (colon placeholder) → maak HH-groep + colon + MM-groep */
+        if (raw.includes('|')) {
+          const [left, right] = raw.split('|');
+          el.style.display    = 'inline-flex';
+          el.style.gap        = '4px';
+          el.style.alignItems = 'center';
+
+          const grpH   = document.createElement('span');
+          grpH.className = 'sf-grp';
+          const colon  = document.createElement('span');
+          colon.className = 'sf-colon' + (color === 'sf-grey' ? ' sf-colon-grey' : ' sf-colon-red');
+          colon.textContent = ':';
+          const grpM   = document.createElement('span');
+          grpM.className = 'sf-grp';
+
+          el.appendChild(grpH);
+          el.appendChild(colon);
+          el.appendChild(grpM);
+
+          const sfH = new SplitFlap(grpH, color);
+          const sfM = new SplitFlap(grpM, color);
+          sfH.animate(left,  delay);
+          sfM.animate(right, delay + 100);
+
+          /* Knipperanimatie op de dubbele punt alleen bij 'op tijd' */
+          if (color === 'sf-white') colon.style.animation = 'blink 1s step-end infinite';
+
+        } else {
+          const sf = new SplitFlap(el, color);
+          sf.animate(raw, delay);
+        }
+      });
+
+      /* ── Post-render: scramble voor richtingsnamen ── */
+      container.querySelectorAll('[data-scramble]').forEach(el => {
+        const target = el.dataset.scramble;
+        const delay  = parseInt(el.dataset.delay) || 0;
+        scramble(el, target, delay);
+      });
+
+      /* ── Rijen inlopen met gestaggerd fade ── */
+      container.querySelectorAll('.row').forEach((row, i) => {
+        setTimeout(() => { row.style.opacity = '1'; row.style.transition = 'opacity 0.25s ease'; }, i * 80);
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CROWD FORECAST
+    ══════════════════════════════════════════════════════════ */
+    async function fetchCrowd(dep) {
+      const trainNr = dep.product?.number || dep.trainNumber || '';
+      if (!trainNr) return '';
+      try {
+        const url = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey`
+                  + `?train=${trainNr}&omitCrowdForecast=false`;
+        const r = await fetch(url, { headers: { 'Ocp-Apim-Subscription-Key': NS_API_KEY } });
+        if (!r.ok) return '';
+        const j = await r.json();
+        const stops = j.payload?.stops || [];
+        const hw = stops.find(s =>
+          s.stop?.name?.toLowerCase().includes('halfweg') ||
+          s.stop?.uicCode === '8400272' ||
+          s.stop?.stationCode?.toUpperCase() === 'HWZB'
+        ) || stops[0];
+        if (!hw) return '';
+        const rawCf = hw.coachCrowdForecast
+                   || hw.crowdForecast
+                   || hw.actualStock?.trainParts?.[0]?.crowdForecast
+                   || hw.plannedStock?.trainParts?.[0]?.crowdForecast
+                   || '';
+        if (Array.isArray(rawCf)) {
+          return ['HIGH','MEDIUM','LOW'].find(l => rawCf.includes(l)) || rawCf[0] || '';
+        }
+        return rawCf;
+      } catch (e) { return ''; }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       NS API
+    ══════════════════════════════════════════════════════════ */
+    async function fetchDepartures() {
+      const errEl = document.getElementById('err');
+      if (!NS_API_KEY || NS_API_KEY === 'JOUW_NS_API_SLEUTEL_HIER') {
+        errEl.style.display = 'block';
+        errEl.textContent   = '⚠  Vul je NS API-sleutel in';
+        return;
+      }
+
+      const url1 = `https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+      const url2 = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+      const hdrs = { 'Ocp-Apim-Subscription-Key': NS_API_KEY };
+      let deps = null;
+
+      try {
+        const r = await fetch(url1, { headers: hdrs });
+        if (r.ok) { const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+      } catch(e) { /* fallback */ }
+
+      if (!deps) {
+        try {
+          const r = await fetch(url2, { headers: hdrs });
+          if (r.ok) { const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+          else throw new Error('HTTP ' + r.status);
+        } catch(e) {
+          errEl.style.display = 'block';
+          errEl.textContent   = '⚠  ' + e.message;
+          document.getElementById('upd').textContent = 'Fout';
+          return;
+        }
+      }
+
+      errEl.style.display = 'none';
+      render(deps);
+
+      /* Crowd data parallel ophalen en board verversen */
+      try {
+        const slice   = deps.slice(0, MAX_ROWS);
+        const crowds  = await Promise.all(slice.map(d => fetchCrowd(d)));
+        const enriched = slice.map((d, i) => ({ ...d, crowdForecast: crowds[i] || '' }));
+        render(enriched);
+      } catch(e) { /* niet kritisch */ }
+
+      const n = new Date();
+      document.getElementById('upd').textContent =
+        'Bijgewerkt om ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       OPSTART
+    ══════════════════════════════════════════════════════════ */
+    window.addEventListener('DOMContentLoaded', () => {
+      initClock();
+
+      /* Klok initieel instellen */
+      const now = new Date();
+      const h0  = pad(now.getHours());
+      const m0  = pad(now.getMinutes());
+      clockH.animate(h0); lastH = h0;
+      clockM.animate(m0); lastM = m0;
+
+      document.getElementById('ds').textContent =
+        DAYS[now.getDay()] + ' ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+
+      setInterval(tickClock, 1000);
+
+      fetchDepartures();
+      setInterval(fetchDepartures, REFRESH_MS);
+    });
+
   </script>
+
 </body>
 </html>
