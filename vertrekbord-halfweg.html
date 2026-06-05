@@ -152,6 +152,7 @@
       letter-spacing: 2.5px; text-transform: uppercase;
       color: var(--grijs-m);
     }
+    .col-head span:nth-child(2) { padding-left: 64px; }
     .col-head span.c { text-align: center; }
     .col-head span.r { text-align: right; }
 
@@ -212,7 +213,7 @@
     }
 
     /* ── RICHTING ── */
-    .cell-dir { padding-left: 32px; padding-right: 20px; overflow: hidden; }
+    .cell-dir { padding-left: 64px; padding-right: 20px; overflow: hidden; }
 
     .dir-name {
       font-size: var(--fs-dir); font-weight: 700;
@@ -545,7 +546,8 @@
     /* ══════════════════════════════════════════════════════════
        SPLIT-FLAP ENGINE
     ══════════════════════════════════════════════════════════ */
-    const SF_POOL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
+    const SF_POOL     = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
+    let   bootTimers  = []; // actieve intervals van de boot-animatie
 
     /**
      * SplitFlap  –  beheert een reeks flip-kaartjes in een container.
@@ -716,9 +718,100 @@
     }
 
     /* ══════════════════════════════════════════════════════════
+       BOOT-ANIMATIE  –  willekeurige tekens tot echte data arriveert
+    ══════════════════════════════════════════════════════════ */
+    function showBootAnimation() {
+      const container = document.getElementById('deps');
+      const n         = MAX_ROWS;
+
+      // Typische richtingslengtes voor NS (gemiddeld 12-18 tekens)
+      const dirLen = [16, 14, 17, 12, 15, 18, 13, 16];
+
+      container.innerHTML = Array(n).fill(0).map((_, i) => `
+        <div class="row" style="opacity:0">
+          <div class="cell-time">
+            <div class="time-planned">
+              <span id="bh${i}" class="sf-grp"></span>
+              <span class="sf-colon" style="animation:none;opacity:.35">:</span>
+              <span id="bm${i}" class="sf-grp"></span>
+            </div>
+          </div>
+          <div class="cell-dir">
+            <div class="dir-name">
+              <span id="bd${i}" class="sf-dir-grp"></span>
+            </div>
+          </div>
+          <div class="cell-train">
+            <div class="train-top">
+              <span class="badge badge-x" style="opacity:.3">···</span>
+            </div>
+          </div>
+          <div class="cell-track">
+            <div class="track-num"><span id="bt${i}" class="sf-grp"></span></div>
+            <div class="track-lbl" style="opacity:.35">spoor</div>
+          </div>
+          <div class="cell-status"></div>
+        </div>`).join('');
+
+      for (let i = 0; i < n; i++) {
+        const sfH = new SplitFlap(document.getElementById(`bh${i}`), 'sf-grey');
+        const sfM = new SplitFlap(document.getElementById(`bm${i}`), 'sf-grey');
+        const sfD = new SplitFlap(document.getElementById(`bd${i}`), 'sf-grey', 2);
+        const sfT = new SplitFlap(document.getElementById(`bt${i}`), 'sf-grey');
+
+        const dl  = dirLen[i] || 14;
+        const rnd = () => SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
+
+        // Initieel vullen zodat kaartjes direct zichtbaar zijn
+        sfH.set('  '); sfM.set('  ');
+        sfD.set(Array(dl).fill(' ').join(''));
+        sfT.set(' ');
+
+        const startDelay = i * 75;
+
+        // ── Tijd-cycling (elke 500ms) ──
+        setTimeout(() => {
+          const doTime = () => {
+            sfH.animateFast(pad(Math.floor(Math.random() * 24)));
+            sfM.animateFast(pad(Math.floor(Math.random() * 60)));
+          };
+          doTime();
+          bootTimers.push(setInterval(doTime, 500));
+        }, startDelay);
+
+        // ── Track-cycling (elke 700ms, iets trager) ──
+        setTimeout(() => {
+          const doTrk = () => sfT.animateFast(String(Math.floor(Math.random() * 8) + 1));
+          doTrk();
+          bootTimers.push(setInterval(doTrk, 700));
+        }, startDelay + 120);
+
+        // ── Richting-cycling (elke 1400ms) ──
+        setTimeout(() => {
+          const doDir = () => {
+            sfD.animateFast(Array(dl).fill(0).map(rnd).join(''));
+          };
+          doDir();
+          bootTimers.push(setInterval(doDir, 1400));
+        }, startDelay + 250);
+
+        // Rij inlopen
+        const row = container.querySelectorAll('.row')[i];
+        setTimeout(() => {
+          row.style.opacity    = '1';
+          row.style.transition = 'opacity 0.25s ease';
+        }, startDelay);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════
        RENDER
     ══════════════════════════════════════════════════════════ */
     function render(list) {
+      /* Stop boot-animatie zodra echte data binnenkomt */
+      bootTimers.forEach(iv => clearInterval(iv));
+      bootTimers = [];
+
       const container = document.getElementById('deps');
 
       if (!list || !list.length) {
@@ -1006,8 +1099,15 @@
 
       setInterval(tickClock, 1000);
 
-      fetchDepartures();
-      setInterval(fetchDepartures, REFRESH_MS);
+      /* Boot-animatie starten: kaarten draaien willekeurige tekens
+         totdat echte data van de NS API binnenkomt */
+      showBootAnimation();
+
+      /* Kleine vertraging zodat de boot-animatie altijd zichtbaar is */
+      setTimeout(() => {
+        fetchDepartures();
+        setInterval(fetchDepartures, REFRESH_MS);
+      }, 600);
     });
 
   </script>
