@@ -494,17 +494,12 @@
         </div>
       </div>
 
-      <!-- Klok: HH:MM groot + :SS klein -->
       <div class="header-right">
         <div class="clock">
           <div class="clock-hm">
             <span id="sf-clock-h" class="sf-grp"></span>
             <span class="clock-sep">:</span>
             <span id="sf-clock-m" class="sf-grp"></span>
-          </div>
-          <div class="clock-sec">
-            <span class="sf-colon sf-colon-sec" style="animation:none;">:</span>
-            <span id="sf-clock-s" class="sf-grp"></span>
           </div>
         </div>
         <div class="date-str" id="ds">–</div>
@@ -655,29 +650,26 @@
     const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
     const pad    = n => String(n).padStart(2, '0');
 
-    let clockH = null, clockM = null, clockS = null;
-    let lastH  = '',   lastM  = '',   lastS  = '';
+    let clockH = null, clockM = null;
+    let lastH  = '',   lastM  = '';
 
     function initClock() {
       clockH = new SplitFlap(document.getElementById('sf-clock-h'), 'sf-white', 4);
       clockM = new SplitFlap(document.getElementById('sf-clock-m'), 'sf-white', 4);
-      clockS = new SplitFlap(document.getElementById('sf-clock-s'), 'sf-white', 3);
     }
 
     function tickClock() {
       const d = new Date();
       const h = pad(d.getHours());
       const m = pad(d.getMinutes());
-      const s = pad(d.getSeconds());
 
       document.getElementById('ds').textContent =
         DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
 
       if (!clockH) return;
 
-      if (h !== lastH) { clockH.animate(h);     lastH = h; }
-      if (m !== lastM) { clockM.animate(m);     lastM = m; }
-      if (s !== lastS) { clockS.animateFast(s); lastS = s; }
+      if (h !== lastH) { clockH.animate(h); lastH = h; }
+      if (m !== lastM) { clockM.animate(m); lastM = m; }
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -1088,11 +1080,9 @@
       const now = new Date();
       const h0  = pad(now.getHours());
       const m0  = pad(now.getMinutes());
-      const s0  = pad(now.getSeconds());
 
       clockH.animate(h0); lastH = h0;
       clockM.animate(m0); lastM = m0;
-      clockS.animateFast(s0); lastS = s0;
 
       document.getElementById('ds').textContent =
         DAYS[now.getDay()] + ' ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
