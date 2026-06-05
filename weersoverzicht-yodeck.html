@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1920">
   <title>Weersoverzicht — Amstelland Ingenieurs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -43,9 +43,7 @@
     .header-time  { font-size: 44px; font-weight: 300; letter-spacing: 2px; line-height: 1; }
     .header-date  { font-size: 13px; color: #616160; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
-    /* ════════════════ TEGEL-GRID ════════════════
-       12 kolommen → rij 1: 4 × 3 col  | rij 2: 3 × 4 col
-    ════════════════════════════════════════════ */
+    /* ════════════════ TEGEL-GRID ════════════════ */
     .grid {
       flex: 1;
       display: grid;
@@ -64,7 +62,6 @@
       display: flex; flex-direction: column;
       position: relative; overflow: hidden;
     }
-    /* subtiel gloed linksboven */
     .tile::before {
       content: '';
       position: absolute; top: 0; left: 0;
@@ -90,10 +87,9 @@
       margin-top: 3px;
     }
     .weather-icon-big {
-      font-size: 72px; line-height: 1;
       filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
       margin-top: -4px;
-      font-family: 'Noto Color Emoji', sans-serif;
+      flex-shrink: 0;
     }
 
     /* ── Temperatuur ── */
@@ -137,13 +133,6 @@
       color: #D9D9D9; white-space: nowrap;
     }
 
-    /* ── Zon rij ── */
-    .sun-row {
-      display: flex; gap: 16px;
-      margin-top: 2px;
-    }
-    .sun-item { display: flex; flex-direction: column; }
-
     /* ── Forecast ── */
     .forecast-section { margin-top: auto; padding-top: 14px; }
     .forecast-label {
@@ -163,7 +152,7 @@
       align-items: center; gap: 5px;
     }
     .fc-day  { font-size: 11px; color: #616160; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-    .fc-icon { font-size: 26px; line-height: 1; font-family: 'Noto Color Emoji', sans-serif; }
+    .fc-icon { display: flex; align-items: center; justify-content: center; }
     .fc-temps { display: flex; gap: 6px; align-items: baseline; }
     .fc-hi { font-size: 16px; font-weight: 700; color: #FFF; }
     .fc-lo { font-size: 13px; color: #484848; }
@@ -253,7 +242,7 @@
 </div>
 
 <script>
-// ── Locaties (alfabetisch) ──────────────────────────
+// ── Locaties ────────────────────────────────────────
 const LOCATIONS = [
   { name: 'Aalsmeer',       region: 'Noord-Holland', lat: 52.263, lon: 4.762 },
   { name: 'Alkmaar',        region: 'Noord-Holland', lat: 52.631, lon: 4.748 },
@@ -267,39 +256,170 @@ const LOCATIONS = [
 
 const REFRESH_MS = 10 * 60 * 1000;
 
-// ── Buienradar: iconurl-code → emoji ────────────────
-function iconEmoji(url) {
-  if (!url) return '🌡️';
-  const m = url.match(/\/([a-z]+)\.png$/i);
-  const c = m ? m[1].toLowerCase() : '';
-  return ({ a:'☀️',aa:'☀️',b:'🌤️',bb:'🌤️',c:'⛅',cc:'☁️',d:'🌤️',
-            f:'🌫️',g:'🌫️',j:'🌨️',k:'⛈️',l:'⛈️',m:'🌦️',
-            n:'🌨️',o:'🌨️',p:'❄️',q:'🌧️',r:'🌦️',s:'⛈️',
-            t:'🌧️',u:'🌨️',v:'🌧️',w:'🌦️',ww:'🌦️' }[c] || '🌡️');
+// ── SVG weericons (inline, geen externe afhankelijkheid) ─
+const SVG_ICONS = {
+  sunny: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g fill="#FFD700">
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(0,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(45,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(90,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(135,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(180,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(225,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(270,32,32)"/>
+      <rect x="30" y="3" width="4" height="10" rx="2" transform="rotate(315,32,32)"/>
+    </g>
+    <circle cx="32" cy="32" r="14" fill="#FFD700"/>
+  </svg>`,
+
+  mostly_sunny: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g fill="#FFD700" opacity="0.95">
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(0,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(45,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(90,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(135,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(180,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(225,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(270,21,21)"/>
+      <rect x="19" y="2" width="3.5" height="9" rx="1.75" transform="rotate(315,21,21)"/>
+    </g>
+    <circle cx="21" cy="21" r="10" fill="#FFD700"/>
+    <path d="M16,43 Q10,43 10,37 Q10,31 16,31 Q17,25 24,25 Q33,25 35,31 Q41,31 41,37 Q41,44 34,44 Z" fill="#BDC8CE"/>
+  </svg>`,
+
+  partly_cloudy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <circle cx="23" cy="23" r="14" fill="#FFD700"/>
+    <path d="M14,46 Q8,46 8,39 Q8,33 14,33 Q15,27 22,27 Q31,27 34,33 Q41,33 41,39 Q41,46 34,46 Z" fill="#B0BEC5"/>
+  </svg>`,
+
+  cloudy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M8,36 Q2,36 2,29 Q2,22 9,22 Q11,15 20,15 Q31,15 34,22 Q42,22 42,29 Q42,37 33,37 Z" fill="#78909C"/>
+    <path d="M22,50 Q15,50 15,44 Q15,38 22,38 Q23,32 30,32 Q39,32 41,38 Q47,38 47,44 Q47,51 39,51 Z" fill="#B0BEC5"/>
+  </svg>`,
+
+  fog: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M8,20 Q4,20 4,16 Q4,12 8,12 Q9,9 13,9 Q20,9 21,13 Q26,13 26,17 Q26,21 20,21 Z" fill="#78909C" opacity="0.55"/>
+    <rect x="5"  y="27" width="54" height="5" rx="2.5" fill="#78909C" opacity="0.65"/>
+    <rect x="9"  y="36" width="46" height="5" rx="2.5" fill="#78909C" opacity="0.48"/>
+    <rect x="13" y="45" width="38" height="5" rx="2.5" fill="#78909C" opacity="0.32"/>
+  </svg>`,
+
+  drizzle: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M9,31 Q3,31 3,24 Q3,17 10,17 Q12,10 21,10 Q32,10 35,17 Q43,17 43,24 Q43,32 34,32 Z" fill="#90A4AE"/>
+    <g fill="#5C9BD6" opacity="0.85">
+      <ellipse cx="18" cy="44" rx="2.5" ry="4"/>
+      <ellipse cx="29" cy="49" rx="2.5" ry="4"/>
+      <ellipse cx="40" cy="44" rx="2.5" ry="4"/>
+    </g>
+  </svg>`,
+
+  rain: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M9,30 Q3,30 3,23 Q3,16 10,16 Q12,9 21,9 Q32,9 35,16 Q43,16 43,23 Q43,31 34,31 Z" fill="#607D8B"/>
+    <g fill="#4A90D9">
+      <ellipse cx="14" cy="41" rx="2.5" ry="4.5"/>
+      <ellipse cx="23" cy="48" rx="2.5" ry="4.5"/>
+      <ellipse cx="32" cy="41" rx="2.5" ry="4.5"/>
+      <ellipse cx="41" cy="48" rx="2.5" ry="4.5"/>
+    </g>
+  </svg>`,
+
+  snow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M9,30 Q3,30 3,23 Q3,16 10,16 Q12,9 21,9 Q32,9 35,16 Q43,16 43,23 Q43,31 34,31 Z" fill="#78909C"/>
+    <g fill="#E3F2FD">
+      <circle cx="14" cy="42" r="3.5"/>
+      <circle cx="25" cy="51" r="3.5"/>
+      <circle cx="36" cy="42" r="3.5"/>
+      <circle cx="47" cy="51" r="3.5"/>
+    </g>
+  </svg>`,
+
+  sleet: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M9,30 Q3,30 3,23 Q3,16 10,16 Q12,9 21,9 Q32,9 35,16 Q43,16 43,23 Q43,31 34,31 Z" fill="#78909C"/>
+    <ellipse cx="14" cy="41" rx="2.5" ry="4"   fill="#4A90D9"/>
+    <circle  cx="25" cy="51" r="3.5"            fill="#E3F2FD"/>
+    <ellipse cx="36" cy="41" rx="2.5" ry="4"   fill="#4A90D9"/>
+    <circle  cx="47" cy="51" r="3.5"            fill="#E3F2FD"/>
+  </svg>`,
+
+  thunderstorm: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M9,28 Q3,28 3,21 Q3,14 10,14 Q12,7 21,7 Q32,7 35,14 Q43,14 43,21 Q43,29 34,29 Z" fill="#455A64"/>
+    <polygon points="29,31 21,47 29,44 24,60 38,41 30,44" fill="#FFD700"/>
+  </svg>`,
+
+  warning: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <polygon points="32,5 61,59 3,59" fill="none" stroke="#E4032D" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="29.5" y="23" width="5" height="18" rx="2.5" fill="#E4032D"/>
+    <circle cx="32" cy="50" r="3.5" fill="#E4032D"/>
+  </svg>`,
+
+  default: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="26" fill="none" stroke="#546E7A" stroke-width="2.5"/>
+    <text x="32" y="42" text-anchor="middle" font-size="30" fill="#546E7A" font-family="Arial,sans-serif" font-weight="bold">?</text>
+  </svg>`
+};
+
+// ── Render SVG als <img> via data-URI ───────────────
+function weatherImg(key, size) {
+  const svg = SVG_ICONS[key] || SVG_ICONS.default;
+  const uri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  return `<img src="${uri}" width="${size}" height="${size}" style="display:block">`;
 }
 
-// ── Buienradar: weatherdescription → emoji ──────────
-function descEmoji(desc) {
-  if (!desc) return '🌡️';
+// ── Buienradar iconurl → sleutel ────────────────────
+function iconKey(url) {
+  if (!url) return 'default';
+  const m = url.match(/\/([a-z]+)\.png$/i);
+  const c = m ? m[1].toLowerCase() : '';
+  return ({
+    a:'sunny',   aa:'sunny',
+    b:'mostly_sunny', bb:'mostly_sunny',
+    c:'partly_cloudy', cc:'cloudy',
+    d:'mostly_sunny',
+    f:'fog',     g:'fog',
+    j:'sleet',   k:'thunderstorm', l:'thunderstorm',
+    m:'drizzle', n:'sleet',  o:'sleet',
+    p:'snow',    q:'rain',   r:'drizzle',
+    s:'thunderstorm', t:'rain', u:'sleet',
+    v:'rain',    w:'drizzle', ww:'drizzle'
+  }[c] || 'default');
+}
+
+// ── Buienradar omschrijving → sleutel ───────────────
+function descKey(desc) {
+  if (!desc) return 'default';
   const d = desc.toLowerCase();
-  if (d.includes('onweer'))             return '⛈️';
-  if (d.includes('hagel'))              return '🌨️';
-  if (d.includes('sneeuw'))             return '❄️';
-  if (d.includes('motregen'))           return '🌦️';
-  if (d.includes('buien'))              return '🌧️';
-  if (d.includes('regen'))              return '🌧️';
-  if (d.includes('mist')||d.includes('nevel')) return '🌫️';
-  if (d.includes('zonnig')||d.includes('helder')) return '☀️';
-  if (d.includes('licht bewolkt'))      return '🌤️';
-  if (d.includes('gedeeltelijk'))       return '⛅';
-  if (d.includes('bewolkt'))            return '☁️';
-  return '🌡️';
+  if (d.includes('onweer'))                       return 'thunderstorm';
+  if (d.includes('hagel'))                        return 'sleet';
+  if (d.includes('sneeuw'))                       return 'snow';
+  if (d.includes('motregen'))                     return 'drizzle';
+  if (d.includes('buien'))                        return 'rain';
+  if (d.includes('regen'))                        return 'rain';
+  if (d.includes('mist') || d.includes('nevel')) return 'fog';
+  if (d.includes('zonnig') || d.includes('helder')) return 'sunny';
+  if (d.includes('licht bewolkt'))                return 'mostly_sunny';
+  if (d.includes('gedeeltelijk'))                 return 'partly_cloudy';
+  if (d.includes('bewolkt'))                      return 'cloudy';
+  return 'default';
+}
+
+// ── WMO-code (Open-Meteo forecast) → sleutel ───────
+function wmoKey(code) {
+  if (code === 0)   return 'sunny';
+  if (code === 1)   return 'mostly_sunny';
+  if (code === 2)   return 'partly_cloudy';
+  if (code === 3)   return 'cloudy';
+  if (code <= 48)   return 'fog';
+  if (code <= 55)   return 'drizzle';
+  if (code <= 65)   return 'rain';
+  if (code <= 77)   return 'snow';
+  if (code <= 82)   return 'rain';
+  if (code <= 86)   return 'sleet';
+  return 'thunderstorm';
 }
 
 // ── Hulpfuncties ────────────────────────────────────
 const R = n => Math.round(n);
 
-// Haversine-afstand in km
 function km(lat1, lon1, lat2, lon2) {
   const dL = (lat2-lat1)*Math.PI/180, dO = (lon2-lon1)*Math.PI/180;
   const a  = Math.sin(dL/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dO/2)**2;
@@ -353,7 +473,10 @@ function errorTile(loc) {
     <div class="tile-head">
       <div><div class="city-name">${loc.name}</div><div class="city-region">${loc.region}</div></div>
     </div>
-    <div class="state-c"><span style="font-size:42px">⚠️</span><span class="state-lbl state-err">Geen verbinding</span></div>
+    <div class="state-c">
+      <div style="width:48px;height:48px">${weatherImg('warning', 48)}</div>
+      <span class="state-lbl state-err">Geen verbinding</span>
+    </div>
   </div>`;
 }
 
@@ -363,13 +486,9 @@ function safeR(val) {
 }
 
 function buildTile(loc, station, fcData) {
-  // Icoon: probeer beschrijving eerst, valt terug op iconurl van station
-  const iconViaDesc = descEmoji(station.weatherdescription);
-  const icon = (iconViaDesc !== '🌡️')
-    ? iconViaDesc
-    : iconEmoji(station.iconurl);
+  const keyViaDesc = descKey(station.weatherdescription);
+  const icon = (keyViaDesc !== 'default') ? keyViaDesc : iconKey(station.iconurl);
 
-  // Buienradar windspeed is in m/s → omrekenen naar km/u
   const windkmh = station.windspeed != null ? R(station.windspeed * 3.6) : '—';
   const windRic = station.winddirection || '—';
   const neerslag = station.rainFallLastHour != null
@@ -377,12 +496,11 @@ function buildTile(loc, station, fcData) {
   const temp     = station.temperature     != null ? R(station.temperature)     : '—';
   const feelTemp = station.feeltemperature != null ? R(station.feeltemperature) : '—';
 
-  // 4-daagse forecast op basis van Open-Meteo (locatie-specifiek)
   const fcHTML = fcData
     ? [1,2,3,4].map(i => `
         <div class="fc-item">
           <div class="fc-day">${dagNaam(fcData.time[i], i)}</div>
-          <div class="fc-icon">${wmoEmoji(fcData.weather_code[i])}</div>
+          <div class="fc-icon">${weatherImg(wmoKey(fcData.weather_code[i]), 30)}</div>
           <div class="fc-temps">
             <span class="fc-hi">${safeR(fcData.temperature_2m_max[i])}°</span>
             <span class="fc-lo">${safeR(fcData.temperature_2m_min[i])}°</span>
@@ -399,7 +517,7 @@ function buildTile(loc, station, fcData) {
         <div class="city-name">${loc.name}</div>
         <div class="city-region">${loc.region}</div>
       </div>
-      <div class="weather-icon-big">${icon}</div>
+      <div class="weather-icon-big">${weatherImg(icon, 72)}</div>
     </div>
 
     <div class="temp-row">
@@ -428,25 +546,10 @@ function buildTile(loc, station, fcData) {
 
     <div class="forecast-section">
       <div class="div"></div>
-      <div class="forecast-label">4-daagse verwachting · Buienradar</div>
+      <div class="forecast-label">4-daagse verwachting · Open-Meteo</div>
       <div class="forecast-row">${fcHTML}</div>
     </div>
   </div>`;
-}
-
-// ── WMO-code → emoji (voor Open-Meteo forecast) ────
-function wmoEmoji(code) {
-  if (code === 0)              return '☀️';
-  if (code === 1)              return '🌤️';
-  if (code === 2)              return '⛅';
-  if (code === 3)              return '☁️';
-  if (code <= 48)              return '🌫️';
-  if (code <= 55)              return '🌦️';
-  if (code <= 65)              return '🌧️';
-  if (code <= 77)              return '❄️';
-  if (code <= 82)              return '🌧️';
-  if (code <= 86)              return '🌨️';
-  return '⛈️';
 }
 
 // ── API: Buienradar (huidig weer) ───────────────────
@@ -476,7 +579,6 @@ function renderPlaceholders() {
 async function loadAll() {
   const tiles = Array.from(document.getElementById('grid').querySelectorAll('.tile'));
 
-  // Haal Buienradar (huidig) en alle locatie-forecasts parallel op
   let buienradarData;
   try {
     buienradarData = await fetchBuienradar();
@@ -493,15 +595,12 @@ async function loadAll() {
 
   const staties = buienradarData.actual.stationmeasurements;
 
-  // Per locatie: combineer Buienradar-station + Open-Meteo forecast
-  // Spreid verzoeken met 150ms tussenpoos om rate-limiting te voorkomen
   await Promise.all(LOCATIONS.map(async (loc, i) => {
     await new Promise(res => setTimeout(res, i * 150));
     try {
       const station = dichtstbij(staties, loc);
       if (!station) throw new Error('Geen station gevonden');
 
-      // Forecast apart ophalen — bij falen tonen we huidig weer mét lege forecast
       let fcData = null;
       try {
         fcData = await fetchForecast(loc);
