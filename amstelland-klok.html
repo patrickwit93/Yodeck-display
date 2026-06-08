@@ -539,7 +539,7 @@ function card(m){
     score=`<div class="score up">VS</div>`;
     badge=`<span class="bdg b-up">${ntime(m.d)}</span>`;
   }
-  return`<div class="mc${cls}"><div class="mm"><div class="mg">Gr.${m.g}</div><div class="md">${ndate(m.d)}</div><div class="mv">${m.v}</div></div><div class="tm ${m.h==='Netherlands'?'nl-t':''}"><span class="tf">${fl(m.h)}</span><span class="tn">${sn(m.h)}</span></div><div class="sc-wrap">${badge}${score}</div><div class="tm r ${m.a==='Netherlands'?'nl-t':''}"><span class="tf">${fl(m.a)}</span><span class="tn">${sn(m.a)}</span></div></div>`;
+  return`<div class="mc${cls}"><div class="mm"><div class="mg">Gr.${m.g}</div><div class="md">${ndate(m.d)}</div><div class="mv">${m.v}</div></div><div class="tm ${m.h==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.h)}</span></div><div class="sc-wrap">${badge}${score}</div><div class="tm r ${m.a==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.a)}</span></div></div>`;
 }
 
 function empty(i,t){return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:8px;opacity:.3"><div style="font-size:20px">${i}</div><div style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#7A8AAA">${t}</div></div>`}
