@@ -3,69 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amstelland Ingenieurs — Klok</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+<title>Amstelland Ingenieurs — Live Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#1D1D1B;font-family:'Montserrat','Segoe UI',sans-serif;color:#fff}
+
+/* Background */
 .bg{position:fixed;inset:0;background-image:linear-gradient(rgba(228,3,45,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(228,3,45,.025) 1px,transparent 1px);background-size:68px 68px;pointer-events:none;z-index:1}
-.vig{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(29,29,27,.8) 100%);pointer-events:none;z-index:3}
+.vig{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(29,29,27,.85) 100%);pointer-events:none;z-index:3}
 .topbar{position:fixed;top:0;left:0;right:0;height:4px;background:linear-gradient(to right,#A0021F,#E4032D,#A0021F);z-index:50}
+
+/* Corner brackets */
 .cr{position:fixed;width:46px;height:46px;pointer-events:none;z-index:30}
 .tl{top:20px;left:20px;border-top:2px solid #E4032D;border-left:2px solid #E4032D}
-.tr{top:20px;right:20px;border-top:2px solid #E4032D;border-right:2px solid #E4032D}
 .bl{bottom:20px;left:20px;border-bottom:2px solid #E4032D;border-left:2px solid #E4032D}
-.br{bottom:20px;right:20px;border-bottom:2px solid #E4032D;border-right:2px solid #E4032D}
-.co{position:fixed;font-size:10px;font-weight:300;letter-spacing:.18em;color:#3a3a38;pointer-events:none;z-index:30}
-.co-tl{top:24px;left:78px}
-.co-tr{top:24px;right:78px;text-align:right}
-.co-bl{bottom:24px;left:78px}
-.co-br{bottom:24px;right:78px;text-align:right}
-.live{position:fixed;top:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;z-index:40}
+.co-bl{position:fixed;bottom:24px;left:78px;font-size:10px;font-weight:300;letter-spacing:.18em;color:#3a3a38;pointer-events:none;z-index:30}
+
+/* Main layout */
+.layout{position:fixed;top:4px;left:0;right:0;bottom:0;display:flex;z-index:10}
+
+/* === LEFT PANEL (Clock) === */
+.left-panel{
+  width:42%;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  padding:40px 0 50px;
+}
+
+/* Live indicator */
+.live{position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;z-index:40}
 .livdot{width:7px;height:7px;border-radius:50%;background:#E4032D;animation:lp 2s ease-in-out infinite}
 @keyframes lp{0%,100%{opacity:1;box-shadow:0 0 8px #E4032D}50%{opacity:.3;box-shadow:none}}
 .livtxt{font-size:10px;letter-spacing:.24em;color:#484848;font-weight:300}
-.center{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;gap:0}
+
+/* Clock rings */
 .ring-wrap{position:relative}
 .ring-wrap::before{content:'';position:absolute;inset:-20px;border-radius:50%;border:1px solid rgba(228,3,45,.14);animation:rp 4s ease-in-out infinite}
 .ring-wrap::after{content:'';position:absolute;inset:-38px;border-radius:50%;border:1px solid rgba(228,3,45,.05);animation:rp 4s ease-in-out infinite .9s}
 @keyframes rp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.013)}}
+
 canvas#clk{display:block}
-.digital{margin-top:26px;display:flex;align-items:baseline;gap:4px}
-.dhm{font-size:clamp(28px,3.6vw,54px);font-weight:200;letter-spacing:.1em;color:#fff;font-variant-numeric:tabular-nums}
-.dsep{font-size:clamp(28px,3.6vw,54px);font-weight:100;color:#E4032D;animation:blink 1s step-start infinite}
+
+/* Digital time */
+.digital{margin-top:22px;display:flex;align-items:baseline;gap:4px}
+.dhm{font-size:clamp(20px,2.6vw,42px);font-weight:200;letter-spacing:.1em;color:#fff;font-variant-numeric:tabular-nums}
+.dsep{font-size:clamp(20px,2.6vw,42px);font-weight:100;color:#E4032D;animation:blink 1s step-start infinite}
 @keyframes blink{0%,49%{opacity:1}50%,99%{opacity:.1}}
-.dsec{font-size:clamp(14px,2vw,26px);font-weight:300;color:#E4032D;font-variant-numeric:tabular-nums;align-self:flex-start;margin-top:.18em}
-.datum{margin-top:10px;font-size:clamp(10px,1.1vw,13px);font-weight:300;letter-spacing:.24em;color:#484848;text-transform:uppercase}
-.logo-bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:10px;opacity:.6}
-.logo-line{width:3px;height:30px;background:#E4032D;border-radius:2px;flex-shrink:0}
+.dsec{font-size:clamp(11px,1.4vw,20px);font-weight:300;color:#E4032D;font-variant-numeric:tabular-nums;align-self:flex-start;margin-top:.18em}
+.datum{margin-top:8px;font-size:clamp(8px,.85vw,11px);font-weight:300;letter-spacing:.24em;color:#484848;text-transform:uppercase}
+
+/* Logo bottom */
+.logo-bar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;opacity:.55}
+.logo-line{width:3px;height:28px;background:#E4032D;border-radius:2px;flex-shrink:0}
 .logo-text{display:flex;flex-direction:column;line-height:1.15}
-.logo-text .ln{font-size:13px;font-weight:600;letter-spacing:.05em;color:#fff}
-.logo-text .lt{font-size:9px;font-weight:300;letter-spacing:.22em;color:#616160;text-transform:uppercase}
+.logo-text .ln{font-size:12px;font-weight:600;letter-spacing:.05em;color:#fff}
+.logo-text .lt{font-size:8px;font-weight:300;letter-spacing:.22em;color:#616160;text-transform:uppercase}
+
+/* === DIVIDER === */
+.divider{width:1px;background:linear-gradient(to bottom,transparent,rgba(228,3,45,.3) 15%,rgba(228,3,45,.3) 85%,transparent);flex-shrink:0;align-self:stretch;margin:16px 0}
+
+/* === RIGHT PANEL (WK) === */
+.right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* WK header */
+.wk-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px 7px;
+  border-bottom:1px solid rgba(228,3,45,.22);
+  background:rgba(7,8,13,.65);
+  flex-shrink:0;position:relative;
+}
+.wk-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#E4032D 30%,#A0021F 70%,transparent);opacity:.5}
+.wk-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;line-height:1;white-space:nowrap}
+.wk-title em{font-style:normal;color:#E4032D}
+.wk-sub{font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#7A8AAA;margin-top:2px}
+.wk-pills{display:flex;gap:6px;margin-left:auto;align-items:center}
+.wpill{background:#141B2A;border:1px solid rgba(228,3,45,.22);border-radius:3px;padding:3px 9px;text-align:center;position:relative;overflow:hidden}
+.wpill::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#E4032D;opacity:.3}
+.wp-n{font-family:'Bebas Neue',sans-serif;font-size:17px;line-height:1}
+.wp-n.r{color:#E4032D}.wp-n.g{color:#2ECC71}.wp-n.d{color:#7A8AAA}
+.wp-l{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#252D45}
+.wk-dot{width:6px;height:6px;border-radius:50%;background:#252D45}
+.wk-dot.ok{background:#2ECC71;animation:pulse 2s infinite}
+.wk-stxt{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7A8AAA}
+.wk-hdiv{width:1px;height:28px;background:rgba(228,3,45,.22);margin:0 6px;flex-shrink:0}
+
+/* NL stats inline */
+.nl-inline{display:flex;align-items:center;gap:7px;padding-left:10px;border-left:1px solid rgba(228,3,45,.22);flex-shrink:0}
+.nl-val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:#E4032D}
+.nl-lbl{font-size:7px;letter-spacing:1px;text-transform:uppercase;color:#7A8AAA;margin-top:1px}
+
+/* Single match list */
+.wk-list{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.list-body{flex:1;overflow:hidden;position:relative;height:0}
+.scroll-inner{display:flex;flex-direction:column}
+
+/* Section divider */
+.sec-div{display:flex;align-items:center;gap:8px;padding:5px 14px 4px;background:rgba(10,12,18,.85);border-bottom:1px solid rgba(255,255,255,.065);border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;position:sticky;top:0}
+.sec-div-title{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:4px}
+.sdt-live{color:#E74C3C}.sdt-done{color:#E4032D}.sdt-up{color:#7A8AAA}
+.sec-div-cnt{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#252D45;margin-left:auto}
+
+/* Match card */
+.mc{
+  display:grid;grid-template-columns:90px 1fr 150px 1fr;
+  align-items:center;gap:14px;
+  padding:24px 22px 22px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  border-left:6px solid transparent;
+}
+.mc.m-nl{background:rgba(255,85,0,.12);border-left-color:#FF5500}
+.mc.m-live{background:rgba(231,76,60,.07);border-left-color:#E74C3C;animation:liveGlow 2.5s infinite alternate}
+.mc.m-done{border-left-color:rgba(228,3,45,.3)}
+.mm{display:flex;flex-direction:column;gap:4px;padding-right:12px;border-right:1px solid rgba(255,255,255,.08)}
+.mg{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1;color:#E4032D}
+.md{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#7A8AAA;margin-top:2px}
+.mv{font-size:11px;color:#3a4060}
+.tm{display:flex;align-items:center;gap:13px}
+.tm.r{flex-direction:row-reverse}
+.tf{font-size:40px;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
+.tn{font-size:26px;font-weight:600;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm.r .tn{text-align:right}
+.tm.nl-t .tn{color:#FF7730}
+.sc-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.score{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:8px;line-height:1}
+.score.up{font-size:22px;color:#252D45;letter-spacing:10px}
+.score.lv{color:#E74C3C}
+.bdg{font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:2px}
+.b-live{color:#fff;background:#E74C3C;animation:pulseBg .8s infinite}
+.b-done{color:#E4032D;background:rgba(228,3,45,.12)}
+.b-up{color:#7A8AAA;background:rgba(255,255,255,.06)}
+.b-nlw{color:#2ECC71;background:rgba(46,204,113,.12);font-weight:700}
+.b-nll{color:#E74C3C;background:rgba(231,76,60,.12)}
+.b-nld{color:#F39C12;background:rgba(243,156,18,.12)}
+
+/* WK footer */
+.wk-footer{flex-shrink:0;padding:4px 14px;border-top:1px solid rgba(228,3,45,.15);background:rgba(7,8,13,.65);display:flex;align-items:center;justify-content:space-between}
+.wft{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#252D45;display:flex;align-items:center;gap:5px}
+.fleg{display:flex;align-items:center;gap:10px}
+.leg{display:flex;align-items:center;gap:4px;font-size:8px;color:#252D45}
+.ldot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+/* Animations */
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+@keyframes pulseBg{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes liveGlow{from{box-shadow:inset 3px 0 0 rgba(231,76,60,0)}to{box-shadow:inset 3px 0 16px rgba(231,76,60,.1)}}
+@keyframes scrollAnim{0%{transform:translateY(0)}100%{transform:translateY(var(--dist))}}
 </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="vig"></div>
 <div class="topbar"></div>
-<div class="cr tl"></div><div class="cr tr"></div><div class="cr bl"></div><div class="cr br"></div>
-<div class="co co-tl">N 52°22′48″</div>
-<div class="co co-tr">E 04°53′31″</div>
-<div class="co co-bl">AMSTERDAM — UTC+01:00</div>
-<div class="co co-br">INGENIEURS</div>
-<div class="live"><div class="livdot"></div><span class="livtxt">LIVE</span></div>
-<div class="center">
-  <div class="ring-wrap">
-    <canvas id="clk" width="1000" height="1000" style="max-width:90vmin;max-height:90vmin"></canvas>
+<div class="cr tl"></div>
+<div class="cr bl"></div>
+<div class="co-bl">AMSTERDAM — UTC+01:00</div>
+
+<div class="layout">
+
+  <!-- ===== LEFT: CLOCK ===== -->
+  <div class="left-panel">
+    <div class="live">
+      <div class="livdot"></div>
+      <span class="livtxt">LIVE</span>
+    </div>
+
+    <div class="ring-wrap">
+      <canvas id="clk" width="1000" height="1000" style="max-width:clamp(180px,30vw,480px);max-height:clamp(180px,72vh,480px)"></canvas>
+    </div>
+    <div class="digital">
+      <span class="dhm" id="dhm">--:--</span>
+      <span class="dsep">:</span>
+      <span class="dsec" id="dsec">--</span>
+    </div>
+    <div class="datum" id="datum"></div>
+
+    <div class="logo-bar">
+      <div class="logo-line"></div>
+      <div class="logo-text">
+        <span class="ln">Amstelland</span>
+        <span class="lt">Ingenieurs</span>
+      </div>
+    </div>
   </div>
-  <div class="digital">
-    <span class="dhm" id="dhm">--:--</span>
-    <span class="dsep">:</span>
-    <span class="dsec" id="dsec">--</span>
+
+  <!-- DIVIDER -->
+  <div class="divider"></div>
+
+  <!-- ===== RIGHT: WK DASHBOARD ===== -->
+  <div class="right-panel">
+
+    <div class="wk-hdr">
+      <div>
+        <div class="wk-title">WK 2026 — <em>Wedstrijden</em></div>
+        <div class="wk-sub">Groepsfase · live bijgewerkt · openfootball</div>
+      </div>
+      <div class="wk-pills">
+        <div class="wpill"><div class="wp-n r" id="cnt-l">0</div><div class="wp-l">Live nu</div></div>
+        <div class="wpill"><div class="wp-n g" id="cnt-d">0</div><div class="wp-l">Gespeeld</div></div>
+        <div class="wpill"><div class="wp-n d" id="cnt-u">0</div><div class="wp-l">Te spelen</div></div>
+      </div>
+      <div class="wk-hdiv"></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="wk-dot" id="dot"></div>
+        <span class="wk-stxt" id="stxt">Laden</span>
+      </div>
+      <div class="wk-hdiv"></div>
+      <!-- NL stats -->
+      <div class="nl-inline">
+        <span style="font-size:16px">🇳🇱</span>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="nl-val" id="nl-pts">0</div>
+          <div class="nl-lbl">punten</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div class="nl-val" id="nl-pos" style="color:#fff">#?</div>
+          <div class="nl-lbl">positie</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;margin-left:4px">
+          <div style="font-size:7px;letter-spacing:1px;color:#7A8AAA">volgende</div>
+          <div style="font-size:10px;color:#fff;font-weight:600" id="nl-next">–</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wk-list">
+      <div class="list-body">
+        <div class="scroll-inner" id="list-all"></div>
+      </div>
+    </div>
+
+    <div class="wk-footer">
+      <div class="wft"><div style="width:5px;height:5px;border-radius:50%;background:#2ECC71"></div>openfootball · gratis · geen API key · ververst elke 5 min</div>
+      <div class="fleg">
+        <div class="leg"><div class="ldot" style="background:#FF5500"></div>🇳🇱 Oranje</div>
+        <div class="leg"><div class="ldot" style="background:#E74C3C"></div>Live</div>
+        <div class="leg"><div class="ldot" style="background:rgba(228,3,45,.45)"></div>Gespeeld</div>
+        <div class="leg"><div class="ldot" style="background:#252D45"></div>Te spelen</div>
+      </div>
+      <div class="wft" id="upd">Bijgewerkt: --:--</div>
+    </div>
+
   </div>
-  <div class="datum" id="datum"></div>
 </div>
+
 <script>
+// ============================================================
+// CLOCK
+// ============================================================
 (function(){
   const cv=document.getElementById('clk'), ctx=cv.getContext('2d');
   const S=1000,cx=500,cy=500,R=464;
@@ -80,19 +270,13 @@ canvas#clk{display:block}
     const h=now.getHours()%12,m=now.getMinutes(),s=now.getSeconds(),ms=now.getMilliseconds();
     ctx.clearRect(0,0,S,S);
 
-    // achtergrond
     ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle='#141412';ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.stroke();
 
-    // outer ring
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.stroke();
-
-    // minuut-arc
     const mFrac=(m+s/60)/60;
     ctx.beginPath();ctx.arc(cx,cy,R,A,A+mFrac*Math.PI*2);
     ctx.strokeStyle=RED;ctx.lineWidth=3.5;ctx.lineCap='round';ctx.stroke();
 
-    // uur-arc
     const hFrac=(h+m/60)/12;
     ctx.save();
     ctx.beginPath();ctx.arc(cx,cy,R-12,A,A+hFrac*Math.PI*2);
@@ -101,34 +285,23 @@ canvas#clk{display:block}
     ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=7;ctx.stroke();
     ctx.restore();
 
-    // accent-ringen
-    ctx.beginPath();ctx.arc(cx,cy,R-22,0,Math.PI*2);
-    ctx.strokeStyle='rgba(228,3,45,.13)';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R-32,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R-22,0,Math.PI*2);ctx.strokeStyle='rgba(228,3,45,.13)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R-32,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=.5;ctx.stroke();
 
-    // kwadrantvulling
     const q=Math.floor(m/15);
     for(let i=0;i<4;i++){
-      ctx.beginPath();ctx.moveTo(cx,cy);
-      ctx.arc(cx,cy,R-35,A+i*Math.PI/2,A+(i+1)*Math.PI/2-.05);
-      ctx.closePath();
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R-35,A+i*Math.PI/2,A+(i+1)*Math.PI/2-.05);ctx.closePath();
       ctx.fillStyle=i<=q?'rgba(228,3,45,.04)':'rgba(255,255,255,.012)';ctx.fill();
     }
 
-    // tikstreepjes
     for(let i=0;i<60;i++){
       const a=i/60*Math.PI*2-Math.PI/2;
       const isQ=i%15===0,isH=i%5===0;
       const r1=isQ?R-40:isH?R-36:R-30;
-      ctx.beginPath();
-      ctx.moveTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));
-      ctx.lineTo(cx+(R-24)*Math.cos(a),cy+(R-24)*Math.sin(a));
-      ctx.strokeStyle=isQ?RED:isH?'rgba(255,255,255,.6)':'rgba(255,255,255,.15)';
-      ctx.lineWidth=isQ?2.5:isH?1.5:.8;ctx.lineCap='round';ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.lineTo(cx+(R-24)*Math.cos(a),cy+(R-24)*Math.sin(a));
+      ctx.strokeStyle=isQ?RED:isH?'rgba(255,255,255,.6)':'rgba(255,255,255,.15)';ctx.lineWidth=isQ?2.5:isH?1.5:.8;ctx.lineCap='round';ctx.stroke();
     }
 
-    // uurcijfers
     [12,1,2,3,4,5,6,7,8,9,10,11].forEach((n,i)=>{
       const a=i/12*Math.PI*2-Math.PI/2,r=R-120;
       const isMain=i%3===0;
@@ -138,72 +311,48 @@ canvas#clk{display:block}
       ctx.fillText(String(n),cx+r*Math.cos(a),cy+r*Math.sin(a));
     });
 
-
-    // kruislijnen
     ctx.save();ctx.globalAlpha=.03;ctx.strokeStyle=RED;ctx.lineWidth=1;
     ctx.beginPath();ctx.moveTo(cx,cy-R+28);ctx.lineTo(cx,cy+R-28);ctx.stroke();
     ctx.beginPath();ctx.moveTo(cx-R+28,cy);ctx.lineTo(cx+R-28,cy);ctx.stroke();
     ctx.restore();
 
-    // logo in de klok (rode balk + tekst, onder middelpunt)
     const lx=cx, ly=cy+R*0.52;
-    // rode verticale balk
     ctx.fillStyle='#E4032D';
     ctx.beginPath();
-    if(ctx.roundRect)ctx.roundRect(lx-70,ly-22,5,44,2);
-    else ctx.rect(lx-70,ly-22,5,44);
+    if(ctx.roundRect)ctx.roundRect(lx-70,ly-22,5,44,2);else ctx.rect(lx-70,ly-22,5,44);
     ctx.fill();
-    // "Amstelland"
-    ctx.font=`600 22px ${nf}`;
-    ctx.fillStyle='rgba(255,255,255,.85)';
-    ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.fillText('Amstelland',lx-58,ly-8);
-    // "Ingenieurs"
-    ctx.font=`300 14px ${nf}`;
-    ctx.fillStyle='rgba(255,255,255,.38)';
-    ctx.letterSpacing='0.1em';
-    ctx.fillText('Ingenieurs',lx-58,ly+12);
-    ctx.letterSpacing='0';
+    ctx.font=`600 22px ${nf}`;ctx.fillStyle='rgba(255,255,255,.85)';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText('Amstelland',lx-58,ly-8);
+    ctx.font=`300 14px ${nf}`;ctx.fillStyle='rgba(255,255,255,.38)';ctx.fillText('Ingenieurs',lx-58,ly+12);
 
-    // uurwijzer
     hand((h+m/60+s/3600)*30,R*.46,16,WHITE,.95);
-    // minuutwijzer
     hand((m+s/60)*6,R*.70,9,WHITE,1);
-    // secondewijzer
+
     const sa=(s+ms/1000)*6;
     const rad=(sa-90)*Math.PI/180,sl=R*.80,st=R*.22;
     ctx.save();ctx.shadowColor=RED;ctx.shadowBlur=18;
-    ctx.beginPath();
-    ctx.moveTo(cx-st*Math.cos(rad),cy-st*Math.sin(rad));
-    ctx.lineTo(cx+sl*Math.cos(rad),cy+sl*Math.sin(rad));
+    ctx.beginPath();ctx.moveTo(cx-st*Math.cos(rad),cy-st*Math.sin(rad));ctx.lineTo(cx+sl*Math.cos(rad),cy+sl*Math.sin(rad));
     ctx.strokeStyle=RED;ctx.lineWidth=4;ctx.lineCap='round';ctx.stroke();
     ctx.beginPath();ctx.arc(cx+(sl-28)*Math.cos(rad),cy+(sl-28)*Math.sin(rad),9,0,Math.PI*2);
     ctx.fillStyle=RED;ctx.shadowBlur=24;ctx.fill();
     ctx.restore();
 
-    // seconde-arc
     ctx.beginPath();ctx.arc(cx,cy,R+3,A,A+(s+ms/1000)/60*Math.PI*2);
     ctx.strokeStyle='rgba(228,3,45,.38)';ctx.lineWidth=4;ctx.lineCap='round';ctx.stroke();
 
-    // middelpunt
     ctx.beginPath();ctx.arc(cx,cy,22,0,Math.PI*2);ctx.fillStyle='#141412';ctx.fill();
     ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);ctx.fillStyle=RED;ctx.fill();
     ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fillStyle=WHITE;ctx.fill();
 
-    // digitaal
     const p=n=>String(n).padStart(2,'0');
     document.getElementById('dhm').textContent=`${p(now.getHours())}:${p(m)}`;
     document.getElementById('dsec').textContent=p(s);
-    document.getElementById('datum').textContent=
-      `${days[now.getDay()]}  ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    document.getElementById('datum').textContent=`${days[now.getDay()]}  ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
   }
 
   function hand(deg,len,w,color,alpha){
     const a=(deg-90)*Math.PI/180,tail=len*.16;
     ctx.save();ctx.globalAlpha=alpha;
-    ctx.beginPath();
-    ctx.moveTo(cx-tail*Math.cos(a),cy-tail*Math.sin(a));
-    ctx.lineTo(cx+len*Math.cos(a),cy+len*Math.sin(a));
+    ctx.beginPath();ctx.moveTo(cx-tail*Math.cos(a),cy-tail*Math.sin(a));ctx.lineTo(cx+len*Math.cos(a),cy+len*Math.sin(a));
     ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';ctx.stroke();
     ctx.restore();
   }
@@ -211,6 +360,197 @@ canvas#clk{display:block}
   function loop(){draw();requestAnimationFrame(loop);}
   loop();
 })();
+
+// ============================================================
+// WK DATA & RENDER
+// ============================================================
+const DATA='https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+const FLAGS={Mexico:'🇲🇽','South Africa':'🇿🇦','South Korea':'🇰🇷','Czech Republic':'🇨🇿',Canada:'🇨🇦','Bosnia-Herzegovina':'🇧🇦',Qatar:'🇶🇦',Switzerland:'🇨🇭',Brazil:'🇧🇷',Morocco:'🇲🇦',Haiti:'🇭🇹',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿','United States':'🇺🇸',Paraguay:'🇵🇾',Australia:'🇦🇺',Turkey:'🇹🇷',Germany:'🇩🇪',Curacao:'🇨🇼','Ivory Coast':'🇨🇮',Ecuador:'🇪🇨',Netherlands:'🇳🇱',Japan:'🇯🇵',Sweden:'🇸🇪',Tunisia:'🇹🇳',Belgium:'🇧🇪',Egypt:'🇪🇬',Iran:'🇮🇷','New Zealand':'🇳🇿',Spain:'🇪🇸','Cape Verde':'🇨🇻','Saudi Arabia':'🇸🇦',Uruguay:'🇺🇾',France:'🇫🇷',Senegal:'🇸🇳',Iraq:'🇮🇶',Norway:'🇳🇴',Argentina:'🇦🇷',Algeria:'🇩🇿',Austria:'🇦🇹',Jordan:'🇯🇴',Portugal:'🇵🇹','DR Congo':'🇨🇩',Uzbekistan:'🇺🇿',Colombia:'🇨🇴',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Croatia:'🇭🇷',Ghana:'🇬🇭',Panama:'🇵🇦'};
+const NL_NAMES={Netherlands:'Nederland','South Africa':'Zuid-Afrika','South Korea':'Zuid-Korea','Czech Republic':'Tsjechië','Bosnia-Herzegovina':'Bosnië-Herzegovina','Saudi Arabia':'Saudi-Arabië','Ivory Coast':'Ivoorkust','United States':'Verenigde Staten','New Zealand':'Nieuw-Zeeland','Cape Verde':'Kaapverdië','DR Congo':'DR Congo','Uzbekistan':'Oezbekistan','Bosnia and Herzegovina':'Bosnië-Herzegovina'};
+const sn=n=>NL_NAMES[n]||n;const fl=n=>FLAGS[n]||'🏳️';
+
+const ALL=[
+  {g:'A',h:'Mexico',a:'South Africa',u:'2026-06-11T19:00:00Z',v:'Mexico City'},
+  {g:'A',h:'South Korea',a:'Czech Republic',u:'2026-06-12T02:00:00Z',v:'Guadalajara'},
+  {g:'B',h:'Canada',a:'Bosnia-Herzegovina',u:'2026-06-12T19:00:00Z',v:'Toronto'},
+  {g:'B',h:'Qatar',a:'Switzerland',u:'2026-06-13T19:00:00Z',v:'Guadalajara'},
+  {g:'D',h:'United States',a:'Paraguay',u:'2026-06-13T01:00:00Z',v:'Los Angeles'},
+  {g:'C',h:'Brazil',a:'Morocco',u:'2026-06-13T22:00:00Z',v:'Dallas'},
+  {g:'C',h:'Haiti',a:'Scotland',u:'2026-06-14T01:00:00Z',v:'Philadelphia'},
+  {g:'D',h:'Australia',a:'Turkey',u:'2026-06-14T04:00:00Z',v:'Kansas City'},
+  {g:'E',h:'Germany',a:'Curacao',u:'2026-06-14T17:00:00Z',v:'Houston'},
+  {g:'F',h:'Netherlands',a:'Japan',u:'2026-06-14T20:00:00Z',v:'Dallas'},
+  {g:'E',h:'Ivory Coast',a:'Ecuador',u:'2026-06-14T23:00:00Z',v:'Philadelphia'},
+  {g:'F',h:'Sweden',a:'Tunisia',u:'2026-06-15T02:00:00Z',v:'Monterrey'},
+  {g:'G',h:'Belgium',a:'Egypt',u:'2026-06-15T13:00:00Z',v:'Seattle'},
+  {g:'H',h:'Spain',a:'Cape Verde',u:'2026-06-15T16:00:00Z',v:'Atlanta'},
+  {g:'G',h:'Iran',a:'New Zealand',u:'2026-06-15T19:00:00Z',v:'Los Angeles'},
+  {g:'H',h:'Saudi Arabia',a:'Uruguay',u:'2026-06-15T22:00:00Z',v:'Miami'},
+  {g:'J',h:'Argentina',a:'Algeria',u:'2026-06-16T01:00:00Z',v:'Dallas'},
+  {g:'I',h:'France',a:'Senegal',u:'2026-06-16T19:00:00Z',v:'Philadelphia'},
+  {g:'J',h:'Austria',a:'Jordan',u:'2026-06-17T01:00:00Z',v:'Seattle'},
+  {g:'I',h:'Iraq',a:'Norway',u:'2026-06-17T01:00:00Z',v:'New York/NJ'},
+  {g:'K',h:'Portugal',a:'DR Congo',u:'2026-06-17T19:00:00Z',v:'Los Angeles'},
+  {g:'K',h:'Uzbekistan',a:'Colombia',u:'2026-06-18T01:00:00Z',v:'Philadelphia'},
+  {g:'A',h:'Czech Republic',a:'South Africa',u:'2026-06-18T16:00:00Z',v:'Atlanta'},
+  {g:'B',h:'Switzerland',a:'Bosnia-Herzegovina',u:'2026-06-18T19:00:00Z',v:'Toronto'},
+  {g:'L',h:'England',a:'Croatia',u:'2026-06-18T19:00:00Z',v:'Miami'},
+  {g:'L',h:'Ghana',a:'Panama',u:'2026-06-18T22:00:00Z',v:'Houston'},
+  {g:'A',h:'Mexico',a:'South Korea',u:'2026-06-19T01:00:00Z',v:'Guadalajara'},
+  {g:'B',h:'Canada',a:'Qatar',u:'2026-06-19T01:00:00Z',v:'Toronto'},
+  {g:'D',h:'United States',a:'Australia',u:'2026-06-19T19:00:00Z',v:'Seattle'},
+  {g:'C',h:'Scotland',a:'Morocco',u:'2026-06-19T22:00:00Z',v:'Dallas'},
+  {g:'C',h:'Brazil',a:'Haiti',u:'2026-06-20T01:00:00Z',v:'Los Angeles'},
+  {g:'D',h:'Turkey',a:'Paraguay',u:'2026-06-20T04:00:00Z',v:'Kansas City'},
+  {g:'F',h:'Netherlands',a:'Sweden',u:'2026-06-20T17:00:00Z',v:'Houston'},
+  {g:'E',h:'Germany',a:'Ivory Coast',u:'2026-06-20T20:00:00Z',v:'Toronto'},
+  {g:'E',h:'Ecuador',a:'Curacao',u:'2026-06-21T00:00:00Z',v:'Kansas City'},
+  {g:'F',h:'Tunisia',a:'Japan',u:'2026-06-21T04:00:00Z',v:'Monterrey'},
+  {g:'H',h:'Spain',a:'Saudi Arabia',u:'2026-06-21T16:00:00Z',v:'Atlanta'},
+  {g:'G',h:'Belgium',a:'Iran',u:'2026-06-21T19:00:00Z',v:'Los Angeles'},
+  {g:'H',h:'Uruguay',a:'Cape Verde',u:'2026-06-21T22:00:00Z',v:'Miami'},
+  {g:'G',h:'New Zealand',a:'Egypt',u:'2026-06-22T01:00:00Z',v:'Vancouver'},
+  {g:'I',h:'France',a:'Iraq',u:'2026-06-22T16:00:00Z',v:'Philadelphia'},
+  {g:'J',h:'Argentina',a:'Austria',u:'2026-06-22T19:00:00Z',v:'Dallas'},
+  {g:'I',h:'Norway',a:'Senegal',u:'2026-06-22T22:00:00Z',v:'New York/NJ'},
+  {g:'J',h:'Jordan',a:'Algeria',u:'2026-06-23T01:00:00Z',v:'Los Angeles'},
+  {g:'K',h:'Portugal',a:'Uzbekistan',u:'2026-06-23T16:00:00Z',v:'Los Angeles'},
+  {g:'K',h:'Colombia',a:'DR Congo',u:'2026-06-23T22:00:00Z',v:'Miami'},
+  {g:'L',h:'England',a:'Ghana',u:'2026-06-24T16:00:00Z',v:'Atlanta'},
+  {g:'L',h:'Panama',a:'Croatia',u:'2026-06-24T22:00:00Z',v:'Houston'},
+  {g:'A',h:'South Korea',a:'Mexico',u:'2026-06-24T23:00:00Z',v:'Guadalajara'},
+  {g:'A',h:'South Africa',a:'Czech Republic',u:'2026-06-24T23:00:00Z',v:'Atlanta'},
+  {g:'B',h:'Bosnia-Herzegovina',a:'Qatar',u:'2026-06-25T01:00:00Z',v:'Toronto'},
+  {g:'B',h:'Switzerland',a:'Canada',u:'2026-06-25T01:00:00Z',v:'Vancouver'},
+  {g:'E',h:'Ecuador',a:'Germany',u:'2026-06-25T21:00:00Z',v:'New York/NJ'},
+  {g:'E',h:'Curacao',a:'Ivory Coast',u:'2026-06-25T21:00:00Z',v:'Philadelphia'},
+  {g:'C',h:'Morocco',a:'Brazil',u:'2026-06-25T23:00:00Z',v:'Dallas'},
+  {g:'C',h:'Scotland',a:'Haiti',u:'2026-06-25T23:00:00Z',v:'Philadelphia'},
+  {g:'F',h:'Japan',a:'Sweden',u:'2026-06-25T23:00:00Z',v:'Dallas'},
+  {g:'F',h:'Tunisia',a:'Netherlands',u:'2026-06-25T23:00:00Z',v:'Kansas City'},
+  {g:'H',h:'Cape Verde',a:'Saudi Arabia',u:'2026-06-26T01:00:00Z',v:'Miami'},
+  {g:'H',h:'Uruguay',a:'Spain',u:'2026-06-26T01:00:00Z',v:'New York/NJ'},
+  {g:'D',h:'Paraguay',a:'Australia',u:'2026-06-26T23:00:00Z',v:'Seattle'},
+  {g:'D',h:'Turkey',a:'United States',u:'2026-06-26T23:00:00Z',v:'Los Angeles'},
+  {g:'G',h:'Egypt',a:'Iran',u:'2026-06-27T03:00:00Z',v:'Seattle'},
+  {g:'G',h:'New Zealand',a:'Belgium',u:'2026-06-27T03:00:00Z',v:'Vancouver'},
+  {g:'I',h:'Senegal',a:'Iraq',u:'2026-06-27T01:00:00Z',v:'Seattle'},
+  {g:'I',h:'Norway',a:'France',u:'2026-06-27T01:00:00Z',v:'New York/NJ'},
+  {g:'J',h:'Algeria',a:'Austria',u:'2026-06-27T21:00:00Z',v:'Los Angeles'},
+  {g:'J',h:'Jordan',a:'Argentina',u:'2026-06-27T21:00:00Z',v:'Dallas'},
+  {g:'K',h:'DR Congo',a:'Uzbekistan',u:'2026-06-28T01:00:00Z',v:'Miami'},
+  {g:'K',h:'Colombia',a:'Portugal',u:'2026-06-28T01:00:00Z',v:'New York/NJ'},
+  {g:'L',h:'Croatia',a:'Ghana',u:'2026-06-28T21:00:00Z',v:'Houston'},
+  {g:'L',h:'Panama',a:'England',u:'2026-06-28T21:00:00Z',v:'Miami'},
+];
+const NL_TEAMS=['Netherlands','Japan','Sweden','Tunisia'];
+const NL_M=ALL.filter(m=>m.h==='Netherlands'||m.a==='Netherlands');
+let SCORES={},tG=0,tP=0;
+
+async function load(){
+  try{
+    const r=await fetch(DATA+'?t='+Math.floor(Date.now()/300000));
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    SCORES={};tG=0;tP=0;
+    (j.matches||[]).forEach(m=>{
+      const sc=m.score?.ft;
+      if(sc){SCORES[`${m.team1}|${m.team2}`]=sc;SCORES[`${n2(m.team1)}|${n2(m.team2)}`]=sc;tG+=sc[0]+sc[1];tP++}
+    });
+    setDot('ok');
+  }catch{setDot('err')}
+  render();
+  document.getElementById('upd').textContent='Bijgewerkt: '+nt();
+}
+
+function n2(n){const m={'Korea Republic':'South Korea','Bosnia and Herzegovina':'Bosnia-Herzegovina','Türkiye':'Turkey','Czechia':'Czech Republic','Curaçao':'Curacao','USA':'United States',"Côte d'Ivoire":'Ivory Coast'};return m[n]||n}
+function gsc(h,a){return SCORES[`${h}|${a}`]||SCORES[`${n2(h)}|${n2(a)}`]||null}
+
+function render(){
+  const now=new Date(),today=now.toLocaleDateString('nl-NL');
+  const live=[],done=[],up=[];
+  ALL.forEach(m=>{
+    const d=new Date(m.u),sc=gsc(m.h,m.a),played=!!sc;
+    const isLive=!played&&now>=d&&now<new Date(d.getTime()+7200000);
+    const isToday=d.toLocaleDateString('nl-NL')===today;
+    const e={...m,d,sc,played,isLive,isToday};
+    if(isLive)live.push(e);else if(played)done.push(e);else if(isToday)live.push(e);else up.push(e);
+  });
+  live.sort((a,b)=>b.isLive-a.isLive||a.d-b.d);
+  done.sort((a,b)=>b.d-a.d);
+  up.sort((a,b)=>a.d-b.d);
+
+  document.getElementById('cnt-l').textContent=live.filter(m=>m.isLive).length;
+  document.getElementById('cnt-d').textContent=done.length;
+  document.getElementById('cnt-u').textContent=up.length;
+
+  // NL stats
+  const nlSt={};NL_TEAMS.forEach(t=>{nlSt[t]={pts:0,gf:0,ga:0}});
+  ALL.filter(m=>NL_TEAMS.includes(m.h)&&NL_TEAMS.includes(m.a)).forEach(m=>{
+    const sc=gsc(m.h,m.a);if(!sc)return;
+    const h=nlSt[m.h],a=nlSt[m.a];if(!h||!a)return;
+    h.gf+=sc[0];h.ga+=sc[1];a.gf+=sc[1];a.ga+=sc[0];
+    if(sc[0]>sc[1])h.pts+=3;else if(sc[0]<sc[1])a.pts+=3;else{h.pts++;a.pts++}
+  });
+  const sorted=Object.entries(nlSt).sort((a,b)=>b[1].pts-a[1].pts||(b[1].gf-b[1].ga)-(a[1].gf-a[1].ga)||b[1].gf-a[1].gf);
+  const nlPos=sorted.findIndex(x=>x[0]==='Netherlands')+1;
+  document.getElementById('nl-pts').textContent=nlSt['Netherlands'].pts;
+  document.getElementById('nl-pos').textContent='#'+nlPos;
+  const nextNl=NL_M.filter(m=>!gsc(m.h,m.a)&&new Date(m.u)>now).sort((a,b)=>new Date(a.u)-new Date(b.u))[0];
+  document.getElementById('nl-next').textContent=nextNl?ndShort(new Date(nextNl.u)):'✓ Klaar';
+
+  // Build single combined list: live → upcoming → played (most recent first)
+  let html='';
+  if(live.length){
+    html+=`<div class="sec-div"><span class="sec-div-title sdt-live">● Live &amp; Vandaag</span><span class="sec-div-cnt">${live.length} duel${live.length!==1?'s':''}</span></div>`;
+    html+=live.map(card).join('');
+  }
+  if(up.length){
+    html+=`<div class="sec-div"><span class="sec-div-title sdt-up">▷ Komende wedstrijden</span><span class="sec-div-cnt">${up.length} te spelen</span></div>`;
+    html+=up.map(card).join('');
+  }
+  if(done.length){
+    html+=`<div class="sec-div"><span class="sec-div-title sdt-done">✓ Gespeeld</span><span class="sec-div-cnt">${done.length} gespeeld</span></div>`;
+    html+=done.map(card).join('');
+  }
+  if(!html) html=empty('⏳','Wedstrijden laden…');
+
+  const inner=document.getElementById('list-all'),wrap=inner.parentElement;
+  inner.style.animation='none';
+  inner.innerHTML=html;
+  const ch=inner.scrollHeight,wh=wrap.clientHeight;
+  if(ch>wh){const dist=ch-wh,spd=Math.max(dist/36,10);inner.style.setProperty('--dist',`-${dist}px`);requestAnimationFrame(()=>{inner.style.animation=`scrollAnim ${spd}s linear infinite alternate`})}
+}
+
+function card(m){
+  const isNl=m.h==='Netherlands'||m.a==='Netherlands';
+  let score,badge,cls='';
+  if(isNl)cls+=' m-nl';
+  if(m.isLive){
+    score=`<div class="score lv">${m.sc?m.sc[0]+' – '+m.sc[1]:'0 – 0'}</div>`;
+    badge=`<span class="bdg b-live">●LIVE</span>`;cls+=' m-live';
+  }else if(m.played){
+    const sh=m.sc[0],sa=m.sc[1];
+    score=`<div class="score">${sh} – ${sa}</div>`;
+    if(isNl){const nlH=m.h==='Netherlands';const nlW=(nlH&&sh>sa)||(!nlH&&sa>sh),nlL=(nlH&&sh<sa)||(!nlH&&sa<sh);badge=nlW?`<span class="bdg b-nlw">Gewonnen</span>`:nlL?`<span class="bdg b-nll">Verloren</span>`:`<span class="bdg b-nld">Gelijk</span>`;}
+    else badge=`<span class="bdg b-done">FT</span>`;
+    cls+=' m-done';
+  }else{
+    score=`<div class="score up">VS</div>`;
+    badge=`<span class="bdg b-up">${ntime(m.d)}</span>`;
+  }
+  return`<div class="mc${cls}"><div class="mm"><div class="mg">Gr.${m.g}</div><div class="md">${ndate(m.d)}</div><div class="mv">${m.v}</div></div><div class="tm ${m.h==='Netherlands'?'nl-t':''}"><span class="tf">${fl(m.h)}</span><span class="tn">${sn(m.h)}</span></div><div class="sc-wrap">${badge}${score}</div><div class="tm r ${m.a==='Netherlands'?'nl-t':''}"><span class="tf">${fl(m.a)}</span><span class="tn">${sn(m.a)}</span></div></div>`;
+}
+
+function empty(i,t){return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:8px;opacity:.3"><div style="font-size:20px">${i}</div><div style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#7A8AAA">${t}</div></div>`}
+function setDot(s){const d=document.getElementById('dot'),t=document.getElementById('stxt');d.className='wk-dot';if(s==='ok'){d.classList.add('ok');t.textContent='Live data'}else{t.textContent='Offline'}}
+function ndate(d){return d.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}).replace(/\./g,'')}
+function ndShort(d){return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}
+function ntime(d){return d.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})+' u'}
+function nt(){return new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+
+setInterval(render,30000);
+load();setInterval(load,5*60*1000);
 </script>
 </body>
 </html>
