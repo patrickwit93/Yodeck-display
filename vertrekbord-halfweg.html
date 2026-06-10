@@ -23,7 +23,7 @@
       --fs-dir:     44px;
       --fs-via:     20px;
       --fs-badge:   16px;
-      --fs-track:   58px;
+      --fs-track:   82px;
       --fs-status:  18px;
       --row-pad:    28px 0;
     }
@@ -143,7 +143,7 @@
     ════════════════════════════════ */
     .col-head {
       display: grid;
-      grid-template-columns: 310px 1fr 230px 120px 170px;
+      grid-template-columns: 310px 1fr 260px 160px 170px;
       padding: 10px 48px 8px;
       flex-shrink: 0;
     }
@@ -175,7 +175,7 @@
     ════════════════════════════════ */
     .row {
       display: grid;
-      grid-template-columns: 310px 1fr 230px 120px 170px;
+      grid-template-columns: 310px 1fr 260px 160px 170px;
       align-items: center;
       padding: var(--row-pad);
       border-bottom: 1px solid rgba(255,255,255,.07);
@@ -307,25 +307,18 @@
     }
     .countdown-sf {
       display: inline-flex;
-      align-items: center; justify-content: center; gap: 8px;
-      background: #1e1e1c;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 3px;
-      padding: 10px 16px;
-      font-size: 28px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5);
-      min-height: 54px; min-width: 130px;
+      align-items: center; justify-content: center; gap: 14px;
+      font-size: 78px;
     }
     /* "OVER" en eenheid: kleiner, niet als flap */
     .cd-label {
-      font-size: 12px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       letter-spacing: 2.5px; text-transform: uppercase;
       color: var(--grijs-m); align-self: center;
       line-height: 1;
     }
-    .countdown-sf.soon { border-color: rgba(245,166,35,.4); background: rgba(245,166,35,.05); }
     .countdown-sf.soon .cd-label { color: #f5a623; }
-    .countdown-sf.now  { border-color: rgba(228,3,45,.5); background: rgba(228,3,45,.07); animation: blink 1s step-end infinite; }
+    .countdown-sf.now  { animation: blink 1s step-end infinite; }
     .countdown-sf.now  .cd-label { color: var(--rood); }
     .countdown-sf.gone { opacity: 0; pointer-events: none; }
 
@@ -942,7 +935,6 @@
               <div class="track-num">
                 <span class="sf-grp" data-sf data-text="${trk}" data-color="sf-white" data-delay="${d+170}"></span>
               </div>
-              <div class="track-lbl">spoor</div>
             </div>
             <div class="cell-status">${statusHtml}</div>
           </div>`;
@@ -1050,11 +1042,11 @@
     function _cdInfo(departs) {
       const diffSec = Math.round((departs - Date.now()) / 1000);
       const diffMin = Math.floor(diffSec / 60);
-      if (diffSec < -60) return { prefix: '',     num: '',              unit: '',    cls: 'gone', color: 'sf-grey'  };
+      if (diffSec < -60) return { prefix: '',     num: '',              unit: '',    cls: 'gone', color: 'sf-white' };
       if (diffSec <   0) return { prefix: '',     num: 'RIJDT WEG',     unit: '',    cls: 'now',  color: 'sf-red', static: true };
-      if (diffSec <  60) return { prefix: '',     num: String(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
-      if (diffMin <=  5) return { prefix: 'over', num: String(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
-      return                    { prefix: 'over', num: String(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
+      if (diffSec <  60) return { prefix: '',     num: pad(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
+      if (diffMin <=  5) return { prefix: 'over', num: pad(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
+      return                    { prefix: 'over', num: pad(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
     }
 
     function _buildCountdown(el, info) {
