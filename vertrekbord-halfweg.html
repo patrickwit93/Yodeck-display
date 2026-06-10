@@ -19,13 +19,13 @@
       --grijs-l:    #D9D9D9;
       --wit:        #FFFFFF;
 
-      --fs-time:    62px;
-      --fs-dir:     34px;
-      --fs-via:     17px;
+      --fs-time:    78px;
+      --fs-dir:     44px;
+      --fs-via:     20px;
       --fs-badge:   16px;
-      --fs-track:   46px;
-      --fs-status:  17px;
-      --row-pad:    22px 0;
+      --fs-track:   58px;
+      --fs-status:  18px;
+      --row-pad:    28px 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -143,7 +143,7 @@
     ════════════════════════════════ */
     .col-head {
       display: grid;
-      grid-template-columns: 215px 1fr 260px 110px 160px;
+      grid-template-columns: 310px 1fr 230px 120px 170px;
       padding: 10px 48px 8px;
       flex-shrink: 0;
     }
@@ -175,7 +175,7 @@
     ════════════════════════════════ */
     .row {
       display: grid;
-      grid-template-columns: 215px 1fr 260px 110px 160px;
+      grid-template-columns: 310px 1fr 230px 120px 170px;
       align-items: center;
       padding: var(--row-pad);
       border-bottom: 1px solid rgba(255,255,255,.07);
@@ -229,7 +229,7 @@
     }
 
     /* ── TREIN / DRUKTE ── */
-    .cell-train { display: flex; flex-direction: row; align-items: center; gap: 16px; }
+    .cell-train { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
     .train-top  { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
     .badge {
@@ -299,6 +299,68 @@
       font-size: 12px; font-weight: 500; color: rgba(228,3,45,.8);
       margin-top: 5px; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── AFTELKLOK kolom ── */
+    .cell-countdown {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .countdown-sf {
+      display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px;
+      background: #1e1e1c;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 3px;
+      padding: 10px 16px;
+      font-size: 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+      min-height: 54px; min-width: 130px;
+    }
+    /* "OVER" en eenheid: kleiner, niet als flap */
+    .cd-label {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m); align-self: center;
+      line-height: 1;
+    }
+    .countdown-sf.soon { border-color: rgba(245,166,35,.4); background: rgba(245,166,35,.05); }
+    .countdown-sf.soon .cd-label { color: #f5a623; }
+    .countdown-sf.now  { border-color: rgba(228,3,45,.5); background: rgba(228,3,45,.07); animation: blink 1s step-end infinite; }
+    .countdown-sf.now  .cd-label { color: var(--rood); }
+    .countdown-sf.gone { opacity: 0; pointer-events: none; }
+
+    /* ── DRUKTE CHIP (SF-kaartje stijl) ── */
+    .crowd-chip {
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      position: relative;
+      background: #1e1e1c;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 3px;
+      padding: 5px 13px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,0,0,.5);
+      min-width: 80px; text-align: center;
+    }
+    .crowd-chip::after {
+      content: '';
+      position: absolute; left: 6px; right: 6px;
+      top: calc(50% - 0.5px); height: 1px;
+      background: rgba(0,0,0,.55);
+      pointer-events: none;
+    }
+    .crowd-chip.crowd-none { color: rgba(255,255,255,.2); }
+    .crowd-chip.crowd-low  { color: rgba(255,255,255,.38); }
+    .crowd-chip.crowd-med  {
+      color: rgba(230,170,0,.9);
+      border-color: rgba(230,170,0,.35);
+      background: rgba(230,170,0,.05);
+    }
+    .crowd-chip.crowd-high {
+      color: var(--rood);
+      border-color: rgba(228,3,45,.4);
+      background: rgba(228,3,45,.06);
     }
 
     /* ═══════════════════════════════
@@ -444,7 +506,7 @@
   <script>
    const NS_API_KEY = '8a4e5ff007914724aee958afa0481ea6';
     const STATION_CODE = 'HWZB';
-    const MAX_ROWS     = 8;
+    const MAX_ROWS     = 6;
     const REFRESH_MS   = 60000;
   </script>
 
@@ -507,7 +569,7 @@
     <div class="col-head">
       <span>Vertrek</span>
       <span>Richting</span>
-      <span>Trein &amp; drukte</span>
+      <span class="c">Vertrekt over</span>
       <span class="c">Spoor</span>
       <span class="r">Status</span>
     </div>
@@ -823,9 +885,10 @@
         const msg = (dep.messages && dep.messages.length) ? dep.messages[0].text || '' : '';
         const cf  = dep.crowdForecast || '';
         const d   = idx * 55; // stagger-vertraging per rij (ms)
+        const departsIso = dep.actualDateTime || dep.plannedDateTime || '';
 
         /* ── Tijdcel ── */
-        // Encodeer de tijd als "HH|MM" zodat post-render de colon kan injecteren
+        const cdAttr = departsIso ? ` data-departs="${departsIso}"` : '';
         let timeCell;
         if (can) {
           timeCell = `
@@ -845,27 +908,14 @@
             </div>`;
         }
 
-        const pill = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
-
-        /* ── Drukte ── */
-        const cc = crowdCls(cf);
-        const cl = crowdLbl(cf);
-        const personSvg = `<svg class="crowd-icon" width="18" height="22" viewBox="0 0 18 22" fill="currentColor">
-          <circle cx="9" cy="5" r="4"/>
-          <path d="M1 21c0-4.4 3.6-8 8-8s8 3.6 8 8H1z"/>
-        </svg>`;
-        const crowdHtml = `
-          <div class="crowd ${cc || 'crowd-none'}">
-            ${personSvg}
-            <div class="crowd-bars"><b></b><b></b><b></b></div>
-            <span class="crowd-text">${cl || '–'}</span>
-          </div>`;
+        const cdClass = can ? 'countdown-sf gone' : 'countdown-sf';
 
         /* ── Status ── */
+        const delayBadge = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
         const statusHtml = can
           ? `<span class="status s-cancel">Rijdt niet</span>`
           : del >= 1
-            ? `<span class="status s-late">+${del} min</span>`
+            ? `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="status s-late">Te laat</span>${delayBadge}</div>`
             : `<span class="status s-ok">Op tijd</span>`;
 
         const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
@@ -885,12 +935,8 @@
               ${viaHtml}
               ${msgHtml}
             </div>
-            <div class="cell-train">
-              <div class="train-top">
-                <span class="badge ${badgeCls(cat)}">${cat}</span>
-                ${pill}
-              </div>
-              ${crowdHtml}
+            <div class="cell-countdown">
+              <div class="${cdClass}"${cdAttr}></div>
             </div>
             <div class="cell-track">
               <div class="track-num">
@@ -964,6 +1010,9 @@
           row.style.transition = 'opacity 0.2s ease';
         }, i * 70);
       });
+
+      /* ── Aftelklok SF-instanties initialiseren ── */
+      initCountdownFlaps();
     }
 
     /* ── Via-tekst scramble ── */
@@ -987,6 +1036,105 @@
           if (iter > TOTAL) { clearInterval(id); el.textContent = str; }
         }, 40);
       }, baseDelay);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       AFTELKLOK  –  update elke seconde alle .countdown-elementen
+    ══════════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════════
+       AFTELLEN  –  split-flap kaartjes per rij
+    ══════════════════════════════════════════════════════════ */
+    const countdownFlaps = new Map(); // wrapper-el → { sf, grp, lastText, lastColor }
+
+    // Geeft prefix (statisch), getal (SF), eenheid (statisch) terug
+    function _cdInfo(departs) {
+      const diffSec = Math.round((departs - Date.now()) / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffSec < -60) return { prefix: '',     num: '',              unit: '',    cls: 'gone', color: 'sf-grey'  };
+      if (diffSec <   0) return { prefix: '',     num: 'RIJDT WEG',     unit: '',    cls: 'now',  color: 'sf-red', static: true };
+      if (diffSec <  60) return { prefix: '',     num: String(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
+      if (diffMin <=  5) return { prefix: 'over', num: String(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
+      return                    { prefix: 'over', num: String(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
+    }
+
+    function _buildCountdown(el, info) {
+      el.innerHTML = '';
+      if (info.cls === 'gone') return null;
+
+      if (info.static) {
+        // "RIJDT WEG" — puur statische tekst
+        const lbl = document.createElement('span');
+        lbl.className   = 'cd-label';
+        lbl.textContent = info.num;
+        el.appendChild(lbl);
+        return null;
+      }
+
+      if (info.prefix) {
+        const pre = document.createElement('span');
+        pre.className   = 'cd-label';
+        pre.textContent = info.prefix;
+        el.appendChild(pre);
+      }
+
+      const grp = document.createElement('span');
+      grp.className = 'sf-grp';
+      el.appendChild(grp);
+
+      if (info.unit) {
+        const unit = document.createElement('span');
+        unit.className   = 'cd-label';
+        unit.textContent = info.unit;
+        el.appendChild(unit);
+      }
+
+      const sf = new SplitFlap(grp, info.color, 4);
+      sf.animateFast(info.num, 0);
+      return { sf, grp };
+    }
+
+    function initCountdownFlaps() {
+      countdownFlaps.clear();
+      document.querySelectorAll('.countdown-sf[data-departs]').forEach(el => {
+        const departs = new Date(el.dataset.departs).getTime();
+        if (isNaN(departs)) return;
+        const info = _cdInfo(departs);
+        el.className = 'countdown-sf' + (info.cls ? ' ' + info.cls : '');
+        const built = _buildCountdown(el, info);
+        if (built) {
+          countdownFlaps.set(el, { ...built, lastNum: info.num, lastColor: info.color, lastCls: info.cls });
+        }
+      });
+    }
+
+    function tickCountdowns() {
+      countdownFlaps.forEach((state, el) => {
+        const departs = new Date(el.dataset.departs).getTime();
+        if (isNaN(departs)) return;
+        const info = _cdInfo(departs);
+
+        if (info.cls === 'gone') {
+          el.className = 'countdown-sf gone';
+          countdownFlaps.delete(el);
+          return;
+        }
+
+        el.className = 'countdown-sf' + (info.cls ? ' ' + info.cls : '');
+
+        // Kleur of type veranderd → volledig herbouwen
+        if (info.color !== state.lastColor || !!info.static !== !!state.lastStatic) {
+          const built = _buildCountdown(el, info);
+          if (built) {
+            Object.assign(state, built, { lastNum: info.num, lastColor: info.color, lastCls: info.cls });
+          }
+          return;
+        }
+
+        if (info.num !== state.lastNum && state.sf) {
+          state.sf.animateFast(info.num);
+          state.lastNum = info.num;
+        }
+      });
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -1083,7 +1231,7 @@
       document.getElementById('ds').textContent =
         DAYS[now.getDay()] + ' ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
 
-      setInterval(tickClock, 1000);
+      setInterval(() => { tickClock(); tickCountdowns(); }, 1000);
 
       /* Boot-animatie starten: kaarten draaien willekeurige tekens
          totdat echte data van de NS API binnenkomt */
