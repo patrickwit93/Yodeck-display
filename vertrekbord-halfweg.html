@@ -19,13 +19,13 @@
       --grijs-l:    #D9D9D9;
       --wit:        #FFFFFF;
 
-      --fs-time:    78px;
-      --fs-dir:     44px;
-      --fs-via:     20px;
-      --fs-badge:   16px;
-      --fs-track:   82px;
-      --fs-status:  18px;
-      --row-pad:    28px 0;
+      --fs-time:    66px;
+      --fs-dir:     36px;
+      --fs-via:     16px;
+      --fs-badge:   15px;
+      --fs-track:   70px;
+      --fs-status:  16px;
+      --row-pad:    18px 0;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -270,7 +270,7 @@
     .crowd-high .crowd-text { color: var(--rood); }
 
     /* ── SPOOR ── */
-    .cell-track { text-align: center; }
+    .cell-track { display: flex; align-items: center; justify-content: center; }
     .track-num {
       font-size: var(--fs-track); font-weight: 700;
       color: var(--wit); line-height: 1;
@@ -284,7 +284,7 @@
     }
 
     /* ── STATUS ── */
-    .cell-status { text-align: right; }
+    .cell-status { display: flex; align-items: center; justify-content: flex-end; }
     .status {
       display: inline-flex; align-items: center; justify-content: flex-end;
       font-size: var(--fs-status); font-weight: 600;
@@ -307,14 +307,15 @@
     }
     .countdown-sf {
       display: inline-flex;
-      align-items: center; justify-content: center; gap: 14px;
-      font-size: 78px;
+      align-items: flex-end; justify-content: center; gap: 12px;
+      font-size: 66px;
     }
-    /* "OVER" en eenheid: kleiner, niet als flap */
+    /* eenheid: op basislijn van de kaartjes */
     .cd-label {
       font-size: 13px; font-weight: 700;
       letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--grijs-m); align-self: center;
+      color: var(--grijs-m);
+      padding-bottom: 8px;
       line-height: 1;
     }
     .countdown-sf.soon .cd-label { color: #f5a623; }
@@ -1044,9 +1045,9 @@
       const diffMin = Math.floor(diffSec / 60);
       if (diffSec < -60) return { prefix: '',     num: '',              unit: '',    cls: 'gone', color: 'sf-white' };
       if (diffSec <   0) return { prefix: '',     num: 'RIJDT WEG',     unit: '',    cls: 'now',  color: 'sf-red', static: true };
-      if (diffSec <  60) return { prefix: '',     num: pad(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
-      if (diffMin <=  5) return { prefix: 'over', num: pad(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
-      return                    { prefix: 'over', num: pad(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
+      if (diffSec <  60) return { prefix: '',  num: pad(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
+      if (diffMin <=  5) return { prefix: '',  num: pad(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
+      return                    { prefix: '',  num: pad(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
     }
 
     function _buildCountdown(el, info) {
