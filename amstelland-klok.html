@@ -201,7 +201,7 @@ canvas#clk{display:block}
     <div class="wk-hdr">
       <div>
         <div class="wk-title">WK 2026 — <em>Wedstrijden</em></div>
-        <div class="wk-sub">Groepsfase · live bijgewerkt · openfootball</div>
+        <div class="wk-sub">Groepsfase · live bijgewerkt · football-data.org</div>
       </div>
       <div class="wk-pills">
         <div class="wpill"><div class="wp-n r" id="cnt-l">0</div><div class="wp-l">Live nu</div></div>
@@ -239,7 +239,7 @@ canvas#clk{display:block}
     </div>
 
     <div class="wk-footer">
-      <div class="wft"><div style="width:5px;height:5px;border-radius:50%;background:#2ECC71"></div>openfootball · gratis · geen API key · ververst elke 5 min</div>
+      <div class="wft"><div style="width:5px;height:5px;border-radius:50%;background:#2ECC71"></div>football-data.org · live scores · ververst elke 5 min</div>
       <div class="fleg">
         <div class="leg"><div class="ldot" style="background:#FF5500"></div>🇳🇱 Oranje</div>
         <div class="leg"><div class="ldot" style="background:#E74C3C"></div>Live</div>
@@ -362,120 +362,123 @@ canvas#clk{display:block}
 })();
 
 // ============================================================
-// WK DATA & RENDER
+// WK DATA & RENDER  (football-data.org v4)
 // ============================================================
-const DATA='https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
-const FLAGS={Mexico:'🇲🇽','South Africa':'🇿🇦','South Korea':'🇰🇷','Czech Republic':'🇨🇿',Canada:'🇨🇦','Bosnia-Herzegovina':'🇧🇦',Qatar:'🇶🇦',Switzerland:'🇨🇭',Brazil:'🇧🇷',Morocco:'🇲🇦',Haiti:'🇭🇹',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿','United States':'🇺🇸',Paraguay:'🇵🇾',Australia:'🇦🇺',Turkey:'🇹🇷',Germany:'🇩🇪',Curacao:'🇨🇼','Ivory Coast':'🇨🇮',Ecuador:'🇪🇨',Netherlands:'🇳🇱',Japan:'🇯🇵',Sweden:'🇸🇪',Tunisia:'🇹🇳',Belgium:'🇧🇪',Egypt:'🇪🇬',Iran:'🇮🇷','New Zealand':'🇳🇿',Spain:'🇪🇸','Cape Verde':'🇨🇻','Saudi Arabia':'🇸🇦',Uruguay:'🇺🇾',France:'🇫🇷',Senegal:'🇸🇳',Iraq:'🇮🇶',Norway:'🇳🇴',Argentina:'🇦🇷',Algeria:'🇩🇿',Austria:'🇦🇹',Jordan:'🇯🇴',Portugal:'🇵🇹','DR Congo':'🇨🇩',Uzbekistan:'🇺🇿',Colombia:'🇨🇴',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Croatia:'🇭🇷',Ghana:'🇬🇭',Panama:'🇵🇦'};
-const NL_NAMES={Netherlands:'Nederland','South Africa':'Zuid-Afrika','South Korea':'Zuid-Korea','Czech Republic':'Tsjechië','Bosnia-Herzegovina':'Bosnië-Herzegovina','Saudi Arabia':'Saudi-Arabië','Ivory Coast':'Ivoorkust','United States':'Verenigde Staten','New Zealand':'Nieuw-Zeeland','Cape Verde':'Kaapverdië','DR Congo':'DR Congo','Uzbekistan':'Oezbekistan','Bosnia and Herzegovina':'Bosnië-Herzegovina'};
-const sn=n=>NL_NAMES[n]||n;const fl=n=>FLAGS[n]||'🏳️';
+const API_KEY='4222c8892e0d4f85b6e35b9f548b3071';
+const API_M='https://api.football-data.org/v4/competitions/WC/matches';
+const API_S='https://api.football-data.org/v4/competitions/WC/standings';
+const HDR={'X-Auth-Token':API_KEY};
 
-const ALL=[
-  {g:'A',h:'Mexico',a:'South Africa',u:'2026-06-11T19:00:00Z',v:'Mexico City'},
-  {g:'A',h:'South Korea',a:'Czech Republic',u:'2026-06-12T02:00:00Z',v:'Guadalajara'},
-  {g:'B',h:'Canada',a:'Bosnia-Herzegovina',u:'2026-06-12T19:00:00Z',v:'Toronto'},
-  {g:'B',h:'Qatar',a:'Switzerland',u:'2026-06-13T19:00:00Z',v:'Guadalajara'},
-  {g:'D',h:'United States',a:'Paraguay',u:'2026-06-13T01:00:00Z',v:'Los Angeles'},
-  {g:'C',h:'Brazil',a:'Morocco',u:'2026-06-13T22:00:00Z',v:'Dallas'},
-  {g:'C',h:'Haiti',a:'Scotland',u:'2026-06-14T01:00:00Z',v:'Philadelphia'},
-  {g:'D',h:'Australia',a:'Turkey',u:'2026-06-14T04:00:00Z',v:'Kansas City'},
-  {g:'E',h:'Germany',a:'Curacao',u:'2026-06-14T17:00:00Z',v:'Houston'},
-  {g:'F',h:'Netherlands',a:'Japan',u:'2026-06-14T20:00:00Z',v:'Dallas'},
-  {g:'E',h:'Ivory Coast',a:'Ecuador',u:'2026-06-14T23:00:00Z',v:'Philadelphia'},
-  {g:'F',h:'Sweden',a:'Tunisia',u:'2026-06-15T02:00:00Z',v:'Monterrey'},
-  {g:'G',h:'Belgium',a:'Egypt',u:'2026-06-15T13:00:00Z',v:'Seattle'},
-  {g:'H',h:'Spain',a:'Cape Verde',u:'2026-06-15T16:00:00Z',v:'Atlanta'},
-  {g:'G',h:'Iran',a:'New Zealand',u:'2026-06-15T19:00:00Z',v:'Los Angeles'},
-  {g:'H',h:'Saudi Arabia',a:'Uruguay',u:'2026-06-15T22:00:00Z',v:'Miami'},
-  {g:'J',h:'Argentina',a:'Algeria',u:'2026-06-16T01:00:00Z',v:'Dallas'},
-  {g:'I',h:'France',a:'Senegal',u:'2026-06-16T19:00:00Z',v:'Philadelphia'},
-  {g:'J',h:'Austria',a:'Jordan',u:'2026-06-17T01:00:00Z',v:'Seattle'},
-  {g:'I',h:'Iraq',a:'Norway',u:'2026-06-17T01:00:00Z',v:'New York/NJ'},
-  {g:'K',h:'Portugal',a:'DR Congo',u:'2026-06-17T19:00:00Z',v:'Los Angeles'},
-  {g:'K',h:'Uzbekistan',a:'Colombia',u:'2026-06-18T01:00:00Z',v:'Philadelphia'},
-  {g:'A',h:'Czech Republic',a:'South Africa',u:'2026-06-18T16:00:00Z',v:'Atlanta'},
-  {g:'B',h:'Switzerland',a:'Bosnia-Herzegovina',u:'2026-06-18T19:00:00Z',v:'Toronto'},
-  {g:'L',h:'England',a:'Croatia',u:'2026-06-18T19:00:00Z',v:'Miami'},
-  {g:'L',h:'Ghana',a:'Panama',u:'2026-06-18T22:00:00Z',v:'Houston'},
-  {g:'A',h:'Mexico',a:'South Korea',u:'2026-06-19T01:00:00Z',v:'Guadalajara'},
-  {g:'B',h:'Canada',a:'Qatar',u:'2026-06-19T01:00:00Z',v:'Toronto'},
-  {g:'D',h:'United States',a:'Australia',u:'2026-06-19T19:00:00Z',v:'Seattle'},
-  {g:'C',h:'Scotland',a:'Morocco',u:'2026-06-19T22:00:00Z',v:'Dallas'},
-  {g:'C',h:'Brazil',a:'Haiti',u:'2026-06-20T01:00:00Z',v:'Los Angeles'},
-  {g:'D',h:'Turkey',a:'Paraguay',u:'2026-06-20T04:00:00Z',v:'Kansas City'},
-  {g:'F',h:'Netherlands',a:'Sweden',u:'2026-06-20T17:00:00Z',v:'Houston'},
-  {g:'E',h:'Germany',a:'Ivory Coast',u:'2026-06-20T20:00:00Z',v:'Toronto'},
-  {g:'E',h:'Ecuador',a:'Curacao',u:'2026-06-21T00:00:00Z',v:'Kansas City'},
-  {g:'F',h:'Tunisia',a:'Japan',u:'2026-06-21T04:00:00Z',v:'Monterrey'},
-  {g:'H',h:'Spain',a:'Saudi Arabia',u:'2026-06-21T16:00:00Z',v:'Atlanta'},
-  {g:'G',h:'Belgium',a:'Iran',u:'2026-06-21T19:00:00Z',v:'Los Angeles'},
-  {g:'H',h:'Uruguay',a:'Cape Verde',u:'2026-06-21T22:00:00Z',v:'Miami'},
-  {g:'G',h:'New Zealand',a:'Egypt',u:'2026-06-22T01:00:00Z',v:'Vancouver'},
-  {g:'I',h:'France',a:'Iraq',u:'2026-06-22T16:00:00Z',v:'Philadelphia'},
-  {g:'J',h:'Argentina',a:'Austria',u:'2026-06-22T19:00:00Z',v:'Dallas'},
-  {g:'I',h:'Norway',a:'Senegal',u:'2026-06-22T22:00:00Z',v:'New York/NJ'},
-  {g:'J',h:'Jordan',a:'Algeria',u:'2026-06-23T01:00:00Z',v:'Los Angeles'},
-  {g:'K',h:'Portugal',a:'Uzbekistan',u:'2026-06-23T16:00:00Z',v:'Los Angeles'},
-  {g:'K',h:'Colombia',a:'DR Congo',u:'2026-06-23T22:00:00Z',v:'Miami'},
-  {g:'L',h:'England',a:'Ghana',u:'2026-06-24T16:00:00Z',v:'Atlanta'},
-  {g:'L',h:'Panama',a:'Croatia',u:'2026-06-24T22:00:00Z',v:'Houston'},
-  {g:'A',h:'South Korea',a:'Mexico',u:'2026-06-24T23:00:00Z',v:'Guadalajara'},
-  {g:'A',h:'South Africa',a:'Czech Republic',u:'2026-06-24T23:00:00Z',v:'Atlanta'},
-  {g:'B',h:'Bosnia-Herzegovina',a:'Qatar',u:'2026-06-25T01:00:00Z',v:'Toronto'},
-  {g:'B',h:'Switzerland',a:'Canada',u:'2026-06-25T01:00:00Z',v:'Vancouver'},
-  {g:'E',h:'Ecuador',a:'Germany',u:'2026-06-25T21:00:00Z',v:'New York/NJ'},
-  {g:'E',h:'Curacao',a:'Ivory Coast',u:'2026-06-25T21:00:00Z',v:'Philadelphia'},
-  {g:'C',h:'Morocco',a:'Brazil',u:'2026-06-25T23:00:00Z',v:'Dallas'},
-  {g:'C',h:'Scotland',a:'Haiti',u:'2026-06-25T23:00:00Z',v:'Philadelphia'},
-  {g:'F',h:'Japan',a:'Sweden',u:'2026-06-25T23:00:00Z',v:'Dallas'},
-  {g:'F',h:'Tunisia',a:'Netherlands',u:'2026-06-25T23:00:00Z',v:'Kansas City'},
-  {g:'H',h:'Cape Verde',a:'Saudi Arabia',u:'2026-06-26T01:00:00Z',v:'Miami'},
-  {g:'H',h:'Uruguay',a:'Spain',u:'2026-06-26T01:00:00Z',v:'New York/NJ'},
-  {g:'D',h:'Paraguay',a:'Australia',u:'2026-06-26T23:00:00Z',v:'Seattle'},
-  {g:'D',h:'Turkey',a:'United States',u:'2026-06-26T23:00:00Z',v:'Los Angeles'},
-  {g:'G',h:'Egypt',a:'Iran',u:'2026-06-27T03:00:00Z',v:'Seattle'},
-  {g:'G',h:'New Zealand',a:'Belgium',u:'2026-06-27T03:00:00Z',v:'Vancouver'},
-  {g:'I',h:'Senegal',a:'Iraq',u:'2026-06-27T01:00:00Z',v:'Seattle'},
-  {g:'I',h:'Norway',a:'France',u:'2026-06-27T01:00:00Z',v:'New York/NJ'},
-  {g:'J',h:'Algeria',a:'Austria',u:'2026-06-27T21:00:00Z',v:'Los Angeles'},
-  {g:'J',h:'Jordan',a:'Argentina',u:'2026-06-27T21:00:00Z',v:'Dallas'},
-  {g:'K',h:'DR Congo',a:'Uzbekistan',u:'2026-06-28T01:00:00Z',v:'Miami'},
-  {g:'K',h:'Colombia',a:'Portugal',u:'2026-06-28T01:00:00Z',v:'New York/NJ'},
-  {g:'L',h:'Croatia',a:'Ghana',u:'2026-06-28T21:00:00Z',v:'Houston'},
-  {g:'L',h:'Panama',a:'England',u:'2026-06-28T21:00:00Z',v:'Miami'},
-];
-const NL_TEAMS=['Netherlands','Japan','Sweden','Tunisia'];
-const NL_M=ALL.filter(m=>m.h==='Netherlands'||m.a==='Netherlands');
-let SCORES={},tG=0,tP=0;
+const FLAGS={
+  Mexico:'🇲🇽','South Africa':'🇿🇦','South Korea':'🇰🇷','Korea Republic':'🇰🇷',
+  'Czech Republic':'🇨🇿','Czechia':'🇨🇿',Canada:'🇨🇦',
+  'Bosnia-Herzegovina':'🇧🇦','Bosnia and Herzegovina':'🇧🇦',
+  Qatar:'🇶🇦',Switzerland:'🇨🇭',Brazil:'🇧🇷',Morocco:'🇲🇦',Haiti:'🇭🇹',
+  Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿','United States':'🇺🇸',USA:'🇺🇸',Paraguay:'🇵🇾',
+  Australia:'🇦🇺',Turkey:'🇹🇷','Türkiye':'🇹🇷',Germany:'🇩🇪',
+  Curacao:'🇨🇼','Curaçao':'🇨🇼','Ivory Coast':'🇨🇮',"Côte d'Ivoire":'🇨🇮',
+  Ecuador:'🇪🇨',Netherlands:'🇳🇱',Japan:'🇯🇵',Sweden:'🇸🇪',Tunisia:'🇹🇳',
+  Belgium:'🇧🇪',Egypt:'🇪🇬',Iran:'🇮🇷','New Zealand':'🇳🇿',Spain:'🇪🇸',
+  'Cape Verde':'🇨🇻','Saudi Arabia':'🇸🇦',Uruguay:'🇺🇾',France:'🇫🇷',
+  Senegal:'🇸🇳',Iraq:'🇮🇶',Norway:'🇳🇴',Argentina:'🇦🇷',Algeria:'🇩🇿',
+  Austria:'🇦🇹',Jordan:'🇯🇴',Portugal:'🇵🇹','DR Congo':'🇨🇩','Congo DR':'🇨🇩',
+  Uzbekistan:'🇺🇿',Colombia:'🇨🇴',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Croatia:'🇭🇷',Ghana:'🇬🇭',Panama:'🇵🇦'
+};
+
+const NL_NAMES={
+  Netherlands:'Nederland','South Africa':'Zuid-Afrika','South Korea':'Zuid-Korea',
+  'Korea Republic':'Zuid-Korea','Czech Republic':'Tsjechië','Czechia':'Tsjechië',
+  'Bosnia-Herzegovina':'Bosnië-Herzegovina','Bosnia and Herzegovina':'Bosnië-Herzegovina',
+  'Saudi Arabia':'Saudi-Arabië','Ivory Coast':'Ivoorkust',"Côte d'Ivoire":'Ivoorkust',
+  'United States':'Verenigde Staten',USA:'Verenigde Staten',
+  'New Zealand':'Nieuw-Zeeland','Cape Verde':'Kaapverdië',
+  'DR Congo':'DR Congo','Congo DR':'DR Congo',Uzbekistan:'Oezbekistan',
+  'Türkiye':'Turkije',Turkey:'Turkije','Curaçao':'Curaçao'
+};
+
+const ROUND_LBL={
+  GROUP_STAGE:'Gr.','LAST_32':'R32','ROUND_OF_32':'R32',
+  'LAST_16':'R16','ROUND_OF_16':'R16',
+  QUARTER_FINALS:'KW',SEMI_FINALS:'HF',
+  FINAL:'FIN',THIRD_PLACE:'3de'
+};
+
+const sn=n=>NL_NAMES[n]||n;
+const fl=n=>FLAGS[n]||'🏳️';
+
+// Normaliseer API-teamnamen
+function nn(n){
+  if(!n)return n;
+  const m={
+    'Korea Republic':'South Korea','Türkiye':'Turkey',"Côte d'Ivoire":'Ivory Coast',
+    'Curaçao':'Curacao','Bosnia and Herzegovina':'Bosnia-Herzegovina',
+    'Czechia':'Czech Republic','USA':'United States','Congo DR':'DR Congo'
+  };
+  return m[n]||n;
+}
+
+let ALL_MATCHES=[];
+let NL_STAND=null;
 
 async function load(){
   try{
-    const r=await fetch(DATA+'?t='+Math.floor(Date.now()/300000));
-    if(!r.ok)throw 0;
-    const j=await r.json();
-    SCORES={};tG=0;tP=0;
-    (j.matches||[]).forEach(m=>{
-      const sc=m.score?.ft;
-      if(sc){SCORES[`${m.team1}|${m.team2}`]=sc;SCORES[`${n2(m.team1)}|${n2(m.team2)}`]=sc;tG+=sc[0]+sc[1];tP++}
-    });
+    const [mr,sr]=await Promise.all([
+      fetch(API_M,{headers:HDR}),
+      fetch(API_S,{headers:HDR})
+    ]);
+
+    if(mr.ok){
+      const j=await mr.json();
+      ALL_MATCHES=(j.matches||[]).map(m=>({
+        h:nn(m.homeTeam.name),
+        a:nn(m.awayTeam.name),
+        u:m.utcDate,
+        v:m.venue||'',
+        g:m.group?m.group.replace('GROUP_',''):null,
+        stage:m.stage||'',
+        status:m.status,
+        sc:(m.score?.fullTime?.home!=null&&m.score?.fullTime?.away!=null)
+           ?[m.score.fullTime.home,m.score.fullTime.away]
+           :null,
+        min:m.minute||null
+      }));
+    }
+
+    if(sr.ok){
+      const j=await sr.json();
+      NL_STAND=null;
+      for(const t of(j.standings||[])){
+        if(t.type!=='TOTAL')continue;
+        const row=(t.table||[]).find(r=>nn(r.team.name)==='Netherlands');
+        if(row){NL_STAND=row;break;}
+      }
+    }
+
     setDot('ok');
-  }catch{setDot('err')}
+  }catch(e){
+    setDot('err');
+    console.error('WK load error:',e);
+  }
   render();
   document.getElementById('upd').textContent='Bijgewerkt: '+nt();
 }
 
-function n2(n){const m={'Korea Republic':'South Korea','Bosnia and Herzegovina':'Bosnia-Herzegovina','Türkiye':'Turkey','Czechia':'Czech Republic','Curaçao':'Curacao','USA':'United States',"Côte d'Ivoire":'Ivory Coast'};return m[n]||n}
-function gsc(h,a){return SCORES[`${h}|${a}`]||SCORES[`${n2(h)}|${n2(a)}`]||null}
-
 function render(){
   const now=new Date(),today=now.toLocaleDateString('nl-NL');
   const live=[],done=[],up=[];
-  ALL.forEach(m=>{
-    const d=new Date(m.u),sc=gsc(m.h,m.a),played=!!sc;
-    const isLive=!played&&now>=d&&now<new Date(d.getTime()+7200000);
+
+  ALL_MATCHES.forEach(m=>{
+    const d=new Date(m.u);
+    const isLive=m.status==='IN_PLAY'||m.status==='PAUSED';
+    const played=m.status==='FINISHED';
     const isToday=d.toLocaleDateString('nl-NL')===today;
-    const e={...m,d,sc,played,isLive,isToday};
-    if(isLive)live.push(e);else if(played)done.push(e);else if(isToday)live.push(e);else up.push(e);
+    const e={...m,d,played,isLive,isToday};
+    if(isLive)live.push(e);
+    else if(played)done.push(e);
+    else if(isToday)live.push(e);
+    else up.push(e);
   });
+
   live.sort((a,b)=>b.isLive-a.isLive||a.d-b.d);
   done.sort((a,b)=>b.d-a.d);
   up.sort((a,b)=>a.d-b.d);
@@ -484,22 +487,19 @@ function render(){
   document.getElementById('cnt-d').textContent=done.length;
   document.getElementById('cnt-u').textContent=up.length;
 
-  // NL stats
-  const nlSt={};NL_TEAMS.forEach(t=>{nlSt[t]={pts:0,gf:0,ga:0}});
-  ALL.filter(m=>NL_TEAMS.includes(m.h)&&NL_TEAMS.includes(m.a)).forEach(m=>{
-    const sc=gsc(m.h,m.a);if(!sc)return;
-    const h=nlSt[m.h],a=nlSt[m.a];if(!h||!a)return;
-    h.gf+=sc[0];h.ga+=sc[1];a.gf+=sc[1];a.ga+=sc[0];
-    if(sc[0]>sc[1])h.pts+=3;else if(sc[0]<sc[1])a.pts+=3;else{h.pts++;a.pts++}
-  });
-  const sorted=Object.entries(nlSt).sort((a,b)=>b[1].pts-a[1].pts||(b[1].gf-b[1].ga)-(a[1].gf-a[1].ga)||b[1].gf-a[1].gf);
-  const nlPos=sorted.findIndex(x=>x[0]==='Netherlands')+1;
-  document.getElementById('nl-pts').textContent=nlSt['Netherlands'].pts;
-  document.getElementById('nl-pos').textContent='#'+nlPos;
-  const nextNl=NL_M.filter(m=>!gsc(m.h,m.a)&&new Date(m.u)>now).sort((a,b)=>new Date(a.u)-new Date(b.u))[0];
+  // NL stats uit standings API
+  const pts=NL_STAND?.points??0;
+  const pos=NL_STAND?.position??'?';
+  document.getElementById('nl-pts').textContent=pts;
+  document.getElementById('nl-pos').textContent='#'+pos;
+
+  const nextNl=ALL_MATCHES
+    .filter(m=>(m.h==='Netherlands'||m.a==='Netherlands')
+      &&m.status!=='FINISHED'&&new Date(m.u)>now)
+    .sort((a,b)=>new Date(a.u)-new Date(b.u))[0];
   document.getElementById('nl-next').textContent=nextNl?ndShort(new Date(nextNl.u)):'✓ Klaar';
 
-  // Build single combined list: live → upcoming → played (most recent first)
+  // Bouw lijst
   let html='';
   if(live.length){
     html+=`<div class="sec-div"><span class="sec-div-title sdt-live">● Live &amp; Vandaag</span><span class="sec-div-cnt">${live.length} duel${live.length!==1?'s':''}</span></div>`;
@@ -513,33 +513,48 @@ function render(){
     html+=`<div class="sec-div"><span class="sec-div-title sdt-done">✓ Gespeeld</span><span class="sec-div-cnt">${done.length} gespeeld</span></div>`;
     html+=done.map(card).join('');
   }
-  if(!html) html=empty('⏳','Wedstrijden laden…');
+  if(!html)html=empty('⏳','Wedstrijden laden…');
 
   const inner=document.getElementById('list-all'),wrap=inner.parentElement;
   inner.style.animation='none';
   inner.innerHTML=html;
   const ch=inner.scrollHeight,wh=wrap.clientHeight;
-  if(ch>wh){const dist=ch-wh,spd=Math.max(dist/36,10);inner.style.setProperty('--dist',`-${dist}px`);requestAnimationFrame(()=>{inner.style.animation=`scrollAnim ${spd}s linear infinite alternate`})}
+  if(ch>wh){
+    const dist=ch-wh,spd=Math.max(dist/36,10);
+    inner.style.setProperty('--dist',`-${dist}px`);
+    requestAnimationFrame(()=>{inner.style.animation=`scrollAnim ${spd}s linear infinite alternate`});
+  }
 }
 
 function card(m){
   const isNl=m.h==='Netherlands'||m.a==='Netherlands';
+  const lbl=m.g?`Gr.${m.g}`:(ROUND_LBL[m.stage]||m.stage||'');
   let score,badge,cls='';
   if(isNl)cls+=' m-nl';
   if(m.isLive){
-    score=`<div class="score lv">${m.sc?m.sc[0]+' – '+m.sc[1]:'0 – 0'}</div>`;
-    badge=`<span class="bdg b-live">●LIVE</span>`;cls+=' m-live';
+    const sc=m.sc;
+    score=`<div class="score lv">${sc?sc[0]+' – '+sc[1]:'0 – 0'}</div>`;
+    badge=`<span class="bdg b-live">●LIVE${m.min?' '+m.min+"'":''}</span>`;
+    cls+=' m-live';
   }else if(m.played){
     const sh=m.sc[0],sa=m.sc[1];
     score=`<div class="score">${sh} – ${sa}</div>`;
-    if(isNl){const nlH=m.h==='Netherlands';const nlW=(nlH&&sh>sa)||(!nlH&&sa>sh),nlL=(nlH&&sh<sa)||(!nlH&&sa<sh);badge=nlW?`<span class="bdg b-nlw">Gewonnen</span>`:nlL?`<span class="bdg b-nll">Verloren</span>`:`<span class="bdg b-nld">Gelijk</span>`;}
-    else badge=`<span class="bdg b-done">FT</span>`;
+    if(isNl){
+      const nlH=m.h==='Netherlands';
+      const nlW=(nlH&&sh>sa)||(!nlH&&sa>sh);
+      const nlL=(nlH&&sh<sa)||(!nlH&&sa<sh);
+      badge=nlW?`<span class="bdg b-nlw">Gewonnen</span>`
+           :nlL?`<span class="bdg b-nll">Verloren</span>`
+               :`<span class="bdg b-nld">Gelijk</span>`;
+    }else{
+      badge=`<span class="bdg b-done">FT</span>`;
+    }
     cls+=' m-done';
   }else{
     score=`<div class="score up">VS</div>`;
     badge=`<span class="bdg b-up">${ntime(m.d)}</span>`;
   }
-  return`<div class="mc${cls}"><div class="mm"><div class="mg">Gr.${m.g}</div><div class="md">${ndate(m.d)}</div><div class="mv">${m.v}</div></div><div class="tm ${m.h==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.h)}</span></div><div class="sc-wrap">${badge}${score}</div><div class="tm r ${m.a==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.a)}</span></div></div>`;
+  return`<div class="mc${cls}"><div class="mm"><div class="mg">${lbl}</div><div class="md">${ndate(m.d)}</div><div class="mv">${m.v}</div></div><div class="tm ${m.h==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.h)}</span></div><div class="sc-wrap">${badge}${score}</div><div class="tm r ${m.a==='Netherlands'?'nl-t':''}"><span class="tn">${sn(m.a)}</span></div></div>`;
 }
 
 function empty(i,t){return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:8px;opacity:.3"><div style="font-size:20px">${i}</div><div style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#7A8AAA">${t}</div></div>`}
