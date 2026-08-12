@@ -568,7 +568,7 @@ function kaartResultaatHTML(b, r) {
   // reistijd zonder verkeer (dekt ook reguliere drukte, niet alleen incidenten)
   const delta = Math.max(r.vertragingSec, r.rijSec - r.normSec);
   const rat  = r.normSec > 0 ? r.rijSec / r.normSec : 1;
-  const kls  = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.1 || delta > 180) ? 'o' : 'g';
+  const kls  = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.2 || delta > 300) ? 'o' : 'g';
   const bdg  = kls === 'g' ? 'Vlot' : kls === 'o' ? 'Matig' : 'Druk';
   const pct  = Math.min(100, Math.round((r.rijSec / Math.max(r.normSec * 2.5, 1)) * 100));
 
