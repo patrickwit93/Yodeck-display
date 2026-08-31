@@ -50,13 +50,9 @@
     .rij.r { border-left-color: #ff5a72; }
 
     .rij-info { min-width: 0; flex: 1; }
-    .rij-naam { font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rij-vertraging { font-size: .7rem; font-weight: 700; margin-top: .15rem; }
-    .rij-vertraging.g { color: rgba(255,255,255,.35); }
-    .rij-vertraging.o { color: #f0902a; }
-    .rij-vertraging.r { color: #ff5a72; }
-
+    .rij-naam { font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .rij-min { font-size: 1.3rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; flex-shrink: 0; text-align: right; }
+    .rij-min .rij-plus { font-size: .78rem; font-weight: 700; margin-left: .3rem; }
     .rij-min.g { color: #4ec46a; }
     .rij-min.o { color: #f0902a; }
     .rij-min.r { color: #ff5a72; }
@@ -287,15 +283,12 @@ function rijResultaatHTML(b, r) {
   const rat   = r.normSec > 0 ? r.rijSec / r.normSec : 1;
   const kls   = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.1 || delta > 180) ? 'o' : 'g';
   const deltaMin = Math.round(delta / 60);
-  const vertragingHTML = deltaMin > 0
-    ? `<div class="rij-vertraging ${kls}">+${deltaMin} min vertraging</div>`
-    : `<div class="rij-vertraging g">geen vertraging</div>`;
+  const plusHTML = deltaMin > 0 ? `<span class="rij-plus">+${deltaMin} min</span>` : '';
   return `<div class="rij ${kls}">
       <div class="rij-info">
         <div class="rij-naam">${e(b.naam)}</div>
-        ${vertragingHTML}
       </div>
-      <div class="rij-min ${kls}">${e(secNaarTekst(r.rijSec))}</div>
+      <div class="rij-min ${kls}">${e(secNaarTekst(r.rijSec))}${plusHTML}</div>
     </div>`;
 }
 function tekenLadende() {
