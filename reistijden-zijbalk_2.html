@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=320" />
+  <title>Reistijden — Amstelland Ingenieurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #1D1D1B; }
+    body {
+      width: 320px; height: 962px; overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+      background: #1D1D1B;
+      transform-origin: top left;
+    }
+    .scherm { position: relative; width: 320px; height: 962px; display: flex; flex-direction: column; padding: 22px 20px 16px; }
+
+    /* ══ KOP ═══════════════════════════════════════════════════════ */
+    .kop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-shrink: 0; }
+    .kop-links { display: flex; align-items: center; gap: 9px; }
+    .kop-icoon {
+      width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
+      background: rgba(228,3,45,.16); display: flex; align-items: center; justify-content: center;
+    }
+    .kop-titel { font-size: .78rem; font-weight: 800; color: #fff; letter-spacing: .04em; text-transform: uppercase; }
+
+    .inst-knop {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.45); font-family: inherit;
+      font-size: .64rem; padding: 4px 8px; border-radius: 5px; cursor: pointer;
+    }
+    .inst-knop:hover { background: rgba(255,255,255,.13); color: #fff; }
+
+    /* ══ LIJST ═════════════════════════════════════════════════════ */
+    .lijst { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .rij {
+      flex: 1;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      min-height: 0;
+    }
+    .lijst .rij:last-child { border-bottom: none; }
+
+    .rij-eta { font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.45); width: 38px; flex-shrink: 0; }
+    .rij-info { min-width: 0; flex: 1; }
+    .rij-naam { font-size: .84rem; font-weight: 700; color: #fff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rij-sub { font-size: .62rem; color: rgba(255,255,255,.4); font-weight: 500; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .rij-min { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; flex-shrink: 0; }
+    .rij-min.g { color: #4ec46a; }
+    .rij-min.o { color: #f0902a; }
+    .rij-min.r { color: #ff5a72; }
+    .rij-min.gr { color: rgba(255,255,255,.3); font-size: .85rem; }
+
+    .laden-punt { width: 13px; height: 13px; flex-shrink: 0; border: 2px solid rgba(255,255,255,.15); border-top-color: #E4032D; border-radius: 50%; animation: draaien .7s linear infinite; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+
+    /* ══ VOET ══════════════════════════════════════════════════════ */
+    .voet { flex-shrink: 0; margin-top: 12px; text-align: right; }
+    .stxt { font-size: .6rem; color: rgba(255,255,255,.3); font-weight: 400; }
+    .stxt.fout { color: #ff5a72; }
+
+    /* ══ MODAL INSTELLINGEN ═══════════════════════════════════════════ */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 10px; border-top: 5px solid #E4032D; padding: 30px; width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+    .modal h3 { font-size: .9rem; font-weight: 700; margin-bottom: 20px; color: #1D1D1B; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+    .knop-wit { padding: 9px 16px; background: #fff; color: #1D1D1B; border: 1.5px solid #D9D9D9; border-radius: 5px; font-family: inherit; font-size: .78rem; font-weight: 600; cursor: pointer; }
+    .knop-wit:hover { border-color: #999; }
+    .knop-rood-sm { padding: 9px 16px; background: #E4032D; color: #fff; border: none; border-radius: 5px; font-family: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+    .knop-rood-sm:hover { background: #A0021F; }
+    .knop-gevaar { padding: 9px 16px; background: #fde8ea; color: #A0021F; border: none; border-radius: 5px; font-family: inherit; font-size: .78rem; font-weight: 600; cursor: pointer; margin-right: auto; }
+    .knop-gevaar:hover { background: #fbc4c4; }
+    label { display: block; font-size: .62rem; font-weight: 700; color: #616160; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+    input[type=text], input[type=password] {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #D9D9D9; border-radius: 6px;
+      font-family: inherit; font-size: .82rem; color: #1D1D1B; outline: none; margin-bottom: 16px;
+    }
+    input:focus { border-color: #E4032D; }
+  </style>
+</head>
+<body>
+<!-- ══ MODAL INSTELLINGEN ════════════════════════════════════════ -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3>⚙ Instellingen</h3>
+    <label for="m-api">TomTom API-sleutel</label>
+    <input type="password" id="m-api" placeholder="Plak hier je sleutel" autocomplete="off" />
+    <label for="m-werk">Vertrekadres</label>
+    <input type="text" id="m-werk" />
+    <div class="modal-footer">
+      <button class="knop-gevaar" onclick="resetAlles()">Wissen</button>
+      <button class="knop-wit" onclick="sluitModal()">Annuleren</button>
+      <button class="knop-rood-sm" onclick="slaModalOp()">Opslaan</button>
+    </div>
+  </div>
+</div>
+<!-- ══ HOOFDSCHERM ════════════════════════════════════════════════ -->
+<div class="scherm">
+  <div class="kop">
+    <div class="kop-links">
+      <div class="kop-icoon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 0 4 0M5 17a2 2 0 1 1 4 0m6 0a2 2 0 1 0 4 0m-4 0a2 2 0 1 1 4 0M5 17V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8"/><path d="M5 12h14"/></svg>
+      </div>
+      <div class="kop-titel">Reistijden</div>
+    </div>
+    <button class="inst-knop" id="instellingen-btn" style="display:none" onclick="openModal()">⚙</button>
+  </div>
+
+  <div class="lijst" id="lijst"></div>
+
+  <div class="voet">
+    <span class="stxt" id="stxt">Opstarten…</span>
+  </div>
+</div>
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURATIE                                                    ║
+// ║  De API-sleutel wordt NIET hier in de code gezet. Kies één van    ║
+// ║  de twee routes hieronder — zie de toelichting bij het bestand.   ║
+// ║                                                                    ║
+// ║  Route A — Yodeck-URL: geef de widget-URL in Yodeck mee als       ║
+// ║  ...jouw-bestand.html?apikey=JOUW_SLEUTEL — dat leest de pagina    ║
+// ║  zelf uit, telkens als hij (her)laadt. Niets hoeft lokaal          ║
+// ║  onthouden te worden, dus dit overleeft ook een cache-wis of      ║
+// ║  nieuwe player.                                                    ║
+// ║                                                                    ║
+// ║  Route B — vast in het bestand: vul apiSleutel hieronder zelf in  ║
+// ║  voordat je het bestand naar Yodeck uploadt.                      ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const CONFIG = {
+  apiSleutel: 'ClQP1K2s2boAjxqkXDN3Vq66rLyl5wSj',
+  werkAdres:  'Suikersilo-West 39, Halfweg',
+  originLat:  52.3823,
+  originLon:  4.7348,
+};
+function apiSleutelUitUrl() {
+  try { return new URLSearchParams(window.location.search).get('apikey') || ''; } catch { return ''; }
+}
+const BESTEMMINGEN = [
+  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.25908,  lon: 4.76635  },
+  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.63199,  lon: 4.74588  },
+  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.15817,  lon: 5.38682  },
+  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.46965,  lon: 4.74283  },
+  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.55199,  lon: 4.67352  },
+  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.51046,  lon: 4.66997  },
+  { naam: "'t Kalf",         regio: 'Zaandam',       lat: 52.469008, lon: 4.838422 },
+  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.50788,  lon: 4.84802  },
+  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.219967, lon: 5.481498 },
+  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.694906, lon: 4.874942 },
+  { naam: 'Spijkenisse',     regio: 'Zuid-Holland',  lat: 51.84497,  lon: 4.32903  },
+];
+const OPSLAG        = 'ai_reistijd_zijbalk_v1';
+const CACHE_SLEUTEL = 'ai_reistijd_zijbalk_cache_v1';
+const CACHE_TTL     = 5 * 60 * 1000;
+
+let cfg = null;
+let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
+let verversTimer = null;
+
+// ══ HELPERS ════════════════════════════════════════════════════════
+function e(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function secNaarTekst(sec) {
+  const m = Math.round(sec / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}u ${m%60 > 0 ? ' ' + (m%60) + 'm' : ''}`.trim();
+}
+function pasSchaalAan() {
+  const sx = window.innerWidth  / 320;
+  const sy = window.innerHeight / 962;
+  const s  = Math.min(sx, sy);
+  document.body.style.transform  = `scale(${s})`;
+  document.body.style.marginLeft = `${(window.innerWidth  - 320 * s) / 2}px`;
+  document.body.style.marginTop  = `${(window.innerHeight - 962 * s) / 2}px`;
+}
+window.addEventListener('resize', pasSchaalAan);
+function setStatus(t, m) {
+  const el = document.getElementById('stxt');
+  el.textContent = t;
+  el.className = 'stxt' + (m === 'fout' ? ' fout' : '');
+}
+function laadOpslag() { try { return JSON.parse(localStorage.getItem(OPSLAG)) || null; } catch { return null; } }
+function slaOpSlag(d) { localStorage.setItem(OPSLAG, JSON.stringify(d)); }
+
+// ══ MODAL ════════════════════════════════════════════════════════
+function openModal() {
+  document.getElementById('m-api').value  = '';
+  document.getElementById('m-werk').value = cfg.werkAdres;
+  document.getElementById('modal').classList.add('open');
+}
+function sluitModal() { document.getElementById('modal').classList.remove('open'); }
+function slaModalOp() {
+  const a = document.getElementById('m-api').value.trim();
+  const w = document.getElementById('m-werk').value.trim();
+  const nc = { apiSleutel: a || cfg.apiSleutel, werkAdres: w || cfg.werkAdres };
+  slaOpSlag(nc); sluitModal();
+  cfg = null;
+  startApp(nc);
+}
+function resetAlles() {
+  if (!confirm('Alles wissen?')) return;
+  localStorage.removeItem(OPSLAG); localStorage.removeItem(CACHE_SLEUTEL); location.reload();
+}
+
+// ══ TOMTOM ROUTING (tijd + vertraging + belangrijkste weg) ══════════
+function parseWegnummers(instructies, max = 2) {
+  const gezien = new Set(), wegen = [];
+  (instructies || []).forEach(ins => {
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[AN]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    });
+  });
+  return wegen.slice(0, max);
+}
+async function haalReistijd(b, poging = 1) {
+  const key = (cfg.apiSleutel || '').trim();
+  if (!key) return { ok: false, fout: 'Geen API-sleutel ingesteld' };
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/${originCoords.lat},${originCoords.lon}:${b.lat},${b.lon}/json?key=${key}&traffic=true&travelMode=car&computeTravelTimeFor=all&instructionsType=coded&language=nl-NL`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      let detail = `HTTP ${res.status}`;
+      try { const j = await res.json(); detail = j?.detailedError?.message || j?.error?.description || detail; } catch {}
+      const fout = new Error(detail); fout.status = res.status; throw fout;
+    }
+    const data  = await res.json();
+    const route = data.routes?.[0];
+    const sum   = route?.summary;
+    if (!sum) throw new Error('Geen route in antwoord');
+    const wegen = parseWegnummers(route?.guidance?.instructions ?? []);
+    return {
+      ok: true,
+      rijSec:  sum.travelTimeInSeconds,
+      normSec: sum.noTrafficTravelTimeInSeconds ?? sum.travelTimeInSeconds,
+      wegen,
+    };
+  } catch (err) {
+    const limiet = err.status === 429 || err.status === 403 || /rate limit|quota/i.test(err.message || '');
+    if (poging < 3) {
+      await new Promise(r => setTimeout(r, limiet ? 4000 * poging : 1800));
+      return haalReistijd(b, poging + 1);
+    }
+    return { ok: false, fout: err.message };
+  }
+}
+async function haalGespreid(lijst, gelijktijdig = 2, pauzeMs = 300) {
+  const uit = new Array(lijst.length);
+  let volgende = 0;
+  async function werker() {
+    while (volgende < lijst.length) {
+      const k = volgende++;
+      uit[k] = await haalReistijd(lijst[k]);
+      if (volgende < lijst.length) await new Promise(r => setTimeout(r, pauzeMs));
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(gelijktijdig, lijst.length) }, werker));
+  return uit;
+}
+
+// ══ RENDEREN ══════════════════════════════════════════════════════
+function etaTekst(rijSec) {
+  const aankomst = new Date(Date.now() + rijSec * 1000);
+  return aankomst.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+}
+function rijLadenHTML(b) {
+  return `<div class="rij">
+      <div class="rij-eta">–:–</div>
+      <div class="rij-info">
+        <div class="rij-naam">${e(b.naam)}</div>
+        <div class="rij-sub">${e(b.regio)}</div>
+      </div>
+      <div class="laden-punt"></div>
+    </div>`;
+}
+function rijResultaatHTML(b, r) {
+  if (!r.ok) {
+    return `<div class="rij">
+        <div class="rij-eta">–:–</div>
+        <div class="rij-info">
+          <div class="rij-naam">${e(b.naam)}</div>
+          <div class="rij-sub">${e(b.regio)}</div>
+        </div>
+        <div class="rij-min gr">–</div>
+      </div>`;
+  }
+  const delta = Math.max(0, r.rijSec - r.normSec);
+  const rat   = r.normSec > 0 ? r.rijSec / r.normSec : 1;
+  const kls   = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.1 || delta > 180) ? 'o' : 'g';
+  const sub   = r.wegen?.length ? `via ${r.wegen.join(', ')}` : b.regio;
+  return `<div class="rij">
+      <div class="rij-eta">${e(etaTekst(r.rijSec))}</div>
+      <div class="rij-info">
+        <div class="rij-naam">${e(b.naam)}</div>
+        <div class="rij-sub">${e(sub)}</div>
+      </div>
+      <div class="rij-min ${kls}">${e(secNaarTekst(r.rijSec))}</div>
+    </div>`;
+}
+function tekenLadende() {
+  const lijst = document.getElementById('lijst');
+  lijst.innerHTML = BESTEMMINGEN.map(rijLadenHTML).join('');
+}
+function laadCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_SLEUTEL));
+    if (c && c.tijdstip && c.resultaten && (Date.now() - c.tijdstip) < CACHE_TTL) return c;
+  } catch {}
+  return null;
+}
+function slaCache(resultaten) {
+  try { localStorage.setItem(CACHE_SLEUTEL, JSON.stringify({ tijdstip: Date.now(), resultaten })); } catch {}
+}
+function toonResultaten(resultaten) {
+  const lijst = document.getElementById('lijst');
+  lijst.innerHTML = BESTEMMINGEN.map((b, i) => rijResultaatHTML(b, resultaten[i])).join('');
+}
+async function haalAlleReistijden() {
+  clearTimeout(verversTimer);
+  const cache = laadCache();
+  if (cache) {
+    toonResultaten(cache.resultaten);
+    const nuC = new Date(cache.tijdstip).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    setStatus(`Laatste update: ${nuC}`, 'ok');
+    verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL - (Date.now() - cache.tijdstip));
+    return;
+  }
+  setStatus('Reistijden ophalen…', 'bezig');
+  const resultaten = await haalGespreid(BESTEMMINGEN);
+  slaCache(resultaten);
+  toonResultaten(resultaten);
+  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  setStatus(`Laatste update: ${nu}`, 'ok');
+  verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL);
+}
+
+// ══ START ═════════════════════════════════════════════════════════
+async function startApp(data) {
+  cfg = { ...data };
+  clearTimeout(verversTimer);
+  document.getElementById('instellingen-btn').style.display = 'inline-block';
+  tekenLadende();
+  if (!cfg.apiSleutel) {
+    setStatus('Geen API-sleutel — klik op ⚙', 'fout');
+    return;
+  }
+  setTimeout(haalAlleReistijden, 500);
+}
+window.addEventListener('load', () => {
+  pasSchaalAan();
+  const uitUrl = apiSleutelUitUrl();
+  const opgeslagen = laadOpslag();
+  const werkAdres = (opgeslagen && opgeslagen.werkAdres) || CONFIG.werkAdres;
+  startApp({ apiSleutel: uitUrl || (opgeslagen && opgeslagen.apiSleutel) || CONFIG.apiSleutel, werkAdres });
+});
+</script>
+</body>
+</html>
