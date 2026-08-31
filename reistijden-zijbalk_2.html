@@ -49,12 +49,14 @@
     .rij.o { border-left-color: #f0902a; }
     .rij.r { border-left-color: #ff5a72; }
 
-    .rij-eta { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.55); width: 2.5rem; flex-shrink: 0; }
     .rij-info { min-width: 0; flex: 1; }
-    .rij-naam { font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rij-sub { font-size: .68rem; color: rgba(255,255,255,.45); font-weight: 600; margin-top: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rij-naam { font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rij-vertraging { font-size: .7rem; font-weight: 700; margin-top: .15rem; }
+    .rij-vertraging.g { color: rgba(255,255,255,.35); }
+    .rij-vertraging.o { color: #f0902a; }
+    .rij-vertraging.r { color: #ff5a72; }
 
-    .rij-min { font-size: 1.25rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; flex-shrink: 0; }
+    .rij-min { font-size: 1.3rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; flex-shrink: 0; text-align: right; }
     .rij-min.g { color: #4ec46a; }
     .rij-min.o { color: #f0902a; }
     .rij-min.r { color: #ff5a72; }
@@ -264,16 +266,10 @@ async function haalGespreid(lijst, gelijktijdig = 2, pauzeMs = 300) {
 }
 
 // ══ RENDEREN ══════════════════════════════════════════════════════
-function etaTekst(rijSec) {
-  const aankomst = new Date(Date.now() + rijSec * 1000);
-  return aankomst.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-}
 function rijLadenHTML(b) {
   return `<div class="rij">
-      <div class="rij-eta">–:–</div>
       <div class="rij-info">
         <div class="rij-naam">${e(b.naam)}</div>
-        <div class="rij-sub">${e(b.regio)}</div>
       </div>
       <div class="laden-punt"></div>
     </div>`;
@@ -281,10 +277,8 @@ function rijLadenHTML(b) {
 function rijResultaatHTML(b, r) {
   if (!r.ok) {
     return `<div class="rij">
-        <div class="rij-eta">–:–</div>
         <div class="rij-info">
           <div class="rij-naam">${e(b.naam)}</div>
-          <div class="rij-sub">${e(b.regio)}</div>
         </div>
         <div class="rij-min gr">–</div>
       </div>`;
@@ -292,12 +286,14 @@ function rijResultaatHTML(b, r) {
   const delta = Math.max(0, r.rijSec - r.normSec);
   const rat   = r.normSec > 0 ? r.rijSec / r.normSec : 1;
   const kls   = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.1 || delta > 180) ? 'o' : 'g';
-  const sub   = r.wegen?.length ? `via ${r.wegen.join(', ')}` : b.regio;
+  const deltaMin = Math.round(delta / 60);
+  const vertragingHTML = deltaMin > 0
+    ? `<div class="rij-vertraging ${kls}">+${deltaMin} min vertraging</div>`
+    : `<div class="rij-vertraging g">geen vertraging</div>`;
   return `<div class="rij ${kls}">
-      <div class="rij-eta">${e(etaTekst(r.rijSec))}</div>
       <div class="rij-info">
         <div class="rij-naam">${e(b.naam)}</div>
-        <div class="rij-sub">${e(sub)}</div>
+        ${vertragingHTML}
       </div>
       <div class="rij-min ${kls}">${e(secNaarTekst(r.rijSec))}</div>
     </div>`;
