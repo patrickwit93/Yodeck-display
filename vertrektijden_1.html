@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vertrektijden – Halfweg-Zwanenburg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+
+    /* ═══════════════════════════════
+       AMSTELLAND KLEURPALET
+    ════════════════════════════════ */
+    :root {
+      --rood:       #E4032D;
+      --donkerrood: #A0021F;
+      --zwart:      #1D1D1B;
+      --grijs-d:    #484848;
+      --grijs-m:    #616160;
+      --grijs-l:    #D9D9D9;
+      --wit:        #FFFFFF;
+
+      --fs-time:    60px;
+      --fs-dir:     32px;
+      --fs-via:     15px;
+      --fs-badge:   14px;
+      --fs-track:   62px;
+      --fs-status:  15px;
+      --row-pad:    14px 0;
+      --cols: 220px 1fr 190px 116px 124px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100vh;
+      background: var(--zwart);
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: var(--wit);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% -5%,
+        rgba(228,3,45,.10) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .screen {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ═══════════════════════════════
+       COMPACTE STATIONSTITEL (geen logo/klok — dat regelt Yodeck)
+    ════════════════════════════════ */
+    .titel-rij {
+      display: flex; align-items: baseline; gap: 14px;
+      padding: 16px 40px 6px;
+      flex-shrink: 0;
+    }
+    .station-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--rood);
+    }
+    .station-name {
+      font-size: 24px; font-weight: 700;
+      color: var(--wit); letter-spacing: .3px;
+    }
+
+    /* ═══════════════════════════════
+       RODE LIJN
+    ════════════════════════════════ */
+    .red-line {
+      height: 2px; flex-shrink: 0; margin: 4px 40px 0;
+      background: linear-gradient(90deg, var(--rood) 0%, var(--donkerrood) 55%, transparent 100%);
+    }
+
+    /* ═══════════════════════════════
+       KOLOM HEADERS
+    ════════════════════════════════ */
+    .col-head {
+      display: grid;
+      grid-template-columns: var(--cols);
+      padding: 10px 40px 8px;
+      flex-shrink: 0;
+    }
+    .col-head span {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--grijs-m);
+    }
+    .col-head span:nth-child(2) { padding-left: 56px; }
+    .col-head span.c { text-align: center; }
+    .col-head span.r { text-align: right; }
+
+    .thin-line {
+      height: 1px; flex-shrink: 0; margin: 0 40px;
+      background: rgba(255,255,255,.08);
+    }
+
+    /* ═══════════════════════════════
+       DEPARTURES CONTAINER
+    ════════════════════════════════ */
+    .departures {
+      flex: 1; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 0 40px;
+    }
+
+    /* ═══════════════════════════════
+       RIJ
+    ════════════════════════════════ */
+    .row {
+      display: grid;
+      grid-template-columns: var(--cols);
+      align-items: center;
+      padding: var(--row-pad);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      position: relative;
+    }
+
+    .row:first-child::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(228,3,45,.07) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .row:nth-child(even) { background: rgba(255,255,255,.02); }
+
+    /* ── TIJD ── */
+    .cell-time { display: flex; flex-direction: column; gap: 4px; }
+
+    .time-planned {
+      font-size: var(--fs-time); font-weight: 700;
+      color: var(--wit); line-height: 1;
+      font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .time-planned.struck {
+      font-size: 18px; font-weight: 400;
+      color: var(--grijs-m); text-decoration: line-through;
+      display: block;
+    }
+    .time-actual {
+      font-size: var(--fs-time); font-weight: 700;
+      color: var(--rood); line-height: 1;
+      font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ── RICHTING ── */
+    .cell-dir { padding-left: 56px; padding-right: 16px; overflow: hidden; }
+
+    .dir-name {
+      font-size: var(--fs-dir); font-weight: 700;
+      color: var(--wit); line-height: 1.2;
+      overflow: hidden;
+      display: flex; flex-wrap: nowrap; align-items: center;
+    }
+
+    .dir-via {
+      font-size: var(--fs-via); font-weight: 400;
+      color: var(--grijs-m); margin-top: 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── TREIN / DRUKTE ── */
+    .cell-train { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .train-top  { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .badge {
+      font-size: var(--fs-badge); font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 3px;
+    }
+    .badge-ic  { background: rgba(255,255,255,.1);  color: var(--wit);     border: 1px solid rgba(255,255,255,.2); }
+    .badge-spr { background: rgba(228,3,45,.15);    color: var(--rood);    border: 1px solid rgba(228,3,45,.5); }
+    .badge-int { background: rgba(228,3,45,.3);     color: var(--wit);     border: 1px solid var(--rood); }
+    .badge-x   { background: rgba(255,255,255,.06); color: var(--grijs-l); border: 1px solid rgba(255,255,255,.12); }
+
+    .delay-pill {
+      font-size: 11px; font-weight: 700;
+      padding: 4px 8px; border-radius: 20px;
+      background: var(--rood); color: var(--wit); letter-spacing: .5px;
+    }
+
+    .crowd { display: flex; align-items: center; gap: 9px; }
+    .crowd-none .crowd-icon { color: rgba(255,255,255,.15); }
+    .crowd-low  .crowd-icon { color: rgba(255,255,255,.4); }
+    .crowd-med  .crowd-icon { color: rgba(230,170,0,.95); }
+    .crowd-high .crowd-icon { color: var(--rood); }
+
+    .crowd-bars { display: flex; align-items: flex-end; gap: 3px; }
+    .crowd-bars b { display: block; width: 5px; border-radius: 2px; background: rgba(255,255,255,.12); }
+    .crowd-bars b:nth-child(1) { height: 7px; }
+    .crowd-bars b:nth-child(2) { height: 12px; }
+    .crowd-bars b:nth-child(3) { height: 17px; }
+    .crowd-low  .crowd-bars b:nth-child(1) { background: rgba(255,255,255,.45); }
+    .crowd-med  .crowd-bars b:nth-child(1),
+    .crowd-med  .crowd-bars b:nth-child(2) { background: rgba(230,170,0,.9); }
+    .crowd-high .crowd-bars b              { background: var(--rood); }
+    .crowd-text { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .crowd-none .crowd-text { color: rgba(255,255,255,.15); }
+    .crowd-low  .crowd-text { color: rgba(255,255,255,.35); }
+    .crowd-med  .crowd-text { color: rgba(230,170,0,.9); }
+    .crowd-high .crowd-text { color: var(--rood); }
+
+    /* ── SPOOR ── */
+    .cell-track { display: flex; align-items: center; justify-content: center; }
+    .track-num {
+      font-size: var(--fs-track); font-weight: 700;
+      color: var(--wit); line-height: 1;
+      display: flex; justify-content: center; gap: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .track-lbl {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m); margin-top: 3px;
+    }
+
+    /* ── STATUS ── */
+    .cell-status { display: flex; align-items: center; justify-content: flex-end; }
+    .status {
+      display: inline-flex; align-items: center; justify-content: flex-end;
+      font-size: var(--fs-status); font-weight: 600;
+      letter-spacing: .5px; padding: 6px 12px; border-radius: 3px;
+      min-width: 76px;
+    }
+    .s-ok     { background: rgba(34,160,80,.25);  color: #4cce82;     border: 1px solid rgba(34,160,80,.4); }
+    .s-late   { background: rgba(228,3,45,.2);    color: var(--rood); border: 1px solid rgba(228,3,45,.5); }
+    .s-cancel { background: var(--rood);          color: var(--wit); }
+
+    .msg-line {
+      font-size: 12px; font-weight: 500; color: rgba(228,3,45,.8);
+      margin-top: 5px; line-height: 1.3;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── AFTELKLOK kolom ── */
+    .cell-countdown {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .countdown-sf {
+      display: inline-flex;
+      align-items: flex-end; justify-content: center; gap: 10px;
+      font-size: 60px;
+    }
+    /* eenheid: op basislijn van de kaartjes */
+    .cd-label {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--grijs-m);
+      padding-bottom: 8px;
+      line-height: 1;
+    }
+    .countdown-sf.soon .cd-label { color: #f5a623; }
+    .countdown-sf.now  { animation: blink 1s step-end infinite; }
+    .countdown-sf.now  .cd-label { color: var(--rood); }
+    .countdown-sf.gone { opacity: 0; pointer-events: none; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    /* ═══════════════════════════════
+       LEGE STAAT
+    ════════════════════════════════ */
+    .empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px; color: var(--grijs-m);
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,.08);
+      border-top-color: var(--rood);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-lbl { font-size: 15px; letter-spacing: 1px; }
+
+    /* ═══════════════════════════════
+       ERROR / STATUSREGEL
+    ════════════════════════════════ */
+    .err {
+      display: none; flex-shrink: 0; padding: 9px 40px;
+      background: rgba(228,3,45,.1); border-left: 3px solid var(--rood);
+      font-size: 12px; font-weight: 500; color: var(--rood); letter-spacing: .3px;
+    }
+
+    .status-inline {
+      flex-shrink: 0; padding: 6px 40px 10px;
+      font-size: 11px; font-weight: 400; letter-spacing: 1px; color: rgba(255,255,255,.2);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SPLIT-FLAP DISPLAY
+       Elk kaartje = één teken, karakteristieke middellijn
+    ═══════════════════════════════════════════════════════ */
+
+    /* Basis kaartje
+       translateZ(0) = eigen GPU-laag → geen witte flarden bij scaleY */
+    .sf {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #242422;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 4px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 0.04em 0.09em;
+      min-width: 0.62em;
+      vertical-align: middle;
+      box-shadow: 0 3px 10px rgba(0,0,0,.7);
+      /* Eigen compositing-laag: voorkomt Chromium/Yodeck artefacten */
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    /* De kenmerkende horizontale middellijn */
+    .sf::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: calc(50% - 0.5px);
+      height: 1.5px;
+      background: rgba(0,0,0,.65);
+      pointer-events: none;
+    }
+
+    /* Kleurvarianten */
+    .sf-white { color: var(--wit); }
+    .sf-red   { color: var(--rood); }
+    .sf-grey  { color: var(--grijs-m); }
+
+    /* ── Flip-animatie: alleen transform, geen filter ──
+       filter veroorzaakt extra compositing-lagen → witte flarden op Yodeck */
+    @keyframes sf-flip {
+      0%   { transform: translateZ(0) scaleY(1); }
+      40%  { transform: translateZ(0) scaleY(0.04); }
+      60%  { transform: translateZ(0) scaleY(0.04); }
+      85%  { transform: translateZ(0) scaleY(1.03); }
+      100% { transform: translateZ(0) scaleY(1); }
+    }
+
+    .sf.sf-flipping {
+      animation: sf-flip 0.15s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Snelle flip (boot-animatie) ── */
+    @keyframes sf-flip-fast {
+      0%   { transform: translateZ(0) scaleY(1); }
+      42%  { transform: translateZ(0) scaleY(0.04); }
+      58%  { transform: translateZ(0) scaleY(0.04); }
+      100% { transform: translateZ(0) scaleY(1); }
+    }
+
+    .sf.sf-flipping-fast {
+      animation: sf-flip-fast 0.11s ease-in-out;
+    }
+
+    /* ── Container span voor een groep kaartjes ── */
+    .sf-grp {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    /* Dubbele punt tussen HH en MM */
+    .sf-colon {
+      font-size: inherit;
+      font-weight: 700;
+      color: var(--rood);
+      animation: blink 1s step-end infinite;
+      margin: 0 1px;
+      line-height: 1;
+    }
+    .sf-colon-grey { color: var(--grijs-m); animation: none; }
+    .sf-colon-sec  { color: var(--rood); opacity: .5; }
+
+    /* Richting: tighter gap tussen letters */
+    .sf-dir-grp {
+      display: inline-flex;
+      gap: 2px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+
+  </style>
+</head>
+<body>
+
+  <script>
+   const NS_API_KEY = '8a4e5ff007914724aee958afa0481ea6';
+    const STATION_CODE = 'HWZB';
+    const MAX_ROWS     = 6;
+    const REFRESH_MS   = 60000;
+  </script>
+
+  <div class="screen">
+
+    <div class="titel-rij">
+      <span class="station-label">Live vertrektijden</span>
+      <span class="station-name">Halfweg-Zwanenburg</span>
+    </div>
+    <div class="red-line"></div>
+
+    <div class="col-head">
+      <span>Vertrek</span>
+      <span>Richting</span>
+      <span class="c">Vertrekt over</span>
+      <span class="c">Spoor</span>
+      <span class="r">Status</span>
+    </div>
+
+    <div class="thin-line"></div>
+    <div class="err" id="err"></div>
+
+    <div class="departures" id="deps">
+      <div class="empty">
+        <div class="spinner"></div>
+        <div class="empty-lbl">Vertrektijden ophalen…</div>
+      </div>
+    </div>
+
+    <div class="status-inline" id="upd">–</div>
+
+  </div>
+
+  <script>
+    /* ══════════════════════════════════════════════════════════
+       SPLIT-FLAP ENGINE
+    ══════════════════════════════════════════════════════════ */
+    const SF_POOL     = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
+    let   bootTimers  = []; // actieve intervals van de boot-animatie
+
+    /**
+     * SplitFlap  –  beheert een reeks flip-kaartjes in een container.
+     *
+     * @param {HTMLElement} el        container-element
+     * @param {string}      colorCls  'sf-white' | 'sf-red' | 'sf-grey'
+     * @param {number}      gap       gap tussen kaartjes (px), default 3
+     */
+    class SplitFlap {
+      constructor(el, colorCls = 'sf-white', gap = 3) {
+        this.el       = el;
+        this.colorCls = colorCls;
+        this.cards    = [];
+        this.current  = '';
+        el.style.display    = 'inline-flex';
+        el.style.gap        = gap + 'px';
+        el.style.alignItems = 'center';
+      }
+
+      /* Maak één kaartje aan */
+      _card() {
+        const c = document.createElement('span');
+        c.className   = `sf ${this.colorCls}`;
+        c.textContent = ' ';
+        this.el.appendChild(c);
+        return c;
+      }
+
+      /* Resize kaartje-array naar n */
+      _resize(n) {
+        while (this.cards.length < n) this.cards.push(this._card());
+        while (this.cards.length > n) this.cards.pop().remove();
+      }
+
+      /* Direct instellen, geen animatie */
+      set(text) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        s.split('').forEach((ch, i) => { this.cards[i].textContent = ch; });
+        this.current = s;
+      }
+
+      /**
+       * Animeer naar nieuwe tekst (normaal tempo, voor vertrektijden / track).
+       * @param {string} text
+       * @param {number} baseDelay  startvertraging in ms
+       */
+      animate(text, baseDelay = 0) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        this.current = s;
+        s.split('').forEach((target, i) => {
+          this._flip(this.cards[i], target, baseDelay + i * 30, 2 + Math.floor(Math.random() * 2), false);
+        });
+      }
+
+      /**
+       * Snel animeren (voor secondes: maar 2 tussenstappen).
+       * @param {string} text
+       * @param {number} baseDelay
+       */
+      animateFast(text, baseDelay = 0) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        this.current = s;
+        s.split('').forEach((target, i) => {
+          this._flip(this.cards[i], target, baseDelay + i * 18, 2, true);
+        });
+      }
+
+      /**
+       * Animeer één kaartje.
+       * @param {HTMLElement} card
+       * @param {string}      target   eindteken
+       * @param {number}      delay    ms
+       * @param {number}      numFlips aantal tussenstappen
+       * @param {boolean}     fast     gebruik snelle animatie
+       */
+      _flip(card, target, delay, numFlips, fast) {
+        const flipCls   = fast ? 'sf-flipping-fast' : 'sf-flipping';
+        const holdMs    = fast ? 25 : 45;
+        const intervalMs = fast ? 35 + Math.random() * 15 : 60 + Math.random() * 25;
+        let count = 0;
+
+        const doFlip = () => {
+          card.classList.add(flipCls);
+          setTimeout(() => {
+            card.textContent = (count >= numFlips - 1)
+              ? target
+              : SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
+            card.classList.remove(flipCls);
+            count++;
+            if (count < numFlips) setTimeout(doFlip, intervalMs);
+          }, holdMs);
+        };
+
+        setTimeout(doFlip, delay);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════ */
+    const pad = n => String(n).padStart(2, '0');
+
+    function fmtTime(iso) {
+      if (!iso) return '--:--';
+      const d = new Date(iso);
+      return pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function delayMin(p, a) {
+      if (!p || !a) return 0;
+      return Math.round((new Date(a) - new Date(p)) / 60000);
+    }
+
+    function badgeCls(cat) {
+      const c = (cat || '').toUpperCase();
+      if (c === 'IC' || c === 'ICD')                  return 'badge-ic';
+      if (c === 'SPR')                                 return 'badge-spr';
+      if (['INT','ICE','THA','EUR'].includes(c))       return 'badge-int';
+      return 'badge-x';
+    }
+
+    function crowdCls(cf) {
+      const c = (cf || '').toUpperCase();
+      if (c === 'HIGH')   return 'crowd-high';
+      if (c === 'MEDIUM') return 'crowd-med';
+      if (c === 'LOW')    return 'crowd-low';
+      return '';
+    }
+    function crowdLbl(cf) {
+      const c = (cf || '').toUpperCase();
+      if (c === 'HIGH')   return 'Vol';
+      if (c === 'MEDIUM') return 'Druk';
+      if (c === 'LOW')    return 'Rustig';
+      return '';
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       BOOT-ANIMATIE  –  willekeurige tekens tot echte data arriveert
+    ══════════════════════════════════════════════════════════ */
+    function showBootAnimation() {
+      const container = document.getElementById('deps');
+      const n         = MAX_ROWS;
+
+      // Typische richtingslengtes voor NS (gemiddeld 12-18 tekens)
+      const dirLen = [16, 14, 17, 12, 15, 18, 13, 16];
+
+      container.innerHTML = Array(n).fill(0).map((_, i) => `
+        <div class="row" style="opacity:0">
+          <div class="cell-time">
+            <div class="time-planned">
+              <span id="bh${i}" class="sf-grp"></span>
+              <span class="sf-colon" style="animation:none;opacity:.35">:</span>
+              <span id="bm${i}" class="sf-grp"></span>
+            </div>
+          </div>
+          <div class="cell-dir">
+            <div class="dir-name">
+              <span id="bd${i}" class="sf-dir-grp"></span>
+            </div>
+          </div>
+          <div class="cell-train">
+            <div class="train-top">
+              <span class="badge badge-x" style="opacity:.3">···</span>
+            </div>
+          </div>
+          <div class="cell-track">
+            <div class="track-num"><span id="bt${i}" class="sf-grp"></span></div>
+            <div class="track-lbl" style="opacity:.35">spoor</div>
+          </div>
+          <div class="cell-status"></div>
+        </div>`).join('');
+
+      for (let i = 0; i < n; i++) {
+        const sfH = new SplitFlap(document.getElementById(`bh${i}`), 'sf-grey');
+        const sfM = new SplitFlap(document.getElementById(`bm${i}`), 'sf-grey');
+        const sfD = new SplitFlap(document.getElementById(`bd${i}`), 'sf-grey', 2);
+        const sfT = new SplitFlap(document.getElementById(`bt${i}`), 'sf-grey');
+
+        const dl  = dirLen[i] || 14;
+        const rnd = () => SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
+
+        // Initieel vullen zodat kaartjes direct zichtbaar zijn
+        sfH.set('  '); sfM.set('  ');
+        sfD.set(Array(dl).fill(' ').join(''));
+        sfT.set(' ');
+
+        const startDelay = i * 50;
+
+        // ── Tijd-cycling (elke 500ms) ──
+        setTimeout(() => {
+          const doTime = () => {
+            sfH.animateFast(pad(Math.floor(Math.random() * 24)));
+            sfM.animateFast(pad(Math.floor(Math.random() * 60)));
+          };
+          doTime();
+          bootTimers.push(setInterval(doTime, 500));
+        }, startDelay);
+
+        // ── Track-cycling (elke 700ms, iets trager) ──
+        setTimeout(() => {
+          const doTrk = () => sfT.animateFast(String(Math.floor(Math.random() * 8) + 1));
+          doTrk();
+          bootTimers.push(setInterval(doTrk, 700));
+        }, startDelay + 120);
+
+        // ── Richting-cycling (elke 1400ms) ──
+        setTimeout(() => {
+          const doDir = () => {
+            sfD.animateFast(Array(dl).fill(0).map(rnd).join(''));
+          };
+          doDir();
+          bootTimers.push(setInterval(doDir, 1400));
+        }, startDelay + 250);
+
+        // Rij inlopen
+        const row = container.querySelectorAll('.row')[i];
+        setTimeout(() => {
+          row.style.opacity    = '1';
+          row.style.transition = 'opacity 0.25s ease';
+        }, startDelay);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RENDER
+    ══════════════════════════════════════════════════════════ */
+    function render(list) {
+      /* Stop boot-animatie zodra echte data binnenkomt */
+      bootTimers.forEach(iv => clearInterval(iv));
+      bootTimers = [];
+
+      const container = document.getElementById('deps');
+
+      if (!list || !list.length) {
+        container.innerHTML =
+          '<div class="empty"><div class="empty-lbl">Geen vertrektijden beschikbaar</div></div>';
+        return;
+      }
+
+      const rows = list.slice(0, MAX_ROWS);
+
+      /* ── Bouw HTML-skelet ── */
+      container.innerHTML = rows.map((dep, idx) => {
+        const pt  = fmtTime(dep.plannedDateTime);
+        const at  = fmtTime(dep.actualDateTime);
+        const del = delayMin(dep.plannedDateTime, dep.actualDateTime);
+        const can = !!dep.cancelled;
+        const cat = dep.trainCategory || '?';
+        const dir = dep.direction     || '–';
+        const via = (dep.routeStations || []).slice(0, 4).map(s => s.mediumName).join(' · ');
+        const trk = String(dep.actualTrack || dep.plannedTrack || '–').toUpperCase();
+        const msg = (dep.messages && dep.messages.length) ? dep.messages[0].text || '' : '';
+        const cf  = dep.crowdForecast || '';
+        const d   = idx * 55; // stagger-vertraging per rij (ms)
+        const departsIso = dep.actualDateTime || dep.plannedDateTime || '';
+
+        /* ── Tijdcel ── */
+        const cdAttr = departsIso ? ` data-departs="${departsIso}"` : '';
+        let timeCell;
+        if (can) {
+          timeCell = `
+            <div class="time-planned">
+              <span class="sf-grp" data-sf data-text="${pt.replace(':','|')}" data-color="sf-grey" data-delay="${d}"></span>
+            </div>`;
+        } else if (del >= 1) {
+          timeCell = `
+            <div class="time-planned struck">${pt}</div>
+            <div class="time-actual">
+              <span class="sf-grp" data-sf data-text="${at.replace(':','|')}" data-color="sf-red" data-delay="${d}"></span>
+            </div>`;
+        } else {
+          timeCell = `
+            <div class="time-planned">
+              <span class="sf-grp" data-sf data-text="${pt.replace(':','|')}" data-color="sf-white" data-delay="${d}"></span>
+            </div>`;
+        }
+
+        const cdClass = can ? 'countdown-sf gone' : 'countdown-sf';
+
+        /* ── Status ── */
+        const delayBadge = (!can && del >= 1) ? `<span class="delay-pill">+${del} min</span>` : '';
+        const statusHtml = can
+          ? `<span class="status s-cancel">Rijdt niet</span>`
+          : del >= 1
+            ? `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="status s-late">Te laat</span>${delayBadge}</div>`
+            : `<span class="status s-ok">Op tijd</span>`;
+
+        const msgHtml = msg ? `<div class="msg-line">⚠ ${msg}</div>` : '';
+
+        /* ── Richting: flip-cards via data-sf-dir ── */
+        const viaHtml = via
+          ? `<div class="dir-via" data-sf-via="${via.toLowerCase()}" data-delay="${d+120}">&nbsp;</div>`
+          : '';
+
+        return `
+          <div class="row" style="opacity:0">
+            <div class="cell-time">${timeCell}</div>
+            <div class="cell-dir">
+              <div class="dir-name">
+                <span class="sf-dir-grp" data-sf-dir="${dir}" data-delay="${d+50}"></span>
+              </div>
+              ${viaHtml}
+              ${msgHtml}
+            </div>
+            <div class="cell-countdown">
+              <div class="${cdClass}"${cdAttr}></div>
+            </div>
+            <div class="cell-track">
+              <div class="track-num">
+                <span class="sf-grp" data-sf data-text="${trk}" data-color="sf-white" data-delay="${d+170}"></span>
+              </div>
+            </div>
+            <div class="cell-status">${statusHtml}</div>
+          </div>`;
+      }).join('');
+
+      /* ══════════════════════════════════════════════════════
+         POST-RENDER: initialiseer alle SF-containers
+      ══════════════════════════════════════════════════════ */
+
+      /* ── Vertrektijden + spoornummers ── */
+      container.querySelectorAll('[data-sf]').forEach(el => {
+        const raw   = el.dataset.text  || '';
+        const color = el.dataset.color || 'sf-white';
+        const delay = parseInt(el.dataset.delay) || 0;
+
+        if (raw.includes('|')) {
+          /* Tijd: splits op '|' → HH-groep + colon + MM-groep */
+          const [left, right] = raw.split('|');
+          el.style.display    = 'inline-flex';
+          el.style.gap        = '4px';
+          el.style.alignItems = 'center';
+
+          const grpH  = document.createElement('span');
+          grpH.className  = 'sf-grp';
+          const colon = document.createElement('span');
+          colon.className = 'sf-colon' +
+            (color === 'sf-grey' ? ' sf-colon-grey' : '');
+          colon.textContent = ':';
+          if (color === 'sf-white') colon.style.animation = 'blink 1s step-end infinite';
+          const grpM  = document.createElement('span');
+          grpM.className  = 'sf-grp';
+
+          el.appendChild(grpH);
+          el.appendChild(colon);
+          el.appendChild(grpM);
+
+          new SplitFlap(grpH, color).animate(left,  delay);
+          new SplitFlap(grpM, color).animate(right, delay + 90);
+
+        } else {
+          /* Spoor / overig */
+          new SplitFlap(el, color).animate(raw, delay);
+        }
+      });
+
+      /* ── Richtingsnamen als flip-cards ── */
+      container.querySelectorAll('[data-sf-dir]').forEach(el => {
+        const text  = el.dataset.sfDir || '';
+        const delay = parseInt(el.dataset.delay) || 0;
+        const sf    = new SplitFlap(el, 'sf-white', 2); // gap=2 voor letters
+        sf.animate(text.toUpperCase(), delay);
+      });
+
+      /* ── Via-tekst: scramble-animatie ── */
+      container.querySelectorAll('[data-sf-via]').forEach(el => {
+        const target = el.dataset.sfVia;
+        const delay  = parseInt(el.dataset.delay) || 0;
+        scrambleVia(el, target, delay);
+      });
+
+      /* ── Rijen gefaseerd inlopen ── */
+      container.querySelectorAll('.row').forEach((row, i) => {
+        setTimeout(() => {
+          row.style.opacity    = '1';
+          row.style.transition = 'opacity 0.2s ease';
+        }, i * 70);
+      });
+
+      /* ── Aftelklok SF-instanties initialiseren ── */
+      initCountdownFlaps();
+    }
+
+    /* ── Via-tekst scramble ── */
+    function scrambleVia(el, target, baseDelay = 0) {
+      const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ·.';
+      const str   = target;
+      const len   = str.length;
+      let   iter  = 0;
+      const TOTAL = 18;
+
+      el.textContent = Array(len).fill(' ').join('');
+
+      setTimeout(() => {
+        const id = setInterval(() => {
+          el.textContent = str.split('').map((ch, i) => {
+            return iter >= Math.round((i / Math.max(len - 1, 1)) * TOTAL * 0.72)
+              ? ch
+              : ALPHA[Math.floor(Math.random() * ALPHA.length)];
+          }).join('');
+          iter++;
+          if (iter > TOTAL) { clearInterval(id); el.textContent = str; }
+        }, 40);
+      }, baseDelay);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       AFTELLEN  –  split-flap kaartjes per rij
+    ══════════════════════════════════════════════════════════ */
+    const countdownFlaps = new Map(); // wrapper-el → { sf, grp, lastText, lastColor }
+
+    // Geeft prefix (statisch), getal (SF), eenheid (statisch) terug
+    function _cdInfo(departs) {
+      const diffSec = Math.round((departs - Date.now()) / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffSec < -60) return { prefix: '',     num: '',              unit: '',    cls: 'gone', color: 'sf-white' };
+      if (diffSec <   0) return { prefix: '',     num: 'RIJDT WEG',     unit: '',    cls: 'now',  color: 'sf-red', static: true };
+      if (diffSec <  60) return { prefix: '',  num: pad(diffSec), unit: 'sec', cls: 'now',  color: 'sf-red'   };
+      if (diffMin <=  5) return { prefix: '',  num: pad(diffMin), unit: 'min', cls: 'soon', color: 'sf-white' };
+      return                    { prefix: '',  num: pad(diffMin), unit: 'min', cls: '',     color: 'sf-grey'  };
+    }
+
+    function _buildCountdown(el, info) {
+      el.innerHTML = '';
+      if (info.cls === 'gone') return null;
+
+      if (info.static) {
+        // "RIJDT WEG" — puur statische tekst
+        const lbl = document.createElement('span');
+        lbl.className   = 'cd-label';
+        lbl.textContent = info.num;
+        el.appendChild(lbl);
+        return null;
+      }
+
+      if (info.prefix) {
+        const pre = document.createElement('span');
+        pre.className   = 'cd-label';
+        pre.textContent = info.prefix;
+        el.appendChild(pre);
+      }
+
+      const grp = document.createElement('span');
+      grp.className = 'sf-grp';
+      el.appendChild(grp);
+
+      if (info.unit) {
+        const unit = document.createElement('span');
+        unit.className   = 'cd-label';
+        unit.textContent = info.unit;
+        el.appendChild(unit);
+      }
+
+      const sf = new SplitFlap(grp, info.color, 4);
+      sf.animateFast(info.num, 0);
+      return { sf, grp };
+    }
+
+    function initCountdownFlaps() {
+      countdownFlaps.clear();
+      document.querySelectorAll('.countdown-sf[data-departs]').forEach(el => {
+        const departs = new Date(el.dataset.departs).getTime();
+        if (isNaN(departs)) return;
+        const info = _cdInfo(departs);
+        el.className = 'countdown-sf' + (info.cls ? ' ' + info.cls : '');
+        const built = _buildCountdown(el, info);
+        if (built) {
+          countdownFlaps.set(el, { ...built, lastNum: info.num, lastColor: info.color, lastCls: info.cls });
+        }
+      });
+    }
+
+    function tickCountdowns() {
+      countdownFlaps.forEach((state, el) => {
+        const departs = new Date(el.dataset.departs).getTime();
+        if (isNaN(departs)) return;
+        const info = _cdInfo(departs);
+
+        if (info.cls === 'gone') {
+          el.className = 'countdown-sf gone';
+          countdownFlaps.delete(el);
+          return;
+        }
+
+        el.className = 'countdown-sf' + (info.cls ? ' ' + info.cls : '');
+
+        // Kleur of type veranderd → volledig herbouwen
+        if (info.color !== state.lastColor || !!info.static !== !!state.lastStatic) {
+          const built = _buildCountdown(el, info);
+          if (built) {
+            Object.assign(state, built, { lastNum: info.num, lastColor: info.color, lastCls: info.cls });
+          }
+          return;
+        }
+
+        if (info.num !== state.lastNum && state.sf) {
+          state.sf.animateFast(info.num);
+          state.lastNum = info.num;
+        }
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CROWD FORECAST
+    ══════════════════════════════════════════════════════════ */
+    async function fetchCrowd(dep) {
+      const trainNr = dep.product?.number || dep.trainNumber || '';
+      if (!trainNr) return '';
+      try {
+        const r = await fetch(
+          `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey?train=${trainNr}&omitCrowdForecast=false`,
+          { headers: { 'Ocp-Apim-Subscription-Key': NS_API_KEY } }
+        );
+        if (!r.ok) return '';
+        const j = await r.json();
+        const stops = j.payload?.stops || [];
+        const hw = stops.find(s =>
+          s.stop?.name?.toLowerCase().includes('halfweg') ||
+          s.stop?.uicCode === '8400272' ||
+          s.stop?.stationCode?.toUpperCase() === 'HWZB'
+        ) || stops[0];
+        if (!hw) return '';
+        const raw = hw.coachCrowdForecast
+                 || hw.crowdForecast
+                 || hw.actualStock?.trainParts?.[0]?.crowdForecast
+                 || hw.plannedStock?.trainParts?.[0]?.crowdForecast
+                 || '';
+        if (Array.isArray(raw)) {
+          return ['HIGH','MEDIUM','LOW'].find(l => raw.includes(l)) || raw[0] || '';
+        }
+        return raw;
+      } catch { return ''; }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       NS API
+    ══════════════════════════════════════════════════════════ */
+    async function fetchDepartures() {
+      const errEl = document.getElementById('err');
+
+      const hdrs = { 'Ocp-Apim-Subscription-Key': NS_API_KEY };
+      const url1 = `https://gateway.apiportal.ns.nl/timetable-api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+      const url2 = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+
+      let deps = null;
+
+      try {
+        const r = await fetch(url1, { headers: hdrs });
+        if (r.ok) { const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+      } catch { /* probeer fallback */ }
+
+      if (!deps) {
+        try {
+          const r = await fetch(url2, { headers: hdrs });
+          if (r.ok) { const j = await r.json(); deps = j.payload?.departures || j.departures || []; }
+          else throw new Error('HTTP ' + r.status);
+        } catch (e) {
+          errEl.style.display = 'block';
+          errEl.textContent   = '⚠  ' + e.message;
+          document.getElementById('upd').textContent = 'Fout';
+          return;
+        }
+      }
+
+      errEl.style.display = 'none';
+      render(deps);
+
+      try {
+        const slice    = deps.slice(0, MAX_ROWS);
+        const crowds   = await Promise.all(slice.map(d => fetchCrowd(d)));
+        const enriched = slice.map((d, i) => ({ ...d, crowdForecast: crowds[i] || '' }));
+        render(enriched);
+      } catch { /* niet kritisch */ }
+
+      const n = new Date();
+      document.getElementById('upd').textContent =
+        'Bijgewerkt om ' + pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       OPSTART
+    ══════════════════════════════════════════════════════════ */
+    window.addEventListener('DOMContentLoaded', () => {
+      /* Boot-animatie starten: kaarten draaien willekeurige tekens
+         totdat echte data van de NS API binnenkomt */
+      showBootAnimation();
+      setInterval(tickCountdowns, 1000);
+
+      /* Kleine vertraging zodat de boot-animatie altijd zichtbaar is */
+      setTimeout(() => {
+        fetchDepartures();
+        setInterval(fetchDepartures, REFRESH_MS);
+      }, 350);
+    });
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1465" />
+  <title>Reistijd naar Huis — Amstelland Ingenieurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      background: #1D1D1B;
+    }
+    body {
+      width: 1465px; height: 962px; overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+      background: #1D1D1B;
+      color: #1D1D1B;
+      transform-origin: top left;
+    }
+    /* ══ SCHERM ══════════════════════════════════════════════════════ */
+    .scherm { position: relative; width: 1465px; height: 962px; }
+    /* ══ INSTELLINGEN-KNOP (compact, geen header) ══════════════════════ */
+    .inst-knop {
+      position: absolute; top: 12px; right: 12px; z-index: 5;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.45); font-family: inherit;
+      font-size: .68rem; padding: 6px 12px; border-radius: 5px; cursor: pointer;
+      transition: all .15s;
+    }
+    .inst-knop:hover { background: rgba(255,255,255,.13); color: #fff; }
+    /* ══ STATUSTEKST (compact, geen balk) ══════════════════════════════ */
+    .status-inline {
+      position: absolute; left: 12px; bottom: 8px; z-index: 5;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .sdot { width: 6px; height: 6px; border-radius: 50%; background: #2e7d32; }
+    .sdot.bezig { background: #c45e00; animation: knip 1s ease infinite; }
+    .sdot.fout  { background: #E4032D; }
+    @keyframes knip { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .stxt { font-size: .62rem; color: rgba(255,255,255,.3); font-weight: 300; }
+    /* ══ GRID ════════════════════════════════════════════════════════ */
+    .grid-wrapper {
+      width: 100%; height: 100%;
+      padding: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 11px;
+      height: 100%;
+    }
+    /* ══ KAART ═══════════════════════════════════════════════════════ */
+    .kaart {
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 28px rgba(0,0,0,.45);
+      position: relative;
+      background: #e8e6e3 center/cover no-repeat;
+    }
+    .kaart::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      z-index: 0;
+    }
+    .kaart-accent {
+      height: 5px; background: #E4032D; flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+    .kaart-body   {
+      flex: 1; padding: 15px 16px 13px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      position: relative; z-index: 1;
+    }
+    /* — Kop — */
+    .kaart-kop {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 6px;
+    }
+    .plaatsnaam { font-size: 1.55rem; font-weight: 800; color: #1D1D1B; line-height: 1.1; text-shadow: 0 0 18px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,1); }
+    .regio      { font-size: .72rem; color: #333; font-weight: 600; margin-top: 3px; text-shadow: 0 0 10px rgba(255,255,255,1); }
+    .pin-wrap {
+      width: 30px; height: 30px; background: #F5F5F5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    /* — Reistijd — */
+    .rtijd-blok { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .rtijd {
+      font-size: 3.8rem; font-weight: 800; line-height: 1;
+      letter-spacing: -.03em;
+      text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 8px rgba(255,255,255,.8);
+    }
+    .rtijd.g { color: #1a7a2e; }
+    .rtijd.o { color: #c45e00; }
+    .rtijd.r { color: #E4032D; }
+    .rtijd.gr { color: #bbb; font-size: 2.4rem; font-weight: 600; }
+    /* Klein label "zonder file: X min" naast het grote getal */
+    .rtijd-zonder {
+      font-size: .78rem; font-weight: 700; color: #555;
+      background: rgba(255,255,255,.85);
+      border-radius: 4px;
+      padding: 3px 7px;
+      white-space: nowrap;
+    }
+    /* — Onderste zone — */
+    .kaart-onder { display: flex; flex-direction: column; gap: 6px; }
+    /* Weg-chips */
+    .wegen { display: flex; flex-wrap: wrap; gap: 4px; }
+    .weg {
+      font-size: .65rem; font-weight: 800;
+      padding: 2px 7px; border-radius: 3px;
+      letter-spacing: .04em;
+    }
+    .weg.A { background: #1b3a6b; color: #fff; }
+    .weg.N { background: #e8a000; color: #1D1D1B; }
+    .weg.R { background: #484848; color: #fff; }
+    /* Route quick-guide */
+    .route-tekst {
+      font-size: .82rem; color: #1D1D1B; font-weight: 700;
+      line-height: 1.4;
+      background: rgba(255,255,255,.85);
+      border-left: 4px solid #E4032D;
+      border-radius: 4px;
+      padding: 6px 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-height: calc(4.2em + 12px);
+    }
+    /* Vertraging */
+    .vertraging {
+      font-size: .73rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .vertraging.o { color: #c45e00; }
+    .vertraging.r { color: #E4032D; }
+    /* Meta */
+    .rmeta {
+      font-size: .75rem; color: #1D1D1B; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      background: rgba(255,255,255,.82);
+      border-radius: 5px;
+      padding: 5px 9px;
+    }
+    .badge {
+      font-size: .7rem; font-weight: 800; padding: 2px 8px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge.g { background: #1a7a2e; color: #fff; }
+    .badge.o { background: #c45e00; color: #fff; }
+    .badge.r { background: #E4032D; color: #fff; }
+    /* Voortgangsbalk */
+    .voortgangsbalk {
+      height: 4px; background: #EFEFEF; border-radius: 2px; overflow: hidden;
+      margin-top: 3px;
+    }
+    .voortgang { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .voortgang.g { background: #1a7a2e; }
+    .voortgang.o { background: #c45e00; }
+    .voortgang.r { background: #E4032D; }
+    /* Laden */
+    .laden-rij {
+      display: flex; align-items: center; gap: 10px;
+      color: #ccc; font-size: .85rem; font-weight: 300;
+    }
+    .spinner {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2.5px solid #E8E8E8; border-top-color: #E4032D;
+      border-radius: 50%; animation: draaien .7s linear infinite;
+    }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+    /* ══ OVERZICHTSTEGEL (12e vak) ════════════════════════════════════ */
+    .kaart.overzicht { background: #111110; }
+    .kaart.overzicht::before { display: none; }
+    .ov-body { color: #fff; }
+    .ov-kop { display: flex; align-items: flex-start; justify-content: space-between; }
+    .ov-titel { font-size: 1.55rem; font-weight: 800; color: #fff; line-height: 1.1; }
+    .ov-sub   { font-size: .72rem; color: rgba(255,255,255,.4); font-weight: 600; margin-top: 3px; }
+    .ov-pin {
+      width: 30px; height: 30px; background: rgba(255,255,255,.09);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ov-kopje {
+      font-size: .6rem; font-weight: 800; color: rgba(255,255,255,.32);
+      text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px;
+    }
+    /* Wegenlijst */
+    .ov-wegen { display: flex; flex-direction: column; gap: 4px; }
+    .ov-wrij {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.05); border-radius: 5px; padding: 4px 8px;
+    }
+    .ov-wnr {
+      font-size: .68rem; font-weight: 800; letter-spacing: .04em;
+      padding: 2px 7px; border-radius: 3px; flex-shrink: 0; min-width: 42px; text-align: center;
+    }
+    .ov-wnr.A { background: #1b3a6b; color: #fff; }
+    .ov-wnr.N { background: #e8a000; color: #1D1D1B; }
+    .ov-wnr.R { background: #484848; color: #fff; }
+    .ov-wn { font-size: .66rem; font-weight: 600; color: rgba(255,255,255,.4); flex: 1; }
+    .ov-wv { font-size: .78rem; font-weight: 800; white-space: nowrap; }
+    .ov-wv.g { color: #4ec46a; }
+    .ov-wv.o { color: #f0902a; }
+    .ov-wv.r { color: #ff5a72; }
+    /* Statistiekrijen */
+    .ov-stats { display: flex; flex-direction: column; gap: 4px; }
+    .ov-rij {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      background: rgba(255,255,255,.05); border-radius: 5px; padding: 5px 9px;
+    }
+    .ov-lbl { font-size: .66rem; font-weight: 700; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .05em; }
+    .ov-val { font-size: .78rem; font-weight: 800; color: #fff; text-align: right; }
+    .ov-val.g { color: #4ec46a; }
+    .ov-val.o { color: #f0902a; }
+    .ov-val.r { color: #ff5a72; }
+    /* Voet met toelichting */
+    .ov-voet {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .66rem; color: rgba(255,255,255,.42); font-weight: 600; line-height: 1.3;
+    }
+    .ov-voet svg { flex-shrink: 0; }
+    .ov-voet b { color: #fff; font-weight: 800; font-size: .8rem; }
+    /* ══ MODAL INSTELLINGEN ═══════════════════════════════════════════ */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 10px; border-top: 5px solid #E4032D;
+      padding: 38px; width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+    .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 24px; color: #1D1D1B; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+    .knop-wit {
+      padding: 10px 20px; background: #fff; color: #1D1D1B;
+      border: 1.5px solid #D9D9D9; border-radius: 5px;
+      font-family: inherit; font-size: .875rem; font-weight: 600; cursor: pointer;
+    }
+    .knop-wit:hover { border-color: #999; }
+    .knop-rood-sm {
+      padding: 10px 20px; background: #E4032D; color: #fff; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 700; cursor: pointer;
+    }
+    .knop-rood-sm:hover { background: #A0021F; }
+    .knop-gevaar {
+      padding: 10px 20px; background: #fde8ea; color: #A0021F; border: none;
+      border-radius: 5px; font-family: inherit; font-size: .875rem; font-weight: 600;
+      cursor: pointer; margin-right: auto;
+    }
+    .knop-gevaar:hover { background: #fbc4c4; }
+    label {
+      display: block; font-size: .68rem; font-weight: 700;
+      color: #616160; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    input[type=text], input[type=password] {
+      width: 100%; padding: 12px 15px;
+      border: 1.5px solid #D9D9D9; border-radius: 6px;
+      font-family: inherit; font-size: .9rem; color: #1D1D1B;
+      outline: none; transition: border-color .2s; margin-bottom: 20px;
+    }
+    input:focus { border-color: #E4032D; }
+  </style>
+</head>
+<body>
+<!-- ══ MODAL INSTELLINGEN ════════════════════════════════════════ -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3>⚙ Instellingen</h3>
+    <label for="m-api">TomTom API-sleutel</label>
+    <input type="password" id="m-api" placeholder="Laat leeg om huidige te behouden" autocomplete="off" />
+    <label for="m-werk">Vertrekadres</label>
+    <input type="text" id="m-werk" />
+    <div class="modal-footer">
+      <button class="knop-gevaar" onclick="resetAlles()">Wissen</button>
+      <button class="knop-wit" onclick="sluitModal()">Annuleren</button>
+      <button class="knop-rood-sm" onclick="slaModalOp()">Opslaan</button>
+    </div>
+  </div>
+</div>
+<!-- ══ HOOFDSCHERM ════════════════════════════════════════════════ -->
+<div class="scherm">
+  <button class="inst-knop" id="instellingen-btn" style="display:none" onclick="openModal()">⚙</button>
+  <div class="grid-wrapper">
+    <div class="grid" id="kaarten-rij"></div>
+  </div>
+  <div class="status-inline">
+    <div class="sdot" id="sdot"></div>
+    <span class="stxt" id="stxt">Opstarten…</span>
+  </div>
+</div>
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURATIE — pas hier aan indien nodig                       ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const CONFIG = {
+  apiSleutel: 'ClQP1K2s2boAjxqkXDN3Vq66rLyl5wSj',
+  werkAdres:  'Suikersilo-West 39, Halfweg',
+  originLat:  52.3823,
+  originLon:  4.7348,
+};
+// ══ KAARTACHTERGROND ══════════════════════════════════════════════
+function setKaartBg(el, lat, lon) {
+  const url = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=14&size=600x440&maptype=osm`;
+  el.style.backgroundImage = `url('${url}')`;
+  el.style.backgroundSize  = 'cover';
+  el.style.backgroundPosition = 'center';
+}
+// ══ BESTEMMINGEN ═══════════════════════════════════════════════════
+const BESTEMMINGEN = [
+  { naam: 'Aalsmeer',        regio: 'Noord-Holland', lat: 52.25908,  lon: 4.76635  },
+  { naam: 'Alkmaar',         regio: 'Noord-Holland', lat: 52.63199,  lon: 4.74588  },
+  { naam: 'Amersfoort',      regio: 'Utrecht',       lat: 52.15817,  lon: 5.38682  },
+  { naam: 'Assendelft',      regio: 'Noord-Holland', lat: 52.46965,  lon: 4.74283  },
+  { naam: 'Castricum',       regio: 'Noord-Holland', lat: 52.55199,  lon: 4.67352  },
+  { naam: 'Heemskerk',       regio: 'Noord-Holland', lat: 52.51046,  lon: 4.66997  },
+  { naam: "'t Kalf",         regio: 'Zaandam',       lat: 52.469008, lon: 4.838422 },
+  { naam: 'Jisp',            regio: 'Noord-Holland', lat: 52.50788,  lon: 4.84802  },
+  { naam: 'Nijkerk',         regio: 'Gelderland',    lat: 52.219967, lon: 5.481498 },
+  { naam: 'Raamsdonksveer',  regio: 'Noord-Brabant', lat: 51.694906, lon: 4.874942 },
+  { naam: 'Spijkenisse',     regio: 'Zuid-Holland',  lat: 51.84497,  lon: 4.32903  },
+];
+const OPSLAG        = 'ai_reistijd_tt_v2';
+const CACHE_SLEUTEL = 'ai_reistijd_cache_v2';
+const CACHE_TTL     = 5 * 60 * 1000;
+
+let cfg = null;
+let originCoords = { lat: CONFIG.originLat, lon: CONFIG.originLon };
+let verversTimer = null;
+// ══ HELPERS ════════════════════════════════════════════════════════
+function e(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function secNaarTekst(sec) {
+  const m = Math.round(sec / 60);
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}u ${m%60 > 0 ? ' ' + (m%60) + 'm' : ''}`.trim();
+}
+function kmTekst(m) {
+  return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+}
+function wegKlasse(nr) {
+  if (/^A\d/i.test(nr)) return 'A';
+  if (/^N\d/i.test(nr)) return 'N';
+  return 'R';
+}
+const PIN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+const WEGICOON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 22 L9 2"/><path d="M20 22 L15 2"/><path d="M12 4v3"/><path d="M12 11v3"/><path d="M12 18v3"/>
+</svg>`;
+const WARN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+// ══ SCHAAL NAAR VIEWPORT ══════════════════════════════════════════
+function pasSchaalAan() {
+  const sx = window.innerWidth  / 1465;
+  const sy = window.innerHeight / 962;
+  const s  = Math.min(sx, sy);
+  document.body.style.transform  = `scale(${s})`;
+  document.body.style.marginLeft = `${(window.innerWidth  - 1465 * s) / 2}px`;
+  document.body.style.marginTop  = `${(window.innerHeight - 962 * s) / 2}px`;
+}
+window.addEventListener('resize', pasSchaalAan);
+// ══ STATUS ════════════════════════════════════════════════════════
+function setStatus(t, m) {
+  document.getElementById('stxt').textContent = t;
+  const d = document.getElementById('sdot');
+  d.className = 'sdot' + (m && m !== 'ok' ? ' ' + m : '');
+}
+// ══ OPSLAG ════════════════════════════════════════════════════════
+function laadOpslag() {
+  try { return JSON.parse(localStorage.getItem(OPSLAG)) || null; } catch { return null; }
+}
+function slaOpSlag(d) { localStorage.setItem(OPSLAG, JSON.stringify(d)); }
+// ══ MODAL ════════════════════════════════════════════════════════
+function openModal() {
+  document.getElementById('m-api').value  = '';
+  document.getElementById('m-werk').value = cfg.werkAdres;
+  document.getElementById('modal').classList.add('open');
+}
+function sluitModal() { document.getElementById('modal').classList.remove('open'); }
+function slaModalOp() {
+  const a = document.getElementById('m-api').value.trim();
+  const w = document.getElementById('m-werk').value.trim();
+  const nc = { apiSleutel: a || cfg.apiSleutel, werkAdres: w || cfg.werkAdres };
+  slaOpSlag(nc); sluitModal();
+  cfg = null; originCoords = null;
+  startApp(nc);
+}
+function resetAlles() {
+  if (!confirm('Alles wissen?')) return;
+  localStorage.removeItem(OPSLAG); location.reload();
+}
+// ══ TOMTOM ROUTING ════════════════════════════════════════════════
+function parseWegnummers(instructies) {
+  const gezien = new Set(), wegen = [];
+  (instructies || []).forEach(ins => {
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[ANR]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    });
+    if (!ins.roadNumbers?.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (!gezien.has(n) && /^[AN]\d/.test(n)) { gezien.add(n); wegen.push(n); }
+    }
+  });
+  return wegen
+    .sort((a,b) => (a.startsWith('A')?0:a.startsWith('N')?1:2) - (b.startsWith('A')?0:b.startsWith('N')?1:2))
+    .slice(0, 4);
+}
+function bouwRouteTekst(instructies) {
+  const segmenten = [], gezien = new Set();
+  (instructies || []).forEach(ins => {
+    if (['LOCATION_DEPARTURE','LOCATION_ARRIVAL','LOCATION_WAYPOINT'].includes(ins.instructionType)) return;
+    const kandidaten = [];
+    (ins.roadNumbers || []).forEach(nr => {
+      const n = nr.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
+    });
+    if (!kandidaten.length && ins.street) {
+      const n = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(n)) kandidaten.push(n);
+    }
+    kandidaten.forEach(nr => {
+      if (gezien.has(nr)) return;
+      gezien.add(nr);
+      // Bord-richting: eerste bruikbare tekst van het bord
+      const bord = (ins.signpostText || '').replace(/[-–—|]/g,' ').split(/\s{2,}/)[0].trim();
+      const richting = (bord && bord.length < 22 && bord.toUpperCase() !== nr) ? bord : null;
+      segmenten.push({ nr, richting });
+    });
+  });
+  const lijst = segmenten.slice(0, 5);
+  if (!lijst.length) return null;
+  // Alle wegen krijgen hun richting als TomTom die aanlevert (niet alleen de eerste)
+  const labels = lijst.map(s => s.richting ? `${s.nr} richting ${s.richting}` : s.nr);
+  if (labels.length === 1) return `Je rijdt via de ${labels[0]}.`;
+  const laatste = labels[labels.length - 1];
+  const midden  = labels.slice(0, -1);
+  return `Je rijdt via de ${midden.join(', ')} en ${laatste}.`;
+}
+// Welke weg hoort bij welk punt op de route: nodig om een file aan een
+// concrete weg te kunnen koppelen.
+function wegPerPunt(instructies) {
+  const punten = [];
+  let huidig = null;
+  (instructies || []).forEach(ins => {
+    let weg = (ins.roadNumbers || [])
+      .map(n => n.toUpperCase().replace(/\s+/g,''))
+      .find(n => /^[AN]\d/.test(n)) || null;
+    if (!weg && ins.street) {
+      const st = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(st)) weg = st;
+    }
+    if (weg) huidig = weg;
+    if (typeof ins.pointIndex === 'number') punten.push({ idx: ins.pointIndex, weg: huidig });
+  });
+  return punten.sort((a, b) => a.idx - b.idx);
+}
+// Vertraging per weg: alleen de secties die TomTom als verkeer aanmerkt,
+// gekoppeld aan de weg waar die sectie begint.
+function vertragingPerWeg(route, instructies) {
+  const punten = wegPerPunt(instructies);
+  const perWeg = {};
+  (route?.sections || []).forEach(sec => {
+    const vert = sec.delayInSeconds ?? 0;
+    if (!vert || typeof sec.startPointIndex !== 'number') return;
+    let weg = null;
+    for (const pt of punten) {
+      if (pt.idx <= sec.startPointIndex) weg = pt.weg; else break;
+    }
+    if (!weg) return;
+    perWeg[weg] = (perWeg[weg] || 0) + vert;
+  });
+  return perWeg;
+}
+// Alle A- en N-wegen die op deze route worden gebruikt, in volgorde.
+function alleWegen(instructies) {
+  const gezien = new Set(), lijst = [];
+  (instructies || []).forEach(ins => {
+    const kand = (ins.roadNumbers || []).map(n => n.toUpperCase().replace(/\s+/g,''));
+    if (!kand.length && ins.street) kand.push(ins.street.toUpperCase().replace(/\s+/g,''));
+    kand.forEach(n => {
+      if (/^[AN]\d/.test(n) && !gezien.has(n)) { gezien.add(n); lijst.push(n); }
+    });
+  });
+  return lijst;
+}
+// Meters die op elke A- of N-weg worden gereden. Nodig om de vertraging van
+// een route te kunnen toedelen aan de wegen waar hij overheen loopt.
+function metersPerWeg(instructies, totaalM) {
+  const punten = [];
+  let huidig = null;
+  (instructies || []).forEach(ins => {
+    let weg = (ins.roadNumbers || [])
+      .map(n => n.toUpperCase().replace(/\s+/g,''))
+      .find(n => /^[AN]\d/.test(n)) || null;
+    if (!weg && ins.street) {
+      const st = ins.street.toUpperCase().replace(/\s+/g,'');
+      if (/^[AN]\d/.test(st)) weg = st;
+    }
+    if (weg) huidig = weg;
+    punten.push({ off: ins.routeOffsetInMeters ?? 0, weg: huidig });
+  });
+  punten.sort((a, b) => a.off - b.off);
+  const perWeg = {};
+  punten.forEach((pt, i) => {
+    const tot = (i + 1 < punten.length) ? punten[i + 1].off : (totaalM ?? pt.off);
+    if (pt.weg && tot > pt.off) perWeg[pt.weg] = (perWeg[pt.weg] || 0) + (tot - pt.off);
+  });
+  return perWeg;
+}
+
+async function haalReistijd(b, poging = 1) {
+  const key = (cfg.apiSleutel || '').trim();
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/${originCoords.lat},${originCoords.lon}:${b.lat},${b.lon}/json?key=${key}&traffic=true&travelMode=car&computeTravelTimeFor=all&instructionsType=coded&language=nl-NL`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      let detail = `HTTP ${res.status}`;
+      try { const j = await res.json(); detail = j?.detailedError?.message || j?.error?.description || detail; } catch {}
+      const fout = new Error(detail);
+      fout.status = res.status;
+      throw fout;
+    }
+    const data  = await res.json();
+    const route = data.routes?.[0];
+    const sum   = route?.summary;
+    if (!sum) throw new Error('Geen route in antwoord');
+    const instructies = route?.guidance?.instructions ?? [];
+    return {
+      ok: true,
+      rijSec:         sum.travelTimeInSeconds,
+      normSec:        sum.noTrafficTravelTimeInSeconds ?? sum.travelTimeInSeconds,
+      vertragingSec:  sum.trafficDelayInSeconds ?? 0,
+      afstandM:       sum.lengthInMeters,
+      wegen:          parseWegnummers(instructies),
+      routeSegmenten: bouwRouteTekst(instructies),
+      alleWegen:      alleWegen(instructies),
+      metersWeg:      metersPerWeg(instructies, sum.lengthInMeters),
+    };
+  } catch (err) {
+    // Bij een overschreden aanvraaglimiet flink langer wachten, anders lopen
+    // alle bestemmingen tegen dezelfde muur aan.
+    const limiet = err.status === 429 || err.status === 403 || /rate limit|quota/i.test(err.message || '');
+    if (poging < 3) {
+      await new Promise(r => setTimeout(r, limiet ? 4000 * poging : 1800));
+      return haalReistijd(b, poging + 1);
+    }
+    return { ok: false, fout: err.message };
+  }
+}
+// ══ KAART HTML ════════════════════════════════════════════════════
+function kaartLadenHTML(b) {
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok"><div class="laden-rij"><div class="spinner"></div>Ophalen…</div></div>
+      <div class="kaart-onder">
+        <div class="voortgangsbalk"><div class="voortgang g" style="width:0%"></div></div>
+      </div>
+    </div>`;
+}
+function kaartResultaatHTML(b, r) {
+  if (!r.ok) {
+    return `
+      <div class="kaart-accent"></div>
+      <div class="kaart-body">
+        <div class="kaart-kop">
+          <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+          <div class="pin-wrap">${PIN}</div>
+        </div>
+        <div class="rtijd-blok"><div class="rtijd gr">—</div></div>
+        <div class="kaart-onder">
+          <div class="rmeta" style="color:#E4032D;font-size:.65rem" title="${e(r.fout)}">${e(r.fout || 'Geen verbinding')}</div>
+          <div class="voortgangsbalk"><div class="voortgang r" style="width:100%"></div></div>
+        </div>
+      </div>`;
+  }
+  // Vertraging = grootste van TomTom's incident-delay en het verschil met de
+  // reistijd zonder verkeer (dekt ook reguliere drukte, niet alleen incidenten)
+  const delta = Math.max(r.vertragingSec, r.rijSec - r.normSec);
+  const rat  = r.normSec > 0 ? r.rijSec / r.normSec : 1;
+  const kls  = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.1 || delta > 180) ? 'o' : 'g';
+  const bdg  = kls === 'g' ? 'Vlot' : kls === 'o' ? 'Matig' : 'Druk';
+  const pct  = Math.min(100, Math.round((r.rijSec / Math.max(r.normSec * 2.5, 1)) * 100));
+
+  const deltaMin    = Math.round(delta / 60);
+  const zonerFileSec = r.rijSec - delta; // reistijd als er geen verkeer was
+
+  const wegenHTML = r.wegen?.length
+    ? `<div class="wegen">${r.wegen.map(w => `<span class="weg ${wegKlasse(w)}">${e(w)}</span>`).join('')}</div>`
+    : '';
+  const routeHTML = r.routeSegmenten
+    ? `<div class="route-tekst">${e(r.routeSegmenten)}</div>`
+    : '';
+
+  // Vertraging tonen als delta > 0 (berekend verschil, niet TomTom-waarde)
+  const vertragingHTML = deltaMin > 0
+    ? `<div class="vertraging ${kls}">${WARN} +${deltaMin} min door file</div>`
+    : '';
+
+  // Klein label naast het grote getal: "zonder file: X min" — alleen zichtbaar als er vertraging is
+  const zonerFileHTML = deltaMin > 0
+    ? `<div class="rtijd-zonder">zonder file: ${e(secNaarTekst(zonerFileSec))}</div>`
+    : '';
+
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body">
+      <div class="kaart-kop">
+        <div><div class="plaatsnaam">${e(b.naam)}</div><div class="regio">${e(b.regio)}</div></div>
+        <div class="pin-wrap">${PIN}</div>
+      </div>
+      <div class="rtijd-blok">
+        <div class="rtijd ${kls}">${e(secNaarTekst(r.rijSec))}</div>
+        ${zonerFileHTML}
+      </div>
+      <div class="kaart-onder">
+        ${routeHTML}
+        ${wegenHTML}
+        ${vertragingHTML}
+        <div class="rmeta">
+          ${e(kmTekst(r.afstandM))}
+          <span class="badge ${kls}">${bdg}</span>
+        </div>
+        <div class="voortgangsbalk"><div class="voortgang ${kls}" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+// ══ OVERZICHTSTEGEL (12e vak) ═════════════════════════════════════
+function overzichtLadenHTML() {
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body ov-body">
+      <div class="ov-kop">
+        <div><div class="ov-titel">Onze wegen</div><div class="ov-sub">alle routes samen</div></div>
+        <div class="ov-pin">${WEGICOON}</div>
+      </div>
+      <div class="laden-rij"><div class="spinner"></div>Berekenen\u2026</div>
+      <div class="ov-voet">Wordt automatisch bijgewerkt met de reistijden.</div>
+    </div>`;
+}
+function overzichtHTML(resultaten) {
+  const goed = [];
+  BESTEMMINGEN.forEach((b, i) => {
+    const r = resultaten[i];
+    if (r && r.ok) goed.push({ b, r });
+  });
+  if (!goed.length) return overzichtLadenHTML();
+
+  // ── Per weg: hoeveel van onze routes erover lopen en hoeveel file erop staat.
+  // De vertraging is het hoogste dat op die weg is gemeten, niet de som over
+  // alle routes: dezelfde file op de A9 telt anders elf keer mee.
+  const wegen = {};
+  goed.forEach(({ r }) => {
+    // Vertraging van deze route, zelfde berekening als op de kaart
+    const delta = Math.max(r.vertragingSec, r.rijSec - r.normSec);
+    const meters = r.metersWeg || {};
+    const totaalM = Object.keys(meters).reduce((t, w) => t + meters[w], 0);
+    (r.alleWegen || []).forEach(w => {
+      if (!wegen[w]) wegen[w] = { weg: w, routes: 0, vertraging: 0 };
+      wegen[w].routes++;
+    });
+    // De vertraging verdelen naar het aantal kilometers op elke weg, en per
+    // weg het hoogste nemen: dezelfde file op de A9 telt anders elf keer mee.
+    if (delta > 0 && totaalM > 0) {
+      Object.keys(meters).forEach(w => {
+        if (!wegen[w]) wegen[w] = { weg: w, routes: 0, vertraging: 0 };
+        wegen[w].vertraging = Math.max(wegen[w].vertraging, delta * (meters[w] / totaalM));
+      });
+    }
+  });
+  const wegLijst = Object.keys(wegen).map(w => wegen[w])
+    .sort((a, b) => b.vertraging - a.vertraging || b.routes - a.routes || a.weg.localeCompare(b.weg))
+    .slice(0, 6);
+
+  const wegRij = w => {
+    const min = Math.round(w.vertraging / 60);
+    const kls = min >= 10 ? 'r' : min >= 3 ? 'o' : 'g';
+    const val = min >= 1 ? `+${min} min` : 'vrij';
+    return `<div class="ov-wrij">
+      <span class="ov-wnr ${wegKlasse(w.weg)}">${e(w.weg)}</span>
+      <span class="ov-wn">${w.routes} route${w.routes !== 1 ? 's' : ''}</span>
+      <span class="ov-wv ${kls}">${val}</span>
+    </div>`;
+  };
+
+  // ── Samenvatting over alle bestemmingen
+  const metDelta = goed.map(({ b, r }) => {
+    const delta = Math.max(r.vertragingSec, r.rijSec - r.normSec);
+    const rat   = r.normSec > 0 ? r.rijSec / r.normSec : 1;
+    const kls   = (rat > 1.4 || delta > 900) ? 'r' : (rat > 1.2 || delta > 300) ? 'o' : 'g';
+    return { b, r, delta, kls };
+  });
+  const drukst     = metDelta.reduce((a, c) => c.delta > a.delta ? c : a);
+  const vlotst     = metDelta.reduce((a, c) => c.r.rijSec < a.r.rijSec ? c : a);
+  const aantalVlot = metDelta.filter(c => c.kls === 'g').length;
+  const vlotKls    = aantalVlot === metDelta.length ? 'g'
+                   : aantalVlot >= metDelta.length / 2 ? 'o' : 'r';
+
+  const drukstHTML = drukst.delta >= 60
+    ? `<div class="ov-rij"><span class="ov-lbl">Meeste file</span><span class="ov-val ${drukst.kls}">${e(drukst.b.naam)} +${Math.round(drukst.delta / 60)} min</span></div>`
+    : `<div class="ov-rij"><span class="ov-lbl">File</span><span class="ov-val g">Nergens noemenswaardig</span></div>`;
+
+  return `
+    <div class="kaart-accent"></div>
+    <div class="kaart-body ov-body">
+      <div class="ov-kop">
+        <div><div class="ov-titel">Onze wegen</div><div class="ov-sub">${metDelta.length} routes van nu</div></div>
+        <div class="ov-pin">${WEGICOON}</div>
+      </div>
+      <div>
+        <div class="ov-kopje">Wegen die wij rijden</div>
+        <div class="ov-wegen">${wegLijst.map(wegRij).join('')}</div>
+      </div>
+      <div class="ov-stats">
+        ${drukstHTML}
+        <div class="ov-rij"><span class="ov-lbl">Snelst thuis</span><span class="ov-val g">${e(vlotst.b.naam)} ${e(secNaarTekst(vlotst.r.rijSec))}</span></div>
+        <div class="ov-rij"><span class="ov-lbl">Vlotte routes</span><span class="ov-val ${vlotKls}">${aantalVlot} van ${metDelta.length}</span></div>
+      </div>
+      <div class="ov-voet">${WEGICOON}<div>Vertraging per weg is de vertraging van de rit, verdeeld naar het aantal kilometers op die weg.</div></div>
+    </div>`;
+}
+// ══ RENDEREN ══════════════════════════════════════════════════════
+function tekenLadende() {
+  const rij = document.getElementById('kaarten-rij');
+  rij.innerHTML = '';
+  BESTEMMINGEN.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'kaart';
+    div.id = 'k-' + b.naam.replace(/\s+/g,'-');
+    div.innerHTML = kaartLadenHTML(b);
+    setKaartBg(div, b.lat, b.lon);
+    rij.appendChild(div);
+  });
+  const ov = document.createElement('div');
+  ov.className = 'kaart overzicht';
+  ov.id = 'k-overzicht';
+  ov.innerHTML = overzichtLadenHTML();
+  rij.appendChild(ov);
+}
+function laadCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_SLEUTEL));
+    if (c && c.tijdstip && c.resultaten && (Date.now() - c.tijdstip) < CACHE_TTL) return c;
+  } catch {}
+  return null;
+}
+function slaCache(resultaten) {
+  try { localStorage.setItem(CACHE_SLEUTEL, JSON.stringify({ tijdstip: Date.now(), resultaten })); } catch {}
+}
+function toonResultaten(resultaten) {
+  BESTEMMINGEN.forEach((b, i) => {
+    const div = document.getElementById('k-' + b.naam.replace(/\s+/g,'-'));
+    if (div) {
+      div.innerHTML = kaartResultaatHTML(b, resultaten[i]);
+      setKaartBg(div, b.lat, b.lon);
+    }
+  });
+  const ov = document.getElementById('k-overzicht');
+  if (ov) ov.innerHTML = overzichtHTML(resultaten);
+}
+// TomTom staat maar een beperkt aantal aanvragen per seconde toe. Elf
+// bestemmingen tegelijk opvragen levert een deel foutmeldingen op, dus we
+// werken de lijst met twee tegelijk af met een pauze ertussen.
+async function haalGespreid(lijst, gelijktijdig = 2, pauzeMs = 300) {
+  const uit = new Array(lijst.length);
+  let volgende = 0;
+  async function werker() {
+    while (volgende < lijst.length) {
+      const k = volgende++;
+      uit[k] = await haalReistijd(lijst[k]);
+      if (volgende < lijst.length) await new Promise(r => setTimeout(r, pauzeMs));
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(gelijktijdig, lijst.length) }, werker));
+  return uit;
+}
+async function haalAlleReistijden() {
+  clearTimeout(verversTimer);
+  const cache = laadCache();
+  if (cache) {
+    toonResultaten(cache.resultaten);
+    const ouderdom = Math.round((Date.now() - cache.tijdstip) / 60000);
+    const volgend  = Math.round((CACHE_TTL - (Date.now() - cache.tijdstip)) / 60000);
+    setStatus(`Gegevens van ${ouderdom} min geleden · volgende update over ${volgend} min`, 'ok');
+    verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL - (Date.now() - cache.tijdstip));
+    return;
+  }
+  setStatus('Reistijden ophalen via TomTom…', 'bezig');
+  const resultaten = await haalGespreid(BESTEMMINGEN);
+  slaCache(resultaten);
+  toonResultaten(resultaten);
+  const nu = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  setStatus(`Bijgewerkt om ${nu} · volgende update over ${Math.round(CACHE_TTL / 60000)} minuten`, 'ok');
+  verversTimer = setTimeout(haalAlleReistijden, CACHE_TTL);
+}
+// ══ START ══════════════════════════════════════════════════════════
+async function startApp(data) {
+  cfg = { ...data };
+  clearTimeout(verversTimer);
+  document.getElementById('instellingen-btn').style.display = 'inline-block';
+  tekenLadende();
+  setTimeout(haalAlleReistijden, 800);
+}
+// ══ INIT ═══════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  pasSchaalAan();
+  startApp({
+    apiSleutel: CONFIG.apiSleutel,
+    werkAdres:  CONFIG.werkAdres,
+  });
+});
+</script>
+</body>
+</html>
