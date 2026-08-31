@@ -10,7 +10,7 @@
     /* Lettergrootte gekoppeld aan de hoogte van het vak, zodat alles
        vloeiend meeschaalt en het vak altijd volledig vult — geen vaste
        canvas meer die moet worden ingepast. */
-    html { background: #1D1D1B; font-size: 3.3vh; }
+    html { background: #1D1D1B; font-size: 2vh; }
     body {
       width: 100vw; height: 100vh; overflow: hidden;
       font-family: 'Montserrat', sans-serif;
@@ -35,18 +35,15 @@
     .inst-knop:hover { background: rgba(255,255,255,.13); color: #fff; }
 
     /* ══ LIJST ═════════════════════════════════════════════════════ */
-    .lijst {
-      flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0;
-      overflow-y: auto; scrollbar-width: none;
-    }
-    .lijst::-webkit-scrollbar { display: none; }
+    .lijst { flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0; }
     .rij {
-      flex: 0 0 auto;
+      flex: 1;
       display: flex; align-items: center; gap: .75rem;
       background: rgba(255,255,255,.05);
       border-left: .25rem solid #3a3a38;
       border-radius: .45rem;
-      padding: .55rem .8rem;
+      padding: 0 .8rem;
+      min-height: 0;
     }
     .rij.g { border-left-color: #4ec46a; }
     .rij.o { border-left-color: #f0902a; }
