@@ -260,38 +260,44 @@
       });
     }
 
-    function zetScrollAan() {
-      // Eerder toegevoegde keyframe-regels opruimen voordat we nieuwe maken.
-      document.querySelectorAll('style[data-marquee-style]').forEach(s => s.remove());
+    // Scroll wordt met requestAnimationFrame zelf aangedreven (geen
+    // CSS-keyframes) — dat werkt betrouwbaarder in de Yodeck-browser.
+    let scrollItems = [];
+    let scrollRafLoopt = false;
 
-      document.querySelectorAll('.dir-naam-wrap').forEach((wrap, i) => {
+    function zetScrollAan() {
+      scrollItems = [];
+      document.querySelectorAll('.dir-naam-wrap').forEach(wrap => {
         const naam = wrap.querySelector('.dir-naam');
-        naam.classList.remove('scrolt');
-        naam.style.animation = 'none';
+        naam.style.transform = 'translateX(0)';
 
         const wrapBreedte = wrap.clientWidth;
         const tekstBreedte = naam.scrollWidth;
         if (tekstBreedte - wrapBreedte > 4) {
-          const pauzeSec  = 5;                              // stilstaan met de A helemaal links
-          const snelheid  = 55;                              // px per seconde tijdens het schuiven
-          const reisSec   = Math.max(2, tekstBreedte / snelheid);
-          const totaalSec = pauzeSec + reisSec;
-          const pausePct  = (pauzeSec / totaalSec * 100).toFixed(2);
-
-          const keyframeNaam = `marquee-${i}`;
-          const styleEl = document.createElement('style');
-          styleEl.setAttribute('data-marquee-style', '1');
-          styleEl.textContent = `
-            @keyframes ${keyframeNaam} {
-              0%, ${pausePct}% { transform: translateX(0); }
-              100% { transform: translateX(-${tekstBreedte}px); }
-            }`;
-          document.head.appendChild(styleEl);
-
-          naam.style.animation = `${keyframeNaam} ${totaalSec}s linear infinite`;
-          naam.classList.add('scrolt');
+          const pauzeMs = 5000;                                   // stilstaan met de A helemaal links
+          const snelheid = 55;                                    // px per seconde tijdens het schuiven
+          const reisMs = Math.max(2000, (tekstBreedte / snelheid) * 1000);
+          scrollItems.push({ el: naam, tekstBreedte, pauzeMs, reisMs, cycleMs: pauzeMs + reisMs });
         }
       });
+
+      if (!scrollRafLoopt) {
+        scrollRafLoopt = true;
+        requestAnimationFrame(scrollFrame);
+      }
+    }
+
+    function scrollFrame(now) {
+      scrollItems.forEach(item => {
+        const t = now % item.cycleMs;
+        if (t < item.pauzeMs) {
+          item.el.style.transform = 'translateX(0)';
+        } else {
+          const voortgang = (t - item.pauzeMs) / item.reisMs; // 0 → 1
+          item.el.style.transform = `translateX(-${(voortgang * item.tekstBreedte).toFixed(1)}px)`;
+        }
+      });
+      requestAnimationFrame(scrollFrame);
     }
 
     /* ══ NS API ══ */
