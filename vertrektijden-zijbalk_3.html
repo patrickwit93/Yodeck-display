@@ -39,31 +39,46 @@
     .kop-titel { font-size: .95rem; font-weight: 800; color: #fff; letter-spacing: .03em; text-transform: uppercase; }
     .kop-station { font-size: .62rem; color: rgba(255,255,255,.4); font-weight: 600; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    /* ══ KOLOMKOP ══════════════════════════════════════════════════ */
+    .col-head {
+      display: grid; grid-template-columns: 1fr 3.6rem 5.4rem;
+      padding: 0 .8rem; margin-bottom: .35rem; flex-shrink: 0;
+    }
+    .col-head span {
+      font-size: .55rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.32);
+    }
+    .col-head span.c { text-align: center; }
+    .col-head span.r { text-align: right; }
+
     /* ══ LIJST ═════════════════════════════════════════════════════ */
-    .lijst { flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0; }
+    .lijst {
+      flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .lijst::-webkit-scrollbar { display: none; }
     .row {
-      flex: 1;
-      display: flex; align-items: center; gap: .75rem;
+      flex: 0 0 auto;
+      display: grid; grid-template-columns: 1fr 3.6rem 5.4rem; align-items: center;
       background: rgba(255,255,255,.05);
       border-left: .25rem solid #3a3a38;
       border-radius: .45rem;
-      padding: 0 .8rem;
-      min-height: 0;
+      padding: .5rem .8rem;
     }
     .row.g { border-left-color: #4ec46a; }
     .row.o { border-left-color: #f0902a; }
     .row.r { border-left-color: #ff5a72; }
 
-    .cell-dir { min-width: 0; flex: 1; display: flex; align-items: baseline; gap: .6rem; }
+    .cell-dir { min-width: 0; }
     .dir-naam {
-      font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.25;
-      overflow: hidden; min-width: 0; flex: 1;
+      font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.3;
+      min-width: 0;
       display: flex; align-items: center;
     }
-    .dir-spoor { font-size: .68rem; color: rgba(255,255,255,.45); font-weight: 600; display: flex; align-items: center; gap: .3rem; text-transform: lowercase; flex-shrink: 0; }
-    .dir-spoor .sf { font-size: .78rem; padding: 0 .18em; min-width: .6em; }
+    .cell-spoor { display: flex; align-items: center; justify-content: center; }
+    .cell-spoor .sf { font-size: .95rem; padding: 0 .2em; min-width: .65em; }
 
-    .cell-count { display: flex; align-items: baseline; gap: .3rem; flex-shrink: 0; }
+    .cell-count { display: flex; align-items: baseline; justify-content: flex-end; gap: .3rem; }
     .cd-unit { font-size: .78rem; font-weight: 700; }
     .cd-plus { font-size: .78rem; font-weight: 700; margin-left: .3rem; }
     .c-wit   { color: #fff; }
@@ -155,6 +170,12 @@
       </div>
     </div>
 
+    <div class="col-head">
+      <span>Richting</span>
+      <span class="c">Spoor</span>
+      <span class="r">Over</span>
+    </div>
+
     <div class="lijst" id="lijst"></div>
 
     <div class="voet">
@@ -169,11 +190,12 @@
     const SF_POOL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
 
     class SplitFlap {
-      constructor(el, colorCls = 'sf-white', gap = 2) {
+      constructor(el, colorCls = 'sf-white', gap = 2, wrap = false) {
         this.el = el; this.cards = []; this.colorCls = colorCls;
         el.style.display = 'inline-flex';
         el.style.gap = gap + 'px';
         el.style.alignItems = 'center';
+        if (wrap) { el.style.flexWrap = 'wrap'; el.style.rowGap = '3px'; }
       }
       _card() {
         const c = document.createElement('span');
@@ -283,8 +305,8 @@
           <div class="row ${kls}">
             <div class="cell-dir">
               <div class="dir-naam"><span class="sf-dir-grp" data-sf-dir="${dir}" data-color="${sfKleur}" data-delay="${idx * 40}"></span></div>
-              <div class="dir-spoor">spoor <span class="sf-grp" data-sf data-text="${trk}" data-color="${sfKleur}" data-delay="${idx * 40 + 30}"></span></div>
             </div>
+            <div class="cell-spoor"><span class="sf-grp" data-sf data-text="${trk}" data-color="${sfKleur}" data-delay="${idx * 40 + 30}"></span></div>
             <div class="cell-count">${telHtml}</div>
           </div>`;
       }).join('');
@@ -299,7 +321,42 @@
         const tekst = el.dataset.sfDir || '';
         const kleur = el.dataset.color || 'sf-white';
         const delay = parseInt(el.dataset.delay) || 0;
-        new SplitFlap(el, kleur, 2).animate(tekst.toUpperCase(), delay + 60);
+        tekenRichtingFlaps(el, tekst, kleur, delay + 60);
+      });
+    }
+
+    // Richting als hele woord-groepen tekenen, zodat het wrappen naar een
+    // tweede regel alleen tussen woorden gebeurt en niet midden in een woord.
+    // Korte woordjes (aan, van, de...) worden vastgeplakt aan het woord erna,
+    // zodat ze niet alleen op een regel komen te staan.
+    function tekenRichtingFlaps(el, tekst, kleur, baseDelay) {
+      el.innerHTML = '';
+      el.style.display   = 'inline-flex';
+      el.style.flexWrap  = 'wrap';
+      el.style.rowGap    = '3px';
+      el.style.columnGap = '8px';
+      const KORT = new Set(['AAN','VAN','DE','HET','EEN','EN','OP','IN','UIT','NAAR','OM','TE','TER','TEN','DEN','BIJ']);
+      const woorden = tekst.toUpperCase().split(' ').filter(Boolean);
+      const eenheden = [];
+      for (let i = 0; i < woorden.length; i++) {
+        if (KORT.has(woorden[i]) && i + 1 < woorden.length) {
+          eenheden.push([woorden[i], woorden[i + 1]]);
+          i++;
+        } else {
+          eenheden.push([woorden[i]]);
+        }
+      }
+      eenheden.forEach((eenheid, ei) => {
+        const wrapSpan = document.createElement('span');
+        wrapSpan.style.display   = 'inline-flex';
+        wrapSpan.style.flexWrap  = 'nowrap';
+        wrapSpan.style.columnGap = '8px';
+        el.appendChild(wrapSpan);
+        eenheid.forEach((woord, wi) => {
+          const span = document.createElement('span');
+          wrapSpan.appendChild(span);
+          new SplitFlap(span, kleur, 2).animate(woord, baseDelay + (ei + wi) * 60);
+        });
       });
     }
 
