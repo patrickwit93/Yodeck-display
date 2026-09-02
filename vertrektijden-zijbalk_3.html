@@ -4,21 +4,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vertrektijden – Halfweg-Zwanenburg</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --rood:       #E4032D;
-      --donkerrood: #A0021F;
-      --zwart:      #1D1D1B;
-      --grijs-m:    #616160;
-      --wit:        #FFFFFF;
+      --geel:    #FFC917;
+      --rood:    #E4032D;
+      --zwart:   #101010;
+      --grijs-m: #8A8A88;
+      --wit:     #FFFFFF;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Lettergrootte gekoppeld aan de hoogte van het vak — zelfde principe
-       als de reistijden-zijbalk, zodat dit scherm het vak altijd volledig
-       vult, ongeacht de exacte afmeting die Yodeck toekent. */
-    html { background: var(--zwart); font-size: 2vh; }
+    html { background: var(--zwart); font-size: 2.15vh; }
     body {
       width: 100vw; height: 100vh; overflow: hidden;
       font-family: 'Montserrat', Arial, sans-serif;
@@ -26,110 +23,79 @@
       background: var(--zwart);
     }
 
-    .screen { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.6rem 1.1rem 1.1rem; }
+    .screen { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.5rem 1.1rem 1rem; }
 
     /* ══ KOP ═══════════════════════════════════════════════════════ */
-    .kop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-shrink: 0; }
-    .kop-links { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+    .kop { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; flex-shrink: 0; border-bottom: 3px solid var(--geel); padding-bottom: .8rem; }
     .kop-icoon {
-      width: 1.9rem; height: 1.9rem; border-radius: .45rem; flex-shrink: 0;
-      background: rgba(228,3,45,.18); display: flex; align-items: center; justify-content: center;
+      width: 2.1rem; height: 2.1rem; border-radius: .5rem; flex-shrink: 0;
+      background: rgba(255,201,23,.16); display: flex; align-items: center; justify-content: center;
     }
     .kop-tekst { min-width: 0; }
-    .kop-titel { font-size: .95rem; font-weight: 800; color: #fff; letter-spacing: .03em; text-transform: uppercase; }
-    .kop-station { font-size: .62rem; color: rgba(255,255,255,.4); font-weight: 600; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kop-titel { font-size: 1.05rem; font-weight: 800; color: #fff; letter-spacing: .04em; text-transform: uppercase; }
+    .kop-station { font-size: .68rem; color: rgba(255,255,255,.5); font-weight: 600; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* ══ KOLOMKOP ══════════════════════════════════════════════════ */
     .col-head {
-      display: grid; grid-template-columns: 1fr 3.6rem 5.4rem;
-      padding: 0 .8rem; margin-bottom: .35rem; flex-shrink: 0;
+      display: grid; grid-template-columns: 1fr 3.4rem 4.6rem;
+      padding: 0 .3rem; margin-bottom: .4rem; flex-shrink: 0;
     }
     .col-head span {
-      font-size: .55rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: rgba(255,255,255,.32);
+      font-size: .6rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: rgba(255,255,255,.4);
     }
     .col-head span.c { text-align: center; }
     .col-head span.r { text-align: right; }
 
     /* ══ LIJST ═════════════════════════════════════════════════════ */
-    .lijst {
-      flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0;
-      overflow-y: auto; scrollbar-width: none;
-    }
+    .lijst { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; scrollbar-width: none; }
     .lijst::-webkit-scrollbar { display: none; }
+
     .row {
       flex: 0 0 auto;
-      display: grid; grid-template-columns: 1fr 3.6rem 5.4rem; align-items: center;
-      background: rgba(255,255,255,.05);
-      border-left: .25rem solid #3a3a38;
-      border-radius: .45rem;
-      padding: .5rem .8rem;
+      display: grid; grid-template-columns: 1fr 3.4rem 4.6rem; align-items: center;
+      padding: .78rem .3rem;
+      border-bottom: 1px solid rgba(255,255,255,.09);
     }
-    .row.g { border-left-color: #4ec46a; }
-    .row.o { border-left-color: #f0902a; }
-    .row.r { border-left-color: #ff5a72; }
+    .row.x { opacity: .5; }
 
-    .cell-dir { min-width: 0; }
-    .dir-naam {
-      font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.3;
-      min-width: 0;
-      display: flex; align-items: center;
-    }
+    /* Over (aftellen — eerst minuten, onder de minuut in seconden) */
+    .cell-tijd { display: flex; align-items: baseline; justify-content: flex-end; gap: .3rem; line-height: 1.1; }
+    .tijd-nu { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .tijd-nu.vertraagd { color: var(--rood); }
+    .tijd-nu.nul { color: var(--rood); }
+    .tijd-unit { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.55); }
+    .tijd-nu.geannuleerd { color: var(--grijs-m); text-decoration: line-through; }
+
+    /* Richting */
+    .cell-dir { min-width: 0; padding: 0 .8rem; }
+    .dir-naam-wrap { overflow: hidden; }
+    .dir-naam { font-size: 1.4rem; font-weight: 700; white-space: nowrap; display: inline-block; }
+    .dir-naam.geannuleerd { text-decoration: line-through; color: var(--grijs-m); }
+    /* De scroll-animatie zelf wordt per rij dynamisch toegevoegd in JS,
+       omdat de pauzeduur (vast, 5s) en de reisafstand (per naam anders)
+       samen een uniek percentage in de keyframes opleveren. */
+    .dir-status { font-size: .78rem; font-weight: 700; color: var(--rood); text-transform: uppercase; letter-spacing: .02em; margin-top: .05rem; }
+    .dir-status.rijdt-niet { color: var(--grijs-m); }
+
+    /* Spoor */
     .cell-spoor { display: flex; align-items: center; justify-content: center; }
-    .cell-spoor .sf { font-size: .95rem; padding: 0 .2em; min-width: .65em; }
-
-    .cell-count { display: flex; align-items: baseline; justify-content: flex-end; gap: .3rem; }
-    .cd-unit { font-size: .78rem; font-weight: 700; }
-    .cd-plus { font-size: .78rem; font-weight: 700; margin-left: .3rem; }
-    .c-wit   { color: #fff; }
-    .c-rood  { color: var(--rood); }
-    .c-grijs { color: var(--grijs-m); }
+    .spoor-chip {
+      min-width: 2.1rem; text-align: center;
+      background: var(--geel);
+      color: #1a1a1a;
+      border-radius: .3rem;
+      padding: .22rem .3rem;
+      font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums;
+    }
+    .row.x .spoor-chip { background: rgba(255,255,255,.15); color: rgba(255,255,255,.5); }
 
     /* ══ VOET ══════════════════════════════════════════════════════ */
-    .voet { flex-shrink: 0; margin-top: .75rem; text-align: right; }
+    .voet { flex-shrink: 0; margin-top: .7rem; text-align: right; }
     .stxt { font-size: .64rem; color: rgba(255,255,255,.35); font-weight: 500; }
     .stxt.fout { color: #ff5a72; }
 
-    /* ══ SPLIT-FLAP KAARTJES ═══════════════════════════════════════ */
-    .sf {
-      display: inline-flex; align-items: center; justify-content: center;
-      position: relative;
-      background: #242422;
-      border: 1px solid rgba(255,255,255,.13);
-      border-radius: .18rem;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      padding: .02em .12em;
-      min-width: .78em;
-      font-size: 1.15rem;
-      vertical-align: middle;
-      box-shadow: 0 2px 6px rgba(0,0,0,.6);
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      will-change: transform;
-    }
-    .sf.sf-white { color: #fff; }
-    .sf.sf-red   { color: var(--rood); }
-    .sf.sf-grey  { color: var(--grijs-m); }
-    .sf-dir-grp .sf { font-size: 1.1rem; }
-    .sf::after {
-      content: '';
-      position: absolute; left: 0; right: 0; top: calc(50% - .5px);
-      height: 1.2px; background: rgba(0,0,0,.65); pointer-events: none;
-    }
-    .sf-grp { display: inline-flex; gap: 2px; align-items: center; }
-    @keyframes sf-flip {
-      0%   { transform: translateZ(0) scaleY(1); }
-      40%  { transform: translateZ(0) scaleY(0.04); }
-      60%  { transform: translateZ(0) scaleY(0.04); }
-      85%  { transform: translateZ(0) scaleY(1.03); }
-      100% { transform: translateZ(0) scaleY(1); }
-    }
-    .sf.sf-flipping { animation: sf-flip 0.15s cubic-bezier(.4,0,.2,1); }
-
-    .laden-punt { width: .9rem; height: .9rem; flex-shrink: 0; border: .13rem solid rgba(255,255,255,.15); border-top-color: var(--rood); border-radius: 50%; animation: draaien .7s linear infinite; }
+    .laden-punt { width: .9rem; height: .9rem; flex-shrink: 0; border: .13rem solid rgba(255,255,255,.15); border-top-color: var(--geel); border-radius: 50%; animation: draaien .7s linear infinite; margin: .2rem 0; }
     @keyframes draaien { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -138,14 +104,8 @@
   <script>
     // ╔════════════════════════════════════════════════════════════════╗
     // ║  CONFIGURATIE                                                  ║
-    // ║  De NS API-sleutel wordt NIET hier in de code gezet.            ║
-    // ║                                                                  ║
-    // ║  Route A — Yodeck-URL: geef de widget-URL mee als               ║
-    // ║  ...jouw-bestand.html?nsapikey=JOUW_SLEUTEL — wordt bij elke     ║
-    // ║  (her)start zelf uitgelezen.                                     ║
-    // ║                                                                  ║
-    // ║  Route B — vast in het bestand: vul NS_API_KEY hieronder zelf   ║
-    // ║  in voordat je het bestand naar Yodeck uploadt.                 ║
+    // ║  Route A — Yodeck-URL: ...bestand.html?nsapikey=JOUW_SLEUTEL   ║
+    // ║  Route B — vast in dit bestand: vul NS_API_KEY hieronder in    ║
     // ╚════════════════════════════════════════════════════════════════╝
     function nsSleutelUitUrl() {
       try { return new URLSearchParams(window.location.search).get('nsapikey') || ''; } catch { return ''; }
@@ -153,20 +113,18 @@
     const NS_API_KEY   = '8a4e5ff007914724aee958afa0481ea6';
     const STATION_CODE = 'HWZB';
     const STATION_NAAM = 'Halfweg-Zwanenburg';
-    const MAX_ROWS     = 8;
+    const MAX_ROWS     = 7;
     const REFRESH_MS   = 60000;
   </script>
 
   <div class="screen">
     <div class="kop">
-      <div class="kop-links">
-        <div class="kop-icoon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7h16M4 17h16"/><circle cx="8" cy="12" r="1.2" fill="#E4032D" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="#E4032D" stroke="none"/></svg>
-        </div>
-        <div class="kop-tekst">
-          <div class="kop-titel">Vertrektijden</div>
-          <div class="kop-station">Halfweg-Zwanenburg</div>
-        </div>
+      <div class="kop-icoon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFC917" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7h16M4 17h16"/><circle cx="8" cy="12" r="1.2" fill="#FFC917" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="#FFC917" stroke="none"/></svg>
+      </div>
+      <div class="kop-tekst">
+        <div class="kop-titel">Vertrektijden</div>
+        <div class="kop-station">Halfweg-Zwanenburg</div>
       </div>
     </div>
 
@@ -184,69 +142,16 @@
   </div>
 
   <script>
-    /* ══════════════════════════════════════════════════════════
-       SPLIT-FLAP ENGINE (ongewijzigd — de eigen flipover-stijl)
-    ══════════════════════════════════════════════════════════ */
-    const SF_POOL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
-
-    class SplitFlap {
-      constructor(el, colorCls = 'sf-white', gap = 2, wrap = false) {
-        this.el = el; this.cards = []; this.colorCls = colorCls;
-        el.style.display = 'inline-flex';
-        el.style.gap = gap + 'px';
-        el.style.alignItems = 'center';
-        if (wrap) { el.style.flexWrap = 'wrap'; el.style.rowGap = '3px'; }
-      }
-      _card() {
-        const c = document.createElement('span');
-        c.className = `sf ${this.colorCls}`;
-        c.textContent = ' ';
-        this.el.appendChild(c);
-        return c;
-      }
-      _resize(n) {
-        while (this.cards.length < n) this.cards.push(this._card());
-        while (this.cards.length > n) this.cards.pop().remove();
-      }
-      set(text) {
-        const s = String(text).toUpperCase();
-        this._resize(s.length);
-        s.split('').forEach((ch, i) => { this.cards[i].textContent = ch; });
-      }
-      animate(text, baseDelay = 0) {
-        const s = String(text).toUpperCase();
-        this._resize(s.length);
-        s.split('').forEach((target, i) => {
-          this._flip(this.cards[i], target, baseDelay + i * 30, 2 + Math.floor(Math.random() * 2));
-        });
-      }
-      _flip(card, target, delay, numFlips) {
-        let count = 0;
-        const doFlip = () => {
-          card.classList.add('sf-flipping');
-          setTimeout(() => {
-            card.textContent = (count >= numFlips - 1) ? target : SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
-            card.classList.remove('sf-flipping');
-            count++;
-            if (count < numFlips) setTimeout(doFlip, 60 + Math.random() * 25);
-          }, 45);
-        };
-        setTimeout(doFlip, delay);
-      }
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       HELPERS
-    ══════════════════════════════════════════════════════════ */
+    /* ══ HELPERS ══ */
     const pad = n => String(n).padStart(2, '0');
 
+    function resterendMs(iso) {
+      if (!iso) return null;
+      return Math.max(0, new Date(iso) - Date.now());
+    }
     function delayMin(p, a) {
       if (!p || !a) return 0;
       return Math.round((new Date(a) - new Date(p)) / 60000);
-    }
-    function minutenTot(iso) {
-      if (!iso) return null;
-      return Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000));
     }
     function setStatus(t, m) {
       const el = document.getElementById('stxt');
@@ -254,9 +159,19 @@
       el.className = 'stxt' + (m === 'fout' ? ' fout' : '');
     }
 
-    /* ══════════════════════════════════════════════════════════
-       WACHTRIJ TONEN (terwijl data ophaalt)
-    ══════════════════════════════════════════════════════════ */
+    // Boven de minuut: aftellen in minuten. Onder de minuut: aftellen in
+    // seconden, zodat het echt op tikken lijkt vlak voor vertrek. Op 0: rood.
+    function tijdWeergave(ms, vertraagd) {
+      if (ms === null) return { getal: '–', eenheid: '', rood: false };
+      if (ms <= 0) return { getal: '0', eenheid: 'min', rood: true };
+      if (ms < 60000) {
+        const sec = Math.ceil(ms / 1000);
+        return { getal: sec, eenheid: 'sec', rood: vertraagd };
+      }
+      const min = Math.floor(ms / 60000);
+      return { getal: min, eenheid: 'min', rood: vertraagd };
+    }
+
     function tekenLadende() {
       const lijst = document.getElementById('lijst');
       lijst.innerHTML = Array(MAX_ROWS).fill(0).map(() => `
@@ -266,10 +181,10 @@
         </div>`).join('');
     }
 
-    /* ══════════════════════════════════════════════════════════
-       RENDER — één rij per vertrek, zelfde opbouw als de
-       reistijden-zijbalk: naam links, groot gekleurd getal rechts
-    ══════════════════════════════════════════════════════════ */
+    /* ══ RENDER — statisch, geen flip-animatie ══
+       Stijl leunt op het officiele NS-vertrekbord qua kleur en typografie,
+       maar telt af zoals iedereen gewend is: minuten, en onder de minuut
+       in seconden. Rijen die niet rijden krijgen een streep erdoor. */
     function render(list) {
       const lijst = document.getElementById('lijst');
 
@@ -280,89 +195,106 @@
 
       const rows = list.slice(0, MAX_ROWS);
 
-      lijst.innerHTML = rows.map((dep, idx) => {
-        const can  = !!dep.cancelled;
-        const dir  = dep.direction || '–';
-        const del  = delayMin(dep.plannedDateTime, dep.actualDateTime);
-        const departsIso = dep.actualDateTime || dep.plannedDateTime || '';
-        const mins = minutenTot(departsIso);
+      lijst.innerHTML = rows.map(dep => {
+        const can = !!dep.cancelled;
+        const dir = dep.direction || '–';
+        const del = delayMin(dep.plannedDateTime, dep.actualDateTime);
+        const trk = String(dep.actualTrack || dep.plannedTrack || '–').toUpperCase();
+        const vertrekIso = dep.actualDateTime || dep.plannedDateTime || '';
 
-        // Zelfde kleurlogica als de originele vertrektijden.html:
-        // grijs = rijdt niet, rood = vertraagd, wit = op tijd.
-        const sfKleur = can ? 'sf-grey' : (del >= 1 ? 'sf-red' : 'sf-white');
-        const tekstKls = can ? 'c-grijs' : (del >= 1 ? 'c-rood' : 'c-wit');
-        const kls = can ? 'x' : (del >= 5 ? 'r' : del >= 1 ? 'o' : 'g');
-
-        const trk  = String(dep.actualTrack || dep.plannedTrack || '–').toUpperCase();
-
-        const telHtml = can
-          ? `<span class="cd-unit ${tekstKls}">rijdt niet</span>`
-          : `<span class="sf-grp" data-sf data-text="${mins === null ? '–' : pad(mins)}" data-color="${sfKleur}" data-delay="${idx * 40}"></span>
-             <span class="cd-unit ${tekstKls}">min</span>
-             ${del >= 1 ? `<span class="cd-plus c-rood">+${del} min</span>` : ''}`;
+        const statusHtml = can
+          ? `<div class="dir-status rijdt-niet">Rijdt niet</div>`
+          : (del >= 1 ? `<div class="dir-status">${del} min later</div>` : '');
 
         return `
-          <div class="row ${kls}">
+          <div class="row ${can ? 'x' : ''}" data-vertrek="${vertrekIso}" data-vertraagd="${del >= 1 ? '1' : '0'}" data-geannuleerd="${can ? '1' : '0'}">
             <div class="cell-dir">
-              <div class="dir-naam"><span class="sf-dir-grp" data-sf-dir="${dir}" data-color="${sfKleur}" data-delay="${idx * 40}"></span></div>
+              <div class="dir-naam-wrap"><div class="dir-naam${can ? ' geannuleerd' : ''}">${dir}</div></div>
+              ${statusHtml}
             </div>
-            <div class="cell-spoor"><span class="sf-grp" data-sf data-text="${trk}" data-color="${sfKleur}" data-delay="${idx * 40 + 30}"></span></div>
-            <div class="cell-count">${telHtml}</div>
+            <div class="cell-spoor"><span class="spoor-chip">${trk}</span></div>
+            <div class="cell-tijd"><span class="tijd-nu">–</span><span class="tijd-unit"></span></div>
           </div>`;
       }).join('');
 
-      lijst.querySelectorAll('[data-sf]').forEach(el => {
-        const raw   = el.dataset.text  || '';
-        const kleur = el.dataset.color || 'sf-white';
-        const delay = parseInt(el.dataset.delay) || 0;
-        new SplitFlap(el, kleur).animate(raw, delay);
-      });
-      lijst.querySelectorAll('[data-sf-dir]').forEach(el => {
-        const tekst = el.dataset.sfDir || '';
-        const kleur = el.dataset.color || 'sf-white';
-        const delay = parseInt(el.dataset.delay) || 0;
-        tekenRichtingFlaps(el, tekst, kleur, delay + 60);
-      });
+      requestAnimationFrame(zetScrollAan);
+      planScrollCheck();
+      tickKlok();
     }
 
-    // Richting als hele woord-groepen tekenen, zodat het wrappen naar een
-    // tweede regel alleen tussen woorden gebeurt en niet midden in een woord.
-    // Korte woordjes (aan, van, de...) worden vastgeplakt aan het woord erna,
-    // zodat ze niet alleen op een regel komen te staan.
-    function tekenRichtingFlaps(el, tekst, kleur, baseDelay) {
-      el.innerHTML = '';
-      el.style.display   = 'inline-flex';
-      el.style.flexWrap  = 'wrap';
-      el.style.rowGap    = '3px';
-      el.style.columnGap = '8px';
-      const KORT = new Set(['AAN','VAN','DE','HET','EEN','EN','OP','IN','UIT','NAAR','OM','TE','TER','TEN','DEN','BIJ']);
-      const woorden = tekst.toUpperCase().split(' ').filter(Boolean);
-      const eenheden = [];
-      for (let i = 0; i < woorden.length; i++) {
-        if (KORT.has(woorden[i]) && i + 1 < woorden.length) {
-          eenheden.push([woorden[i], woorden[i + 1]]);
-          i++;
-        } else {
-          eenheden.push([woorden[i]]);
-        }
+    // Meet pas als het lettertype echt geladen is (anders wordt de tekst te
+    // smal ingeschat en start de scroll niet) — met een extra vangnet erna.
+    function planScrollCheck() {
+      const opnieuw = () => requestAnimationFrame(() => requestAnimationFrame(zetScrollAan));
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(opnieuw).catch(opnieuw);
+      } else {
+        opnieuw();
       }
-      eenheden.forEach((eenheid, ei) => {
-        const wrapSpan = document.createElement('span');
-        wrapSpan.style.display   = 'inline-flex';
-        wrapSpan.style.flexWrap  = 'nowrap';
-        wrapSpan.style.columnGap = '8px';
-        el.appendChild(wrapSpan);
-        eenheid.forEach((woord, wi) => {
-          const span = document.createElement('span');
-          wrapSpan.appendChild(span);
-          new SplitFlap(span, kleur, 2).animate(woord, baseDelay + (ei + wi) * 60);
-        });
+      setTimeout(zetScrollAan, 500);
+    }
+
+    // Elke seconde de "over"-kolom bijwerken zonder de rest opnieuw te
+    // tekenen — anders begint de scroll-animatie van lange plaatsnamen
+    // steeds opnieuw.
+    function tickKlok() {
+      document.querySelectorAll('.row[data-vertrek]').forEach(row => {
+        const cijfer = row.querySelector('.tijd-nu');
+        const eenheid = row.querySelector('.tijd-unit');
+        const geannuleerd = row.dataset.geannuleerd === '1';
+
+        if (geannuleerd) {
+          cijfer.textContent = '–';
+          cijfer.className = 'tijd-nu geannuleerd';
+          eenheid.textContent = '';
+          return;
+        }
+
+        const ms = resterendMs(row.dataset.vertrek);
+        const vertraagd = row.dataset.vertraagd === '1';
+        const { getal, eenheid: eh, rood } = tijdWeergave(ms, vertraagd);
+
+        cijfer.textContent = getal;
+        cijfer.className = 'tijd-nu' + (rood ? ' vertraagd' : '');
+        eenheid.textContent = eh;
       });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       NS API
-    ══════════════════════════════════════════════════════════ */
+    function zetScrollAan() {
+      // Eerder toegevoegde keyframe-regels opruimen voordat we nieuwe maken.
+      document.querySelectorAll('style[data-marquee-style]').forEach(s => s.remove());
+
+      document.querySelectorAll('.dir-naam-wrap').forEach((wrap, i) => {
+        const naam = wrap.querySelector('.dir-naam');
+        naam.classList.remove('scrolt');
+        naam.style.animation = 'none';
+
+        const wrapBreedte = wrap.clientWidth;
+        const tekstBreedte = naam.scrollWidth;
+        if (tekstBreedte - wrapBreedte > 4) {
+          const pauzeSec  = 5;                              // stilstaan met de A helemaal links
+          const snelheid  = 55;                              // px per seconde tijdens het schuiven
+          const reisSec   = Math.max(2, tekstBreedte / snelheid);
+          const totaalSec = pauzeSec + reisSec;
+          const pausePct  = (pauzeSec / totaalSec * 100).toFixed(2);
+
+          const keyframeNaam = `marquee-${i}`;
+          const styleEl = document.createElement('style');
+          styleEl.setAttribute('data-marquee-style', '1');
+          styleEl.textContent = `
+            @keyframes ${keyframeNaam} {
+              0%, ${pausePct}% { transform: translateX(0); }
+              100% { transform: translateX(-${tekstBreedte}px); }
+            }`;
+          document.head.appendChild(styleEl);
+
+          naam.style.animation = `${keyframeNaam} ${totaalSec}s linear infinite`;
+          naam.classList.add('scrolt');
+        }
+      });
+    }
+
+    /* ══ NS API ══ */
     async function fetchDepartures() {
       if (!NS_API_KEY) {
         setStatus('Geen NS API-sleutel ingesteld — via ?nsapikey=... of in de code', 'fout');
@@ -387,15 +319,14 @@
       setStatus(`Laatste update: ${pad(n.getHours())}:${pad(n.getMinutes())}`, 'ok');
     }
 
-    /* ══════════════════════════════════════════════════════════
-       OPSTART
-    ══════════════════════════════════════════════════════════ */
+    /* ══ OPSTART ══ */
     window.addEventListener('DOMContentLoaded', () => {
       tekenLadende();
       setStatus('Vertrektijden ophalen…', 'bezig');
       setTimeout(() => {
         fetchDepartures();
         setInterval(fetchDepartures, REFRESH_MS);
+        setInterval(tickKlok, 1000);
       }, 300);
     });
   </script>
