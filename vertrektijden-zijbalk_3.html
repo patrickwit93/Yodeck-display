@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vertrektijden – Halfweg-Zwanenburg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --rood:       #E4032D;
+      --donkerrood: #A0021F;
+      --zwart:      #1D1D1B;
+      --grijs-m:    #616160;
+      --wit:        #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Lettergrootte gekoppeld aan de hoogte van het vak — zelfde principe
+       als de reistijden-zijbalk, zodat dit scherm het vak altijd volledig
+       vult, ongeacht de exacte afmeting die Yodeck toekent. */
+    html { background: var(--zwart); font-size: 2vh; }
+    body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: var(--wit);
+      background: var(--zwart);
+    }
+
+    .screen { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1.6rem 1.1rem 1.1rem; }
+
+    /* ══ KOP ═══════════════════════════════════════════════════════ */
+    .kop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-shrink: 0; }
+    .kop-links { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+    .kop-icoon {
+      width: 1.9rem; height: 1.9rem; border-radius: .45rem; flex-shrink: 0;
+      background: rgba(228,3,45,.18); display: flex; align-items: center; justify-content: center;
+    }
+    .kop-tekst { min-width: 0; }
+    .kop-titel { font-size: .95rem; font-weight: 800; color: #fff; letter-spacing: .03em; text-transform: uppercase; }
+    .kop-station { font-size: .62rem; color: rgba(255,255,255,.4); font-weight: 600; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ══ LIJST ═════════════════════════════════════════════════════ */
+    .lijst { flex: 1; display: flex; flex-direction: column; gap: .45rem; min-height: 0; }
+    .row {
+      flex: 1;
+      display: flex; align-items: center; gap: .75rem;
+      background: rgba(255,255,255,.05);
+      border-left: .25rem solid #3a3a38;
+      border-radius: .45rem;
+      padding: 0 .8rem;
+      min-height: 0;
+    }
+    .row.g { border-left-color: #4ec46a; }
+    .row.o { border-left-color: #f0902a; }
+    .row.r { border-left-color: #ff5a72; }
+
+    .cell-dir { min-width: 0; flex: 1; display: flex; align-items: baseline; gap: .6rem; }
+    .dir-naam {
+      font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.25;
+      overflow: hidden; min-width: 0; flex: 1;
+      display: flex; align-items: center;
+    }
+    .dir-spoor { font-size: .68rem; color: rgba(255,255,255,.45); font-weight: 600; display: flex; align-items: center; gap: .3rem; text-transform: lowercase; flex-shrink: 0; }
+    .dir-spoor .sf { font-size: .78rem; padding: 0 .18em; min-width: .6em; }
+
+    .cell-count { display: flex; align-items: baseline; gap: .3rem; flex-shrink: 0; }
+    .cd-unit { font-size: .78rem; font-weight: 700; }
+    .cd-plus { font-size: .78rem; font-weight: 700; margin-left: .3rem; }
+    .c-wit   { color: #fff; }
+    .c-rood  { color: var(--rood); }
+    .c-grijs { color: var(--grijs-m); }
+
+    /* ══ VOET ══════════════════════════════════════════════════════ */
+    .voet { flex-shrink: 0; margin-top: .75rem; text-align: right; }
+    .stxt { font-size: .64rem; color: rgba(255,255,255,.35); font-weight: 500; }
+    .stxt.fout { color: #ff5a72; }
+
+    /* ══ SPLIT-FLAP KAARTJES ═══════════════════════════════════════ */
+    .sf {
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative;
+      background: #242422;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: .18rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      padding: .02em .12em;
+      min-width: .78em;
+      font-size: 1.15rem;
+      vertical-align: middle;
+      box-shadow: 0 2px 6px rgba(0,0,0,.6);
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
+    }
+    .sf.sf-white { color: #fff; }
+    .sf.sf-red   { color: var(--rood); }
+    .sf.sf-grey  { color: var(--grijs-m); }
+    .sf-dir-grp .sf { font-size: 1.1rem; }
+    .sf::after {
+      content: '';
+      position: absolute; left: 0; right: 0; top: calc(50% - .5px);
+      height: 1.2px; background: rgba(0,0,0,.65); pointer-events: none;
+    }
+    .sf-grp { display: inline-flex; gap: 2px; align-items: center; }
+    @keyframes sf-flip {
+      0%   { transform: translateZ(0) scaleY(1); }
+      40%  { transform: translateZ(0) scaleY(0.04); }
+      60%  { transform: translateZ(0) scaleY(0.04); }
+      85%  { transform: translateZ(0) scaleY(1.03); }
+      100% { transform: translateZ(0) scaleY(1); }
+    }
+    .sf.sf-flipping { animation: sf-flip 0.15s cubic-bezier(.4,0,.2,1); }
+
+    .laden-punt { width: .9rem; height: .9rem; flex-shrink: 0; border: .13rem solid rgba(255,255,255,.15); border-top-color: var(--rood); border-radius: 50%; animation: draaien .7s linear infinite; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <script>
+    // ╔════════════════════════════════════════════════════════════════╗
+    // ║  CONFIGURATIE                                                  ║
+    // ║  De NS API-sleutel wordt NIET hier in de code gezet.            ║
+    // ║                                                                  ║
+    // ║  Route A — Yodeck-URL: geef de widget-URL mee als               ║
+    // ║  ...jouw-bestand.html?nsapikey=JOUW_SLEUTEL — wordt bij elke     ║
+    // ║  (her)start zelf uitgelezen.                                     ║
+    // ║                                                                  ║
+    // ║  Route B — vast in het bestand: vul NS_API_KEY hieronder zelf   ║
+    // ║  in voordat je het bestand naar Yodeck uploadt.                 ║
+    // ╚════════════════════════════════════════════════════════════════╝
+    function nsSleutelUitUrl() {
+      try { return new URLSearchParams(window.location.search).get('nsapikey') || ''; } catch { return ''; }
+    }
+    const NS_API_KEY   = '8a4e5ff007914724aee958afa0481ea6';
+    const STATION_CODE = 'HWZB';
+    const STATION_NAAM = 'Halfweg-Zwanenburg';
+    const MAX_ROWS     = 8;
+    const REFRESH_MS   = 60000;
+  </script>
+
+  <div class="screen">
+    <div class="kop">
+      <div class="kop-links">
+        <div class="kop-icoon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4032D" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7h16M4 17h16"/><circle cx="8" cy="12" r="1.2" fill="#E4032D" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="#E4032D" stroke="none"/></svg>
+        </div>
+        <div class="kop-tekst">
+          <div class="kop-titel">Vertrektijden</div>
+          <div class="kop-station">Halfweg-Zwanenburg</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lijst" id="lijst"></div>
+
+    <div class="voet">
+      <span class="stxt" id="stxt">Opstarten…</span>
+    </div>
+  </div>
+
+  <script>
+    /* ══════════════════════════════════════════════════════════
+       SPLIT-FLAP ENGINE (ongewijzigd — de eigen flipover-stijl)
+    ══════════════════════════════════════════════════════════ */
+    const SF_POOL = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ .-+/';
+
+    class SplitFlap {
+      constructor(el, colorCls = 'sf-white', gap = 2) {
+        this.el = el; this.cards = []; this.colorCls = colorCls;
+        el.style.display = 'inline-flex';
+        el.style.gap = gap + 'px';
+        el.style.alignItems = 'center';
+      }
+      _card() {
+        const c = document.createElement('span');
+        c.className = `sf ${this.colorCls}`;
+        c.textContent = ' ';
+        this.el.appendChild(c);
+        return c;
+      }
+      _resize(n) {
+        while (this.cards.length < n) this.cards.push(this._card());
+        while (this.cards.length > n) this.cards.pop().remove();
+      }
+      set(text) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        s.split('').forEach((ch, i) => { this.cards[i].textContent = ch; });
+      }
+      animate(text, baseDelay = 0) {
+        const s = String(text).toUpperCase();
+        this._resize(s.length);
+        s.split('').forEach((target, i) => {
+          this._flip(this.cards[i], target, baseDelay + i * 30, 2 + Math.floor(Math.random() * 2));
+        });
+      }
+      _flip(card, target, delay, numFlips) {
+        let count = 0;
+        const doFlip = () => {
+          card.classList.add('sf-flipping');
+          setTimeout(() => {
+            card.textContent = (count >= numFlips - 1) ? target : SF_POOL[Math.floor(Math.random() * SF_POOL.length)];
+            card.classList.remove('sf-flipping');
+            count++;
+            if (count < numFlips) setTimeout(doFlip, 60 + Math.random() * 25);
+          }, 45);
+        };
+        setTimeout(doFlip, delay);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════ */
+    const pad = n => String(n).padStart(2, '0');
+
+    function delayMin(p, a) {
+      if (!p || !a) return 0;
+      return Math.round((new Date(a) - new Date(p)) / 60000);
+    }
+    function minutenTot(iso) {
+      if (!iso) return null;
+      return Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000));
+    }
+    function setStatus(t, m) {
+      const el = document.getElementById('stxt');
+      el.textContent = t;
+      el.className = 'stxt' + (m === 'fout' ? ' fout' : '');
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       WACHTRIJ TONEN (terwijl data ophaalt)
+    ══════════════════════════════════════════════════════════ */
+    function tekenLadende() {
+      const lijst = document.getElementById('lijst');
+      lijst.innerHTML = Array(MAX_ROWS).fill(0).map(() => `
+        <div class="row">
+          <div class="cell-dir"><div class="dir-naam">Bezig met laden…</div></div>
+          <div class="laden-punt"></div>
+        </div>`).join('');
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RENDER — één rij per vertrek, zelfde opbouw als de
+       reistijden-zijbalk: naam links, groot gekleurd getal rechts
+    ══════════════════════════════════════════════════════════ */
+    function render(list) {
+      const lijst = document.getElementById('lijst');
+
+      if (!list || !list.length) {
+        lijst.innerHTML = `<div class="row"><div class="cell-dir"><div class="dir-naam">Geen vertrektijden beschikbaar</div></div></div>`;
+        return;
+      }
+
+      const rows = list.slice(0, MAX_ROWS);
+
+      lijst.innerHTML = rows.map((dep, idx) => {
+        const can  = !!dep.cancelled;
+        const dir  = dep.direction || '–';
+        const del  = delayMin(dep.plannedDateTime, dep.actualDateTime);
+        const departsIso = dep.actualDateTime || dep.plannedDateTime || '';
+        const mins = minutenTot(departsIso);
+
+        // Zelfde kleurlogica als de originele vertrektijden.html:
+        // grijs = rijdt niet, rood = vertraagd, wit = op tijd.
+        const sfKleur = can ? 'sf-grey' : (del >= 1 ? 'sf-red' : 'sf-white');
+        const tekstKls = can ? 'c-grijs' : (del >= 1 ? 'c-rood' : 'c-wit');
+        const kls = can ? 'x' : (del >= 5 ? 'r' : del >= 1 ? 'o' : 'g');
+
+        const trk  = String(dep.actualTrack || dep.plannedTrack || '–').toUpperCase();
+
+        const telHtml = can
+          ? `<span class="cd-unit ${tekstKls}">rijdt niet</span>`
+          : `<span class="sf-grp" data-sf data-text="${mins === null ? '–' : pad(mins)}" data-color="${sfKleur}" data-delay="${idx * 40}"></span>
+             <span class="cd-unit ${tekstKls}">min</span>
+             ${del >= 1 ? `<span class="cd-plus c-rood">+${del} min</span>` : ''}`;
+
+        return `
+          <div class="row ${kls}">
+            <div class="cell-dir">
+              <div class="dir-naam"><span class="sf-dir-grp" data-sf-dir="${dir}" data-color="${sfKleur}" data-delay="${idx * 40}"></span></div>
+              <div class="dir-spoor">spoor <span class="sf-grp" data-sf data-text="${trk}" data-color="${sfKleur}" data-delay="${idx * 40 + 30}"></span></div>
+            </div>
+            <div class="cell-count">${telHtml}</div>
+          </div>`;
+      }).join('');
+
+      lijst.querySelectorAll('[data-sf]').forEach(el => {
+        const raw   = el.dataset.text  || '';
+        const kleur = el.dataset.color || 'sf-white';
+        const delay = parseInt(el.dataset.delay) || 0;
+        new SplitFlap(el, kleur).animate(raw, delay);
+      });
+      lijst.querySelectorAll('[data-sf-dir]').forEach(el => {
+        const tekst = el.dataset.sfDir || '';
+        const kleur = el.dataset.color || 'sf-white';
+        const delay = parseInt(el.dataset.delay) || 0;
+        new SplitFlap(el, kleur, 2).animate(tekst.toUpperCase(), delay + 60);
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       NS API
+    ══════════════════════════════════════════════════════════ */
+    async function fetchDepartures() {
+      if (!NS_API_KEY) {
+        setStatus('Geen NS API-sleutel ingesteld — via ?nsapikey=... of in de code', 'fout');
+        return;
+      }
+      const hdrs = { 'Ocp-Apim-Subscription-Key': NS_API_KEY };
+      const url  = `https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/departures?station=${STATION_CODE}&maxJourneys=${MAX_ROWS}`;
+
+      let deps = null;
+      try {
+        const r = await fetch(url, { headers: hdrs });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        deps = j.payload?.departures || j.departures || [];
+      } catch (e) {
+        setStatus('Fout bij ophalen: ' + e.message, 'fout');
+        return;
+      }
+
+      render(deps);
+      const n = new Date();
+      setStatus(`Laatste update: ${pad(n.getHours())}:${pad(n.getMinutes())}`, 'ok');
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       OPSTART
+    ══════════════════════════════════════════════════════════ */
+    window.addEventListener('DOMContentLoaded', () => {
+      tekenLadende();
+      setStatus('Vertrektijden ophalen…', 'bezig');
+      setTimeout(() => {
+        fetchDepartures();
+        setInterval(fetchDepartures, REFRESH_MS);
+      }, 300);
+    });
+  </script>
+
+</body>
+</html>
